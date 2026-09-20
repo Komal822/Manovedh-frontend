@@ -1,9 +1,8 @@
 import React from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
-import ComeAsYouAreSection from './components/ComeAsYouAreSection';
+import Feature1 from './components/Feature1'; // Fixed: Removed hyphen
 import FeaturesSection from './components/FeaturesSection';
-import Footer from './components/Footer';
 
 function App() {
   return (
@@ -14,12 +13,9 @@ function App() {
       {/* Main Page Content */}
       <main className="flex-grow">
         <HeroSection />
-        <ComeAsYouAreSection />
         <FeaturesSection />
+        <Feature1 /> {/* Fixed: Updated tag name */}
       </main>
-
-      {/* Separate Footer Component */}
-      <Footer />
     </div>
   );
 }
