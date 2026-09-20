@@ -53,19 +53,28 @@ const HeroSection = () => {
             Manovedh helps you understand your emotions, build healthier habits, and track your progress with calm AI-powered support.
           </p>
 
-          {/* CALL TO ACTION BUTTON */}
-          <div className="pt-2 sm:pt-4 flex items-center animate-ultra-smooth-text-4">
+          {/* CALL TO ACTION BUTTONS */}
+          <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 animate-ultra-smooth-text-4">
+            {/* GET STARTED BUTTON */}
             <a
-              href="#about"
+              href="#get-started"
               className="relative group inline-flex items-center gap-2.5 sm:gap-3 overflow-hidden rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold uppercase tracking-wider text-white shadow-xl shadow-[#1b3328]/35 transition-all duration-500 ease-out hover:shadow-2xl hover:scale-105 active:scale-95"
               style={{ background: "linear-gradient(145deg, #4E8A6B, #234A38)" }}
             >
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
               
               <span className="relative z-10 flex items-center gap-2 transition-transform duration-300">
-                More Information
+                Get Started
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ease-out group-hover:translate-x-2" />
               </span>
+            </a>
+
+            {/* LEARN MORE BUTTON */}
+            <a
+              href="#about"
+              className="inline-flex items-center justify-center rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold tracking-wide text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-lg transition-all duration-300 ease-out hover:scale-105 active:scale-95"
+            >
+              Learn More
             </a>
           </div>
 

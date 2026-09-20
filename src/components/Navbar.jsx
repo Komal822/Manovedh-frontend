@@ -71,16 +71,17 @@ export default function Navbar() {
         <div className="flex items-center gap-8">
           <span className="flex items-center gap-2 hover:text-[#1b3328] transition-colors cursor-pointer">
             <MapPin className="w-3.5 h-3.5 text-[#2e5b45]" />
-            212 Birchwood Lane, Meadowbrook, OH 44081
+           Survey No:374/1, Gaulkhed Road,
+Shegaon, Maharashtra 444203
           </span>
           <span className="flex items-center gap-2 hover:text-[#1b3328] transition-colors cursor-pointer">
             <Phone className="w-3.5 h-3.5 text-[#2e5b45]" />
-            +1 (248) 673-1563
+          +91 9223456789
           </span>
         </div>
         <span className="flex items-center gap-2 hover:text-[#1b3328] transition-colors cursor-pointer">
           <Mail className="w-3.5 h-3.5 text-[#2e5b45]" />
-          hello@manovedh.com
+         mindspace.aisense@gmail.com
         </span>
       </div>
 
