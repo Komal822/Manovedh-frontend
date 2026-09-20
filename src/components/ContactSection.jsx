@@ -31,16 +31,16 @@ export default function ContactSection() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] text-[#1B3328] font-sans antialiased pt-36 pb-20 px-4 sm:px-6 lg:px-12 relative overflow-hidden flex flex-col justify-center items-center">
+    <section className="w-full bg-[#FAF8F5] text-[#1B3328] font-sans antialiased py-12 sm:py-16 px-4 sm:px-6 lg:px-12 relative overflow-hidden flex flex-col justify-center items-center">
       
       {/* BACKGROUND GLOW DECORATIONS */}
-      <div className="absolute top-28 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[#2E5B45]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-10 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[#2E5B45]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-0 w-[450px] h-[450px] bg-gradient-to-tr from-[#A08A4A]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-5xl w-full mx-auto relative z-10">
         
         {/* HEADER SECTION */}
-        <div className="text-center mb-10 space-y-3">
+        <div className="text-center mb-8 sm:mb-10 space-y-3">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1B3328] font-serif tracking-tight leading-tight">
             Let's Start a Conversation.
           </h1>
@@ -246,7 +246,7 @@ export default function ContactSection() {
                   />
                 </div>
 
-                {/* FULL WIDTH BUTTON WITH SHARE ICON */}
+                {/* BUTTON WITH SHARE ICON */}
                 <div className="pt-2 flex flex-col items-center justify-center text-center gap-3">
                   <button
                     type="submit"
@@ -272,6 +272,6 @@ export default function ContactSection() {
         </div>
 
       </div>
-    </div>
+    </section>
   );
 }

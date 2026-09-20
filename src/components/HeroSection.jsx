@@ -1,8 +1,8 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
 
-// Import background image from assets directory
+// Import assets from assets directory
 import heroBgImage from '../assets/image.png';
+import rightIcon from '../assets/right.png';
 
 const HeroSection = () => {
   return (
@@ -65,7 +65,11 @@ const HeroSection = () => {
               
               <span className="relative z-10 flex items-center gap-2 transition-transform duration-300">
                 Get Started
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ease-out group-hover:translate-x-2" />
+                <img 
+                  src={rightIcon} 
+                  alt="Right Arrow" 
+                  className="w-4 h-4 sm:w-5 sm:h-5 object-contain transition-transform duration-300 ease-out group-hover:translate-x-2" 
+                />
               </span>
             </a>
 
