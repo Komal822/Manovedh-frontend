@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* 1. Global Overflow & Box-Sizing Fix */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2. Media Elements Constraint */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
