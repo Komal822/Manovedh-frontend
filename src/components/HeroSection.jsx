@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 // Import assets from assets directory
 import heroBgImage from '../assets/image.png';
@@ -73,13 +74,13 @@ const HeroSection = () => {
               </span>
             </a>
 
-            {/* LEARN MORE BUTTON */}
-            <a
-              href="#about"
+            {/* LEARN MORE BUTTON - LINKED TO /about ROUTE */}
+            <Link
+              to="/about"
               className="inline-flex items-center justify-center rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold tracking-wide text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-lg transition-all duration-300 ease-out hover:scale-105 active:scale-95"
             >
               Learn More
-            </a>
+            </Link>
           </div>
 
         </div>

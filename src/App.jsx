@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
+import LearnMoreSection from './components/LearnMoreSection'; // <-- LearnMoreSection import kar diya hai
 import Feedback from './components/Feedback';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
@@ -29,7 +30,17 @@ function App() {
               } 
             />
 
-            {/* Separate Feedback Page: Extra top margin so Navbar won't overlap */}
+            {/* Separate Learn More / About Page */}
+            <Route 
+              path="/about" 
+              element={
+                <div className="pt-20 sm:pt-24">
+                  <LearnMoreSection />
+                </div>
+              } 
+            />
+
+            {/* Separate Feedback Page */}
             <Route 
               path="/feedback" 
               element={

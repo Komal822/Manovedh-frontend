@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Star, ShieldCheck, Quote } from 'lucide-react';
+import { Star, ShieldCheck, Quote, PlusCircle } from 'lucide-react';
 
 // Assets madhun images import kelea ahet
 import img1 from '../assets/image-1.png';
 import img2 from '../assets/image-2.png';
 import img3 from '../assets/image-3.png';
-import img4 from '../assets/image-4.png';
 
 const INITIAL_FEEDBACKS = [
   {
@@ -38,16 +37,6 @@ const INITIAL_FEEDBACKS = [
     verified: true,
     avatar: img3, // image-3 (boy)
   },
-  {
-    id: 4,
-    name: "Priya Sharma",
-    role: "Wellness Coach",
-    category: "Mindfulness",
-    feedback: "The guided reflection and tracking system bring immense clarity. Highly recommended for daily practice.",
-    rating: 5,
-    verified: true,
-    avatar: img4, // image-4 (girl)
-  },
 ];
 
 const CATEGORIES = ["All", "Daily Users", "Therapists", "Mindfulness"];
@@ -56,9 +45,38 @@ export default function Feedback() {
   const [feedbacks, setFeedbacks] = useState(INITIAL_FEEDBACKS);
   const [activeTab, setActiveTab] = useState("All");
 
+  // New Feedback State
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const [category, setCategory] = useState('Daily Users');
+  const [feedbackText, setFeedbackText] = useState('');
+  const [rating, setRating] = useState(5);
+
   const filteredFeedbacks = activeTab === "All" 
     ? feedbacks 
     : feedbacks.filter(item => item.category === activeTab);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name || !feedbackText) return;
+
+    const newFeedback = {
+      id: Date.now(),
+      name,
+      role: role || "User",
+      category,
+      feedback: feedbackText,
+      rating: Number(rating),
+      verified: true,
+      avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${name}`, // Auto generated avatar
+    };
+
+    setFeedbacks([newFeedback, ...feedbacks]);
+    setName('');
+    setRole('');
+    setFeedbackText('');
+    setRating(5);
+  };
 
   return (
     <section id="feedback" className="relative w-full py-12 sm:py-16 bg-[#eae5db]/40 text-[#1b3328] font-sans">
@@ -143,6 +161,77 @@ export default function Feedback() {
               </div>
             </div>
           ))}
+
+          {/* 4TH CARD: USER FEEDBACK FORM */}
+          <div className="relative flex flex-col justify-between bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-[#1b3328]/10 shadow-sm hover:shadow-xl transition-all duration-300">
+            <div className="space-y-3 relative z-10 w-full">
+              <div className="flex items-center justify-between border-b border-[#1b3328]/10 pb-2">
+                <span className="text-xs font-bold text-[#1b3328] uppercase tracking-wider flex items-center gap-1.5">
+                  <PlusCircle className="w-4 h-4 text-[#2e5b45]" />
+                  Add Your Story
+                </span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      onClick={() => setRating(star)}
+                      className={`w-3.5 h-3.5 cursor-pointer ${
+                        star <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-2.5 pt-1">
+                <input
+                  type="text"
+                  placeholder="Your Name *"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full text-[12px] px-3 py-1.5 bg-[#f4f1ea]/50 border border-[#1b3328]/15 rounded-xl outline-none focus:border-[#1b3328] text-[#1b3328]"
+                />
+
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="Role (e.g. Student)"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="w-full text-[12px] px-3 py-1.5 bg-[#f4f1ea]/50 border border-[#1b3328]/15 rounded-xl outline-none focus:border-[#1b3328] text-[#1b3328]"
+                  />
+
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full text-[12px] px-2 py-1.5 bg-[#f4f1ea]/50 border border-[#1b3328]/15 rounded-xl outline-none focus:border-[#1b3328] text-[#1b3328]"
+                  >
+                    <option value="Daily Users">Daily Users</option>
+                    <option value="Therapists">Therapists</option>
+                    <option value="Mindfulness">Mindfulness</option>
+                  </select>
+                </div>
+
+                <textarea
+                  placeholder="Share your experience..."
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  required
+                  rows={2}
+                  className="w-full text-[12px] p-3 bg-[#f4f1ea]/50 border border-[#1b3328]/15 rounded-xl outline-none focus:border-[#1b3328] text-[#1b3328] resize-none"
+                />
+
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-[#1b3328] hover:bg-[#2e5b45] text-white text-[12px] font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                >
+                  Submit Feedback
+                </button>
+              </form>
+            </div>
+          </div>
+
         </div>
 
       </div>
