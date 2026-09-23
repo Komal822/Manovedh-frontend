@@ -36,7 +36,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Active User Check From LocalStorage (Key matched with Login/Signup Code & Profile Updates)
+  // Active User Check From LocalStorage
   useEffect(() => {
     const checkUserSession = () => {
       const activeUser = localStorage.getItem("manovedh_current_user");
@@ -220,8 +220,9 @@ export default function Navbar() {
                       <div className="flex flex-col overflow-hidden">
                         <span className="font-bold text-[15px] text-white truncate">{user.fullName || "User"}</span>
                         <span className="text-[12px] text-emerald-100/70 truncate">{user.email}</span>
-                        <div className="mt-1 flex items-center gap-1 w-fit px-2 py-0.5 rounded-full bg-[#a08a4a]/20 border border-[#a08a4a]/40 text-[#d4af37] text-[10px] font-semibold uppercase">
-                          <Sparkles className="w-3 h-3" /> Member
+                        {/* USER BADGE */}
+                        <div className="mt-1.5 flex items-center gap-1.5 w-fit px-3 py-1 rounded-full bg-[#a08a4a]/20 border border-[#a08a4a]/40 text-[#d4af37] text-[11px] font-bold uppercase tracking-wider">
+                          <User className="w-4 h-4" /> User
                         </div>
                       </div>
                     </div>
@@ -234,9 +235,7 @@ export default function Navbar() {
                     <Link to="/saved" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all">
                       <Bookmark className="w-4 h-4 text-[#a08a4a]" /> Saved Items
                     </Link>
-                    <Link to="/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all">
-                      <Settings className="w-4 h-4 text-[#a08a4a]" /> Settings
-                    </Link>
+                    {/* Settings removed here */}
                   </div>
 
                   <div className="pt-1">

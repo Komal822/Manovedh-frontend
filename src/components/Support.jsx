@@ -32,7 +32,7 @@ export default function Support() {
       description:
         "Forgot password, email verification, login issues, or account access problems.",
       linkText: "Recover account",
-      linkTo: "/contact",
+      linkTo: "/login?forgot=true", // Ithe link update keli ahe ji direct login page varil forgot password kade jail
     },
     {
       id: "usage",

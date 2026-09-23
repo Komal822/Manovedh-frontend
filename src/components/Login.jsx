@@ -35,7 +35,8 @@ export default function Login({ onLoginSuccess }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [currentYogaIndex, setCurrentYogaIndex] = useState(0);
 
-  // Typewriter effect states
+  const [flowState, setFlowState] = useState('login');
+
   const fullText = "A HEALTHIER MIND A BRIGHTER YOU";
   const [displayedText, setDisplayedText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -49,10 +50,8 @@ export default function Login({ onLoginSuccess }) {
     return () => clearInterval(timer);
   }, []);
 
-  // Typewriter animation logic
   useEffect(() => {
     const handleTyping = () => {
-      const i = loopNum % fullText.length;
       const fullCurText = fullText;
 
       if (isDeleting) {
@@ -76,7 +75,6 @@ export default function Login({ onLoginSuccess }) {
     return () => clearTimeout(ticker);
   }, [displayedText, isDeleting, loopNum, typingSpeed]);
 
-  const [flowState, setFlowState] = useState('login');
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [resetEmail, setResetEmail] = useState('');
   const [enteredOtp, setEnteredOtp] = useState('');
@@ -189,7 +187,6 @@ export default function Login({ onLoginSuccess }) {
   return (
     <div className="min-h-screen w-full bg-[#12241C] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 font-sans relative overflow-hidden">
       
-      {/* WRAPPER CONTAINER TO ALIGN BACK BUTTON WITH THE CARD */}
       <div className="w-full max-w-5xl mb-4 flex items-center justify-start z-30 px-1 sm:px-0">
         <Link 
           to="/" 
@@ -200,13 +197,10 @@ export default function Login({ onLoginSuccess }) {
         </Link>
       </div>
 
-      {/* MAIN CONTAINER */}
       <div className="relative w-full max-w-5xl bg-[#ECE7DE] rounded-[32px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[600px] border border-[#2e5b45]/20">
 
-        {/* ================= LEFT SIDE: REFERENCE MATCHED PANEL ================= */}
+        {/* LEFT SIDE PANEL */}
         <div className="lg:col-span-5 relative p-5 sm:p-6 flex flex-col justify-between overflow-hidden bg-[#ECE7DE]">
-
-          {/* Smooth Curving Organic Wave Divider Layers matching Reference */}
           <div className="absolute right-0 top-0 bottom-0 w-80 pointer-events-none z-20 hidden lg:block overflow-hidden">
             <svg viewBox="0 0 300 800" preserveAspectRatio="none" className="w-full h-full fill-[#1e3d30]">
               <path d="M 120 0 C 260 220, 20 420, 220 620 C 280 690, 100 760, 250 800 L 300 800 L 300 0 Z"></path>
@@ -218,7 +212,6 @@ export default function Login({ onLoginSuccess }) {
             </svg>
           </div>
 
-          {/* Top Logo & Branding */}
           <div className="relative z-30 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#1e3d30] flex items-center justify-center text-white font-bold shadow-md text-sm">
@@ -231,7 +224,6 @@ export default function Login({ onLoginSuccess }) {
             </div>
           </div>
 
-          {/* Center Content: Tagline with Golden Typewriter Effect & Yoga Illustration Showcase */}
           <div className="relative z-10 my-auto py-2 flex flex-col justify-center pr-14 lg:pr-20">
             <div className="mb-2 min-h-[3.5rem] sm:min-h-[4rem]">
               <h2 className="text-lg sm:text-xl font-serif font-normal leading-tight bg-gradient-to-r from-[#b8860b] via-[#ffd700] to-[#daa520] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(218,165,32,0.4)]">
@@ -240,7 +232,6 @@ export default function Login({ onLoginSuccess }) {
               </h2>
             </div>
 
-            {/* Yoga Carousel Container with increased image width and height */}
             <div className="relative w-full h-48 sm:h-56 flex items-center justify-start z-10 -ml-3 sm:-ml-5">
               <div className="absolute left-0 w-4/5 sm:w-60 h-full p-1 flex items-center justify-center overflow-hidden">
                 {yogaImages.map((imgSrc, index) => (
@@ -261,7 +252,6 @@ export default function Login({ onLoginSuccess }) {
             </div>
           </div>
 
-          {/* Bottom Footer Slogan & Indicators */}
           <div className="relative z-30 flex flex-col items-start gap-2 mt-1">
             <div className="flex items-center gap-1.5">
               {yogaImages.map((_, idx) => (
@@ -276,7 +266,7 @@ export default function Login({ onLoginSuccess }) {
           </div>
         </div>
 
-        {/* ================= RIGHT SIDE: LIGHT PANEL (FORM CONTAINER) ================= */}
+        {/* RIGHT SIDE PANEL (FORM) */}
         <div className="lg:col-span-7 p-5 sm:p-8 flex flex-col justify-between bg-[#F8F6F0] relative overflow-hidden">
 
           <div className="max-w-sm mx-auto w-full z-20">

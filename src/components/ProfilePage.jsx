@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
-  User, Mail, Phone, Lock, Globe, Bell, Calendar, 
-  Sun, Moon, Volume2, Camera, ShieldCheck, Save, 
-  CheckCircle2, Eye, EyeOff 
+  Globe, Calendar, User, 
+  Volume2, Camera, ShieldCheck, Save, 
+  CheckCircle2, Eye, EyeOff, LogOut, RefreshCw 
 } from "lucide-react";
+
+// Import custom PNG icon assets from folder
+import userIcon from "../assets/user.png";
+import mailIcon from "../assets/communication.png";
+import mobileIcon from "../assets/call.png";
+import lockIcon from "../assets/lock.png";
+import bellIcon from "../assets/notification-bell.png";
+import calendarIcon from "../assets/calendar.png";
+import internetIcon from "../assets/internet.png";
 
 // Import default avatars from assets
 import avatar1 from "../assets/image-1.png";
@@ -20,21 +29,19 @@ const defaultAvatars = [
   { id: 5, src: avatar5, label: "Avatar 5" },
 ];
 
-export default function Settings({ setActiveTab }) {
+export default function ProfilePage({ setActiveTab }) {
   const [formData, setFormData] = useState({
     fullName: "Komal Ramdas Gadge",
     email: "komalgadge@gmail.com",
     phoneNumber: "9283636353",
-    profilePic: null,
-    password: "••••••••••••",
+    profilePic: avatar3, 
+    password: "",
     language: "English (US)",
     emailNotifications: true,
     sessionReminders: true,
     messageNotifications: true,
     workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     sessionDuration: "50 Minutes",
-    theme: "light",
-    soundEnabled: true,
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +57,7 @@ export default function Settings({ setActiveTab }) {
         
         let assignedPic = parsed.profilePic;
         if (!assignedPic) {
-          assignedPic = avatar3.src; // Default fallback
+          assignedPic = avatar3; 
         }
 
         setFormData((prev) => ({
@@ -58,6 +65,7 @@ export default function Settings({ setActiveTab }) {
           fullName: parsed.fullName || prev.fullName,
           email: parsed.email || prev.email,
           phoneNumber: parsed.phoneNumber || prev.phoneNumber,
+          password: parsed.password || prev.password,
           profilePic: assignedPic,
         }));
       } catch (err) {
@@ -102,10 +110,16 @@ export default function Settings({ setActiveTab }) {
 
   const handleSaveChanges = (e) => {
     e.preventDefault();
+    
+    const activeUser = localStorage.getItem("manovedh_current_user");
+    let parsedUser = activeUser ? JSON.parse(activeUser) : {};
+
     const updatedUser = {
+      ...parsedUser,
       fullName: formData.fullName,
       email: formData.email,
       phoneNumber: formData.phoneNumber,
+      password: formData.password,
       profilePic: formData.profilePic,
     };
 
@@ -114,6 +128,12 @@ export default function Settings({ setActiveTab }) {
 
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("manovedh_current_user");
+    window.dispatchEvent(new Event("storage"));
+    window.location.reload();
   };
 
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -134,15 +154,26 @@ export default function Settings({ setActiveTab }) {
         <form onSubmit={handleSaveChanges} className="space-y-6 w-full px-0 mx-0">
           
           {/* TOP PROFILE SETTINGS CARD */}
-          <div id="profile-settings" className="bg-[#f7fbf9] rounded-none p-6 sm:p-8 shadow-sm border-y border-emerald-900/10 w-full m-0 scroll-mt-6">
-            <div className="flex items-center gap-3 pb-6 border-b border-emerald-900/10 w-full">
-              <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold">
-                <User className="w-5 h-5 text-[#2e5b45]" />
+          <div id="profile-settings" className="bg-gradient-to-r from-[#f7fbf9] to-[#edf4f0] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 w-full m-0 scroll-mt-6">
+            <div className="flex items-center justify-between pb-6 border-b border-emerald-900/10 w-full">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2e5b45] to-[#1b3328] text-white flex items-center justify-center shadow-md p-2.5">
+                  <img src={userIcon} alt="User Icon" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-extrabold tracking-tight text-[#1b3328]">Profile Settings</h3>
+                  <p className="text-xs text-stone-500 font-medium">Update your personal information and choose your avatar</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Profile Settings</h3>
-                <p className="text-xs text-stone-500">Update your personal information and choose your avatar</p>
-              </div>
+
+              {/* LOGOUT BUTTON TOP RIGHT */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+              >
+                <LogOut className="w-4 h-4" /> Log Out
+              </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-6 w-full">
@@ -191,7 +222,7 @@ export default function Settings({ setActiveTab }) {
                     Full Name
                   </label>
                   <div className="relative w-full">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700" />
+                    <img src={userIcon} alt="User" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
                     <input 
                       type="text" 
                       name="fullName"
@@ -209,7 +240,7 @@ export default function Settings({ setActiveTab }) {
                     Email Address
                   </label>
                   <div className="relative w-full">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700" />
+                    <img src={mailIcon} alt="Mail" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
                     <input 
                       type="email" 
                       name="email"
@@ -227,7 +258,7 @@ export default function Settings({ setActiveTab }) {
                     Phone Number
                   </label>
                   <div className="relative w-full">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700" />
+                    <img src={mobileIcon} alt="Phone" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
                     <input 
                       type="text" 
                       name="phoneNumber"
@@ -238,7 +269,7 @@ export default function Settings({ setActiveTab }) {
                   </div>
                 </div>
 
-                {/* AVATAR SELECTION / GENDER SELECTOR */}
+                {/* AVATAR SELECTION */}
                 <div className="space-y-1.5 w-full sm:col-span-2 pt-2">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-stone-600">
                     Choose Your Avatar (Boy / Girl)
@@ -264,47 +295,48 @@ export default function Settings({ setActiveTab }) {
                     })}
                   </div>
                 </div>
-
-                <div className="sm:col-span-2 pt-2">
-                  <button 
-                    type="submit"
-                    className="px-6 py-2.5 bg-[#2e5b45] hover:bg-[#1b3328] text-white rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    <Save className="w-4 h-4 text-[#a08a4a]" /> Save Changes
-                  </button>
-                </div>
               </div>
 
               {/* Right Profile Photo Uploader Card */}
-              <div className="lg:col-span-3 border-2 border-dashed border-emerald-900/20 rounded-2xl p-6 text-center flex flex-col items-center justify-center space-y-3 bg-white shadow-sm w-full">
-                <div className="w-12 h-12 rounded-full bg-[#2e5b45]/10 flex items-center justify-center text-[#2e5b45]">
-                  <Camera className="w-6 h-6" />
+              <div className="lg:col-span-3 flex flex-col gap-4 w-full">
+                <div className="border-2 border-dashed border-emerald-900/20 rounded-2xl p-6 text-center flex flex-col items-center justify-center space-y-3 bg-white shadow-sm w-full">
+                  <div className="w-12 h-12 rounded-full bg-[#2e5b45]/10 flex items-center justify-center text-[#2e5b45]">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#1b3328]">Custom Photo</p>
+                    <p className="text-[10px] text-stone-500 mt-0.5">Upload from device<br />Max size 2MB</p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => fileInputRef.current.click()}
+                    className="px-4 py-1.5 bg-white border border-[#2e5b45] text-[#2e5b45] hover:bg-[#2e5b45] hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  >
+                    Upload File
+                  </button>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-[#1b3328]">Custom Photo</p>
-                  <p className="text-[10px] text-stone-500 mt-0.5">Upload from device<br />Max size 2MB</p>
-                </div>
+
+                {/* UPDATE PROFILE BUTTON */}
                 <button 
-                  type="button"
-                  onClick={() => fileInputRef.current.click()}
-                  className="px-4 py-1.5 bg-white border border-[#2e5b45] text-[#2e5b45] hover:bg-[#2e5b45] hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  type="submit"
+                  className="w-full py-3 bg-[#2e5b45] hover:bg-[#1b3328] text-white rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Upload File
+                  <RefreshCw className="w-4 h-4 text-[#a08a4a]" /> Update Profile
                 </button>
               </div>
 
             </div>
           </div>
 
-          {/* TWO COLUMN MIDDLE SECTION */}
+          {/* TWO COLUMN MIDDLE SECTION (Account Settings & Notifications) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full px-0 mx-0">
             
             {/* ACCOUNT SETTINGS */}
-            <div className="bg-[#f7fbf9] rounded-none p-6 sm:p-8 shadow-sm border-y border-emerald-900/10 space-y-6 flex flex-col justify-between w-full m-0">
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 flex flex-col justify-between w-full m-0">
               <div className="w-full">
                 <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
-                  <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold">
-                    <Lock className="w-5 h-5 text-[#2e5b45]" />
+                  <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
+                    <img src={lockIcon} alt="Lock" className="w-full h-full object-contain" />
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Account Settings</h3>
@@ -316,7 +348,7 @@ export default function Settings({ setActiveTab }) {
                   <div className="space-y-1.5 w-full">
                     <label className="text-[11px] font-bold text-stone-600 uppercase">Password</label>
                     <div className="relative w-full">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700" />
+                      <img src={lockIcon} alt="Lock" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
                       <input 
                         type={showPassword ? "text" : "password"}
                         name="password"
@@ -337,7 +369,7 @@ export default function Settings({ setActiveTab }) {
                   <div className="space-y-1.5 w-full">
                     <label className="text-[11px] font-bold text-stone-600 uppercase">Language</label>
                     <div className="relative w-full">
-                      <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700" />
+                      <img src={internetIcon} alt="Internet" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
                       <select 
                         name="language"
                         value={formData.language}
@@ -354,23 +386,25 @@ export default function Settings({ setActiveTab }) {
               </div>
 
               {/* Account safe banner */}
-              <div className="mt-6 p-4 rounded-2xl bg-white border border-emerald-100 flex items-center justify-between shadow-sm w-full">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#2e5b45] text-white flex items-center justify-center">
-                    <ShieldCheck className="w-5 h-5 text-[#a08a4a]" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#1b3328]">Your account is safe</p>
+              <div className="mt-6 w-full">
+                <div className="p-4 rounded-2xl bg-white border border-emerald-100 flex items-center justify-between shadow-sm w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#2e5b45] text-white flex items-center justify-center">
+                      <ShieldCheck className="w-5 h-5 text-[#a08a4a]" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#1b3328]">Your account is safe</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* NOTIFICATIONS */}
-            <div className="bg-[#f7fbf9] rounded-none p-6 sm:p-8 shadow-sm border-y border-emerald-900/10 space-y-6 w-full m-0">
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full m-0">
               <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
-                <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold">
-                  <Bell className="w-5 h-5 text-[#2e5b45]" />
+                <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
+                  <img src={bellIcon} alt="Bell" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Notifications</h3>
@@ -381,8 +415,8 @@ export default function Settings({ setActiveTab }) {
               <div className="space-y-4 pt-2 w-full">
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600">
-                      <Mail className="w-4 h-4 text-emerald-700" />
+                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 p-2">
+                      <img src={mailIcon} alt="Mail" className="w-full h-full object-contain" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[#1b3328]">Email Notifications</p>
@@ -403,8 +437,8 @@ export default function Settings({ setActiveTab }) {
 
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600">
-                      <Calendar className="w-4 h-4 text-emerald-700" />
+                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 p-2">
+                      <img src={calendarIcon} alt="Calendar" className="w-full h-full object-contain" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[#1b3328]">Session Reminders</p>
@@ -425,8 +459,8 @@ export default function Settings({ setActiveTab }) {
 
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600">
-                      <Bell className="w-4 h-4 text-emerald-700" />
+                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 p-2">
+                      <img src={bellIcon} alt="Bell" className="w-full h-full object-contain" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[#1b3328]">Message Notifications</p>
@@ -449,14 +483,12 @@ export default function Settings({ setActiveTab }) {
 
           </div>
 
-          {/* LOWER TWO COLUMN SECTION */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full px-0 mx-0">
-            
-            {/* AVAILABILITY */}
-            <div className="bg-[#f7fbf9] rounded-none p-6 sm:p-8 shadow-sm border-y border-emerald-900/10 space-y-6 w-full m-0">
+          {/* LOWER SECTION (Availability Card centered/full width neatly) */}
+          <div className="w-full">
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full m-0">
               <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
-                <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold">
-                  <Calendar className="w-5 h-5 text-[#2e5b45]" />
+                <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
+                  <img src={calendarIcon} alt="Calendar" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Availability</h3>
@@ -464,7 +496,7 @@ export default function Settings({ setActiveTab }) {
                 </div>
               </div>
 
-              <div className="space-y-6 pt-2 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 w-full">
                 <div className="space-y-2 w-full">
                   <label className="text-[11px] font-bold uppercase text-stone-600">Working Days</label>
                   <div className="flex flex-wrap gap-2 w-full">
@@ -491,7 +523,7 @@ export default function Settings({ setActiveTab }) {
                 <div className="space-y-2 w-full">
                   <label className="text-[11px] font-bold uppercase text-stone-600">Default Session Duration</label>
                   <div className="relative w-full">
-                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700" />
+                    <img src={calendarIcon} alt="Calendar" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
                     <select 
                       name="sessionDuration"
                       value={formData.sessionDuration}
@@ -506,74 +538,6 @@ export default function Settings({ setActiveTab }) {
                 </div>
               </div>
             </div>
-
-            {/* PREFERENCES */}
-            <div className="bg-[#f7fbf9] rounded-none p-6 sm:p-8 shadow-sm border-y border-emerald-900/10 space-y-6 flex flex-col justify-between relative overflow-hidden w-full m-0">
-              <div className="w-full">
-                <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
-                  <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold">
-                    <Sun className="w-5 h-5 text-[#2e5b45]" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Preferences</h3>
-                    <p className="text-xs text-stone-500">Customize your experience</p>
-                  </div>
-                </div>
-
-                <div className="space-y-6 pt-4 w-full">
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-sm font-bold text-[#1b3328]">Theme</span>
-                    <div className="flex items-center gap-2 bg-white border border-emerald-900/10 p-1.5 rounded-2xl shadow-sm">
-                      <button
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, theme: "light" }))}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                          formData.theme === "light" ? "bg-[#2e5b45] text-white shadow-sm" : "text-stone-500"
-                        }`}
-                      >
-                        <Sun className="w-3.5 h-3.5" /> Light
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, theme: "dark" }))}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                          formData.theme === "dark" ? "bg-[#2e5b45] text-white shadow-sm" : "text-stone-500"
-                        }`}
-                      >
-                        <Moon className="w-3.5 h-3.5" /> Dark
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 w-full">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-white border border-emerald-900/10 flex items-center justify-center text-stone-600 shadow-sm">
-                        <Volume2 className="w-4 h-4 text-emerald-700" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-[#1b3328]">Notifications Sound</p>
-                        <p className="text-xs text-stone-500">Enable sound for notifications</p>
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        name="soundEnabled"
-                        checked={formData.soundEnabled}
-                        onChange={handleChange}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-stone-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2e5b45]"></div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 flex justify-between items-center text-xs text-stone-400 font-medium w-full">
-                <span>Good Vibes Only ♥</span>
-              </div>
-            </div>
-
           </div>
 
         </form>
