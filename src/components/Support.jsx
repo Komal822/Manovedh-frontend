@@ -32,7 +32,7 @@ export default function Support() {
       description:
         "Forgot password, email verification, login issues, or account access problems.",
       linkText: "Recover account",
-      linkTo: "/login?forgot=true", // Ithe link update keli ahe ji direct login page varil forgot password kade jail
+      linkTo: "/login?forgot=true", // Login aslo kinva logout aslo, he nehamich forgot password page var jail
     },
     {
       id: "usage",
@@ -178,7 +178,7 @@ export default function Support() {
         </div>
 
         {/* EMERGENCY WARNING BANNER */}
-        <div className="bg-[#fdf2f2] border border-[#f8d7d7] rounded-2xl p-5 flex items-start gap-4 text-[#9b1c1c] shadow-2xs">
+        <div className="bg-[#fdf2f2] **border** border-[#f8d7d7] rounded-2xl p-5 flex items-start gap-4 text-[#9b1c1c] shadow-2xs">
           <AlertTriangle className="w-5 h-5 text-[#d93838] shrink-0 mt-0.5" />
           <div className="text-xs sm:text-sm leading-relaxed font-medium">
             <span className="font-bold">Important Notice: </span>

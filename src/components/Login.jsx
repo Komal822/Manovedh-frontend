@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Mail, 
   Lock, 
@@ -31,11 +31,16 @@ const yogaImages = [yoga1, yoga2, yoga3, yoga4, yoga5, yoga6, yoga7, yoga8, yoga
 
 export default function Login({ onLoginSuccess }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [currentYogaIndex, setCurrentYogaIndex] = useState(0);
 
-  const [flowState, setFlowState] = useState('login');
+  const queryParams = new URLSearchParams(location.search);
+  const isForgotParam = queryParams.get('forgot') === 'true';
+
+  const [flowState, setFlowState] = useState(isForgotParam ? 'forgot_email' : 'login');
 
   const fullText = "A HEALTHIER MIND A BRIGHTER YOU";
   const [displayedText, setDisplayedText] = useState('');
@@ -90,16 +95,18 @@ export default function Login({ onLoginSuccess }) {
     const users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USERS_KEY)) || [];
     const foundUser = users.find(
       (u) =>
-        u.email.toLowerCase() === loginData.email.toLowerCase() &&
+        u.email && u.email.toLowerCase() === loginData.email.toLowerCase() &&
         u.password === loginData.password
     );
 
     if (foundUser) {
       localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, JSON.stringify(foundUser));
-      if (onLoginSuccess) onLoginSuccess(foundUser);
+      if (onLoginSuccess) {
+        onLoginSuccess(foundUser);
+      }
       navigate('/');
     } else {
-      setErrorMessage('Invalid email or password. Please try again.');
+      setErrorMessage('Invalid email or password. Please check your details or sign up.');
     }
   };
 
@@ -127,7 +134,7 @@ export default function Login({ onLoginSuccess }) {
     setErrorMessage('');
 
     const users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USERS_KEY)) || [];
-    const foundUser = users.find((u) => u.email.toLowerCase() === resetEmail.toLowerCase());
+    const foundUser = users.find((u) => u.email && u.email.toLowerCase() === resetEmail.toLowerCase());
 
     if (!foundUser) {
       setErrorMessage('No account found with this email address.');
@@ -168,7 +175,7 @@ export default function Login({ onLoginSuccess }) {
 
     let users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USERS_KEY)) || [];
     users = users.map((u) => {
-      if (u.email.toLowerCase() === resetEmail.toLowerCase()) {
+      if (u.email && u.email.toLowerCase() === resetEmail.toLowerCase()) {
         return { ...u, password: newPasswordData.newPassword };
       }
       return u;

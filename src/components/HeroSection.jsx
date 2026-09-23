@@ -56,9 +56,9 @@ const HeroSection = () => {
 
           {/* CALL TO ACTION BUTTONS */}
           <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 animate-ultra-smooth-text-4">
-            {/* GET STARTED BUTTON */}
-            <a
-              href="#get-started"
+            {/* GET STARTED BUTTON - LINKED TO /login ROUTE */}
+            <Link
+              to="/login"
               className="relative group inline-flex items-center gap-2.5 sm:gap-3 overflow-hidden rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold uppercase tracking-wider text-white shadow-xl shadow-[#1b3328]/35 transition-all duration-500 ease-out hover:shadow-2xl hover:scale-105 active:scale-95"
               style={{ background: "linear-gradient(145deg, #4E8A6B, #234A38)" }}
             >
@@ -72,7 +72,7 @@ const HeroSection = () => {
                   className="w-4 h-4 sm:w-5 sm:h-5 object-contain transition-transform duration-300 ease-out group-hover:translate-x-2" 
                 />
               </span>
-            </a>
+            </Link>
 
             {/* LEARN MORE BUTTON - LINKED TO /about ROUTE */}
             <Link
