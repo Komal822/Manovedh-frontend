@@ -6,7 +6,7 @@ import rightIcon from '../assets/right.png';
 import brainIcon from '../assets/brain (1).png';
 import smileIcon from '../assets/smile (1).png';
 import sparkleIcon from '../assets/sparkle (1).png';
-import heartIcon from '../assets/heart.png'; // Heart icon import kela aahe
+import heartIcon from '../assets/heart.png';
 import shieldIcon from '../assets/shield.png';
 
 const LearnMoreSection = () => {
@@ -47,8 +47,9 @@ const LearnMoreSection = () => {
                 <img src={rightIcon} alt="Arrow" className="w-4 h-4 object-contain group-hover:translate-x-1.5 transition-transform duration-300" />
               </a>
 
+              {/* VISIT SUPPORT BUTTON ROUTED TO /support */}
               <Link
-                to="/contact"
+                to="/support"
                 className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white border border-[#1B3328]/15 hover:border-[#2E5B45] text-[#1B3328] text-sm font-bold tracking-wide shadow-sm hover:bg-[#F4F6F4] transition-all duration-300"
               >
                 Visit Support

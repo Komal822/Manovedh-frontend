@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ArrowRight, Globe, ChevronDown } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { 
+  Menu, X, Globe, ChevronDown, User, 
+  Settings, Bookmark, HelpCircle, LogOut, Sparkles 
+} from "lucide-react";
 
-// Local Assets Imports
-import logoImg from "../assets/logo.png";
-import locationIcon from "../assets/location.png";
-import callIcon from "../assets/call.png";
-import emailIcon from "../assets/communication.png";
+import logoImg from "../assets/logo.png"; // Your logo path
 
 const NAV_LINKS = [
   { label: "Home", path: "/" },
   { label: "Feedback", path: "/feedback" },
+  { label: "Support", path: "/support" },
   { label: "Contact", path: "/contact" },
 ];
 
@@ -23,12 +23,37 @@ const LANGUAGES = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
   
+  // Profile & Language States
+  const [user, setUser] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const [langOpen, setLangOpen] = useState(false);
-  const langDropdownRef = useRef(null);
 
+  const langDropdownRef = useRef(null);
+  const profileDropdownRef = useRef(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Active User Check From LocalStorage (Key matched with Login/Signup Code & Profile Updates)
+  useEffect(() => {
+    const checkUserSession = () => {
+      const activeUser = localStorage.getItem("manovedh_current_user");
+      if (activeUser) {
+        setUser(JSON.parse(activeUser));
+      } else {
+        setUser(null);
+      }
+    };
+
+    checkUserSession();
+    window.addEventListener("storage", checkUserSession);
+
+    return () => window.removeEventListener("storage", checkUserSession);
+  }, [location]);
+
+  // Scroll & Outside Click Event Listeners
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 30) {
@@ -42,6 +67,9 @@ export default function Navbar() {
       if (langDropdownRef.current && !langDropdownRef.current.contains(event.target)) {
         setLangOpen(false);
       }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -53,40 +81,25 @@ export default function Navbar() {
     };
   }, []);
 
-  return (
-    <header className="fixed top-0 left-0 w-full z-50 font-sans transition-all duration-500">
-      
-      {/* 1. TOP INFO BAR */}
-      <div
-        className={`hidden md:flex items-center justify-between px-8 lg:px-16 bg-[#f4f1ea]/90 backdrop-blur-md text-[12.5px] text-[#33413a] border-b border-[#e5e0d3] transition-all duration-500 overflow-hidden ${
-          scrolled ? "max-h-0 py-0 opacity-0 border-none" : "max-h-12 py-2 opacity-100"
-        }`}
-      >
-        <div className="flex items-center gap-8">
-          <span className="flex items-center gap-2 hover:text-[#1b3328] transition-colors cursor-pointer">
-            <img src={locationIcon} alt="Location" className="w-3.5 h-3.5 object-contain" />
-            Survey No:374/1, Gaulkhed Road, Shegaon, Maharashtra 444203
-          </span>
-          <span className="flex items-center gap-2 hover:text-[#1b3328] transition-colors cursor-pointer">
-            <img src={callIcon} alt="Phone" className="w-3.5 h-3.5 object-contain" />
-            +91 9223456789
-          </span>
-        </div>
-        <span className="flex items-center gap-2 hover:text-[#1b3328] transition-colors cursor-pointer">
-          <img src={emailIcon} alt="Mail" className="w-3.5 h-3.5 object-contain" />
-          mindspace.aisense@gmail.com
-        </span>
-      </div>
+  // Logout Handler
+  const handleLogout = () => {
+    localStorage.removeItem("manovedh_current_user");
+    setUser(null);
+    setProfileOpen(false);
+    setOpen(false);
+    navigate("/login");
+  };
 
-      {/* 2. MAIN NAVIGATION BAR */}
+  return (
+    <header className="fixed top-0 left-0 w-full z-50 font-sans">
       <nav
-        className={`flex items-center justify-between px-6 sm:px-10 lg:px-16 transition-all duration-500 ${
+        className={`flex items-center justify-between px-6 sm:px-10 lg:px-16 transition-all duration-300 bg-white ${
           scrolled
-            ? "py-2 bg-white/90 backdrop-blur-md shadow-md border-b border-black/5 text-[#1b3328]"
-            : "py-3 bg-[#eae5db]/60 backdrop-blur-sm border-b border-black/5 text-[#1b3328]"
+            ? "py-2 shadow-md border-b border-black/5 text-[#1b3328]"
+            : "py-3 border-b border-black/5 text-[#1b3328]"
         }`}
       >
-        {/* LOGO + BRAND NAME */}
+        {/* LOGO */}
         <Link to="/" className="group flex items-center gap-3.5 py-1">
           <img 
             src={logoImg} 
@@ -110,11 +123,11 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* RIGHT GROUP: LINKS + LANGUAGE + BUTTONS */}
+        {/* DESKTOP CONTENT */}
         <div className="hidden lg:flex items-center gap-6">
           
-          {/* DESKTOP LINKS */}
-          <ul className="flex items-center gap-1 bg-black/5 border border-black/5 rounded-full px-3 py-1 backdrop-blur-sm">
+          {/* NAVIGATION LINKS */}
+          <ul className="flex items-center gap-1 bg-black/5 border border-black/5 rounded-full px-3 py-1">
             {NAV_LINKS.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -122,15 +135,11 @@ export default function Navbar() {
                   <Link
                     to={link.path}
                     className={`relative z-10 px-4 py-1.5 text-[14px] font-semibold tracking-wide rounded-full transition-all duration-300 block ${
-                      isActive
-                        ? "text-[#1b3328]"
-                        : "text-[#4a5850] hover:text-[#1b3328]"
+                      isActive ? "text-[#1b3328]" : "text-[#4a5850] hover:text-[#1b3328]"
                     }`}
                   >
                     {link.label}
                   </Link>
-
-                  {/* Hover Pill Effect */}
                   <span
                     className={`absolute inset-0 bg-white shadow-sm rounded-full transition-all duration-300 pointer-events-none ${
                       isActive ? "opacity-100 scale-100" : "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"
@@ -141,20 +150,19 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* LANGUAGE SELECTOR DROPDOWN */}
+          {/* LANGUAGE SELECTOR */}
           <div className="relative" ref={langDropdownRef}>
             <button
               onClick={() => setLangOpen((prev) => !prev)}
-              className="flex items-center gap-2 px-3.5 py-1.5 text-[13.5px] font-semibold text-[#1b3328] bg-black/5 hover:bg-black/10 border border-black/5 rounded-full transition-all duration-300 cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-1.5 text-[13.5px] font-semibold text-[#1b3328] bg-black/5 hover:bg-black/10 border border-black/5 rounded-full transition-all cursor-pointer"
             >
               <Globe className="w-4 h-4 text-[#2e5b45]" />
               <span>{selectedLang.label.split(" ")[0]}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-[#4a5850] transition-transform duration-300 ${langOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-[#4a5850] transition-transform ${langOpen ? "rotate-180" : ""}`} />
             </button>
 
-            {/* Dropdown Options */}
             {langOpen && (
-              <div className="absolute right-0 mt-2 w-44 bg-[#1b3328] text-white rounded-2xl shadow-xl border border-white/10 py-2 z-50 overflow-hidden backdrop-blur-lg animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-2 w-44 bg-[#1b3328] text-white rounded-2xl shadow-xl border border-white/10 py-2 z-50 overflow-hidden">
                 {LANGUAGES.map((lang) => (
                   <button
                     key={lang.code}
@@ -162,10 +170,8 @@ export default function Navbar() {
                       setSelectedLang(lang);
                       setLangOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-[13px] font-medium transition-colors duration-200 flex items-center justify-between cursor-pointer ${
-                      selectedLang.code === lang.code
-                        ? "bg-[#2e5b45] text-white font-semibold"
-                        : "text-emerald-100/80 hover:bg-[#28493a] hover:text-white"
+                    className={`w-full text-left px-4 py-2 text-[13px] font-medium transition-colors flex items-center justify-between cursor-pointer ${
+                      selectedLang.code === lang.code ? "bg-[#2e5b45] text-white font-semibold" : "text-emerald-100/80 hover:bg-[#28493a]"
                     }`}
                   >
                     {lang.label}
@@ -175,115 +181,123 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ACTION BUTTONS */}
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="px-4 py-2 text-[14px] font-bold text-[#1b3328] hover:text-[#2e5b45] transition-colors duration-300"
-            >
-              Log in
-            </Link>
+          {/* USER LOGGED-IN CONDITION */}
+          {user ? (
+            /* PROFILE DROPDOWN (WHEN USER IS LOGGED IN) */
+            <div className="relative" ref={profileDropdownRef}>
+              <button
+                onClick={() => setProfileOpen((prev) => !prev)}
+                className="flex items-center gap-2.5 p-1.5 pl-2 pr-3 rounded-full bg-black/5 hover:bg-black/10 border border-black/5 transition-all duration-300 cursor-pointer group"
+              >
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-full bg-[#2e5b45] text-white flex items-center justify-center font-bold text-sm ring-2 ring-[#a08a4a] overflow-hidden">
+                    {user.profilePic ? (
+                      <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}</span>
+                    )}
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
+                <span className="text-[13.5px] font-semibold text-[#1b3328] group-hover:text-[#2e5b45]">
+                  {user.fullName ? user.fullName.split(" ")[0] : "User"}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-[#4a5850] transition-transform ${profileOpen ? "rotate-180" : ""}`} />
+              </button>
 
-            <Link
-              to="/get-started"
-              className="relative inline-flex items-center gap-2 overflow-hidden rounded-full px-6 py-2.5 text-[13.5px] font-bold uppercase tracking-wider text-white shadow-md shadow-[#1b3328]/20 transition-all duration-500 hover:shadow-xl hover:scale-105 active:scale-95 group"
-              style={{ background: "linear-gradient(145deg, #4E8A6B, #234A38)" }}
-            >
-              <span className="absolute inset-0 w-full h-full bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+              {/* PROFILE MENU */}
+              {profileOpen && (
+                <div className="absolute right-0 mt-3 w-72 bg-[#1b3328] text-white rounded-2xl shadow-2xl border border-white/10 py-3 z-50 overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-3 duration-200">
+                  <div className="px-5 py-3 border-b border-white/10 bg-gradient-to-r from-white/5 to-transparent">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#2e5b45] text-white flex items-center justify-center font-bold text-base ring-2 ring-[#a08a4a] overflow-hidden flex-shrink-0">
+                        {user.profilePic ? (
+                          <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="font-bold text-[15px] text-white truncate">{user.fullName || "User"}</span>
+                        <span className="text-[12px] text-emerald-100/70 truncate">{user.email}</span>
+                        <div className="mt-1 flex items-center gap-1 w-fit px-2 py-0.5 rounded-full bg-[#a08a4a]/20 border border-[#a08a4a]/40 text-[#d4af37] text-[10px] font-semibold uppercase">
+                          <Sparkles className="w-3 h-3" /> Member
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-              <span className="relative z-10 flex items-center gap-1.5">
-                Get Started
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
-            </Link>
-          </div>
+                  <div className="py-2 border-b border-white/10">
+                    <Link to="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all">
+                      <User className="w-4 h-4 text-[#a08a4a]" /> My Profile
+                    </Link>
+                    <Link to="/saved" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all">
+                      <Bookmark className="w-4 h-4 text-[#a08a4a]" /> Saved Items
+                    </Link>
+                    <Link to="/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all">
+                      <Settings className="w-4 h-4 text-[#a08a4a]" /> Settings
+                    </Link>
+                  </div>
+
+                  <div className="pt-1">
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-semibold text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-all cursor-pointer">
+                      <LogOut className="w-4 h-4 text-rose-400" /> Log Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* LOGIN & GET STARTED BUTTONS (WHEN USER IS LOGGED OUT) */
+            <div className="flex items-center gap-3">
+              <Link to="/login" className="px-4 py-2 text-[14px] font-bold text-[#1b3328] hover:text-[#2e5b45] transition-colors cursor-pointer">
+                Login
+              </Link>
+
+              <Link
+                to="/signup"
+                className="relative inline-flex items-center justify-center overflow-hidden rounded-full px-5 py-2.5 text-[13.5px] font-bold uppercase tracking-wider text-white shadow-md transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
+                style={{ background: "linear-gradient(145deg, #4E8A6B, #234A38)" }}
+              >
+                <span>Get Started</span>
+              </Link>
+            </div>
+          )}
 
         </div>
 
-        {/* MOBILE MENU TOGGLE */}
+        {/* MOBILE MENU BUTTON */}
         <button
-          className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-black/10 text-[#1b3328] transition-all duration-300 active:scale-90 hover:bg-black/5 cursor-pointer"
+          className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-black/10 text-[#1b3328]"
           onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
         >
-          <span className={`transition-transform duration-300 ${open ? "rotate-90" : "rotate-0"}`}>
-            {open ? <X className="w-5 h-5 text-[#2e5b45]" /> : <Menu className="w-5 h-5" />}
-          </span>
+          {open ? <X className="w-5 h-5 text-[#2e5b45]" /> : <Menu className="w-5 h-5" />}
         </button>
       </nav>
 
-      {/* 3. MOBILE MENU DROP DOWN */}
-      <div
-        className={`lg:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-b border-black/10 transition-all duration-500 ease-in-out ${
-          open ? "max-h-[500px] opacity-100 shadow-2xl" : "max-h-0 opacity-0 pointer-events-none"
-        }`}
-      >
+      {/* MOBILE DROPDOWN */}
+      <div className={`lg:hidden overflow-hidden bg-white border-b border-black/10 transition-all duration-500 ${open ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="flex flex-col gap-2 px-8 py-6">
-          {NAV_LINKS.map((link, idx) => (
-            <Link
-              key={link.label}
-              to={link.path}
-              className={`py-2.5 text-[16px] font-semibold text-[#1b3328] border-b border-black/5 transition-all duration-300 hover:translate-x-2 hover:text-[#2e5b45] ${
-                open ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-              }`}
-              style={{ transitionDelay: `${open ? idx * 60 : 0}ms` }}
-              onClick={() => setOpen(false)}
-            >
+          {NAV_LINKS.map((link) => (
+            <Link key={link.label} to={link.path} className="py-2.5 text-[16px] font-semibold text-[#1b3328] border-b border-black/5" onClick={() => setOpen(false)}>
               {link.label}
             </Link>
           ))}
 
-          {/* MOBILE LANGUAGE SELECTOR */}
-          <div
-            className={`py-3 border-b border-black/5 transition-all duration-300 ${
-              open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-            }`}
-            style={{ transitionDelay: `${open ? NAV_LINKS.length * 60 : 0}ms` }}
-          >
-            <span className="text-[12px] uppercase font-bold text-[#a08a4a] block mb-2">Select Language</span>
-            <div className="flex gap-2">
-              {LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => setSelectedLang(lang)}
-                  className={`px-3 py-1.5 text-[13px] rounded-full font-medium transition-all cursor-pointer ${
-                    selectedLang.code === lang.code
-                      ? "bg-[#1b3328] text-white"
-                      : "bg-black/5 text-[#1b3328] hover:bg-black/10"
-                  }`}
-                >
-                  {lang.label.split(" ")[0]}
-                </button>
-              ))}
+          {user ? (
+            <button onClick={handleLogout} className="mt-4 py-3 bg-rose-500 text-white font-bold rounded-full text-center">
+              Logout ({user.fullName})
+            </button>
+          ) : (
+            <div className="flex flex-col gap-2.5 pt-3">
+              <Link to="/login" className="py-2.5 text-center text-[15px] font-bold text-[#1b3328] bg-black/5 rounded-full" onClick={() => setOpen(false)}>
+                Login
+              </Link>
+              <Link to="/signup" className="flex items-center justify-center py-3 text-[14px] font-bold uppercase text-white rounded-full shadow-md" style={{ background: "linear-gradient(145deg, #4E8A6B, #234A38)" }} onClick={() => setOpen(false)}>
+                Get Started
+              </Link>
             </div>
-          </div>
-
-          <Link
-            to="/login"
-            className={`mt-2 py-2 text-center text-[15px] font-bold text-[#1b3328] hover:text-[#2e5b45] transition-all duration-300 ${
-              open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-            }`}
-            style={{ transitionDelay: `${open ? (NAV_LINKS.length + 1) * 60 : 0}ms` }}
-            onClick={() => setOpen(false)}
-          >
-            Log in
-          </Link>
-
-          <Link
-            to="/get-started"
-            className={`mt-2 flex justify-center items-center gap-2 rounded-full px-6 py-3.5 text-[14px] font-bold uppercase tracking-wider text-white shadow-md active:scale-95 transition-all duration-300 ${
-              open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-            }`}
-            style={{
-              background: "linear-gradient(145deg, #4E8A6B, #234A38)",
-              transitionDelay: `${open ? (NAV_LINKS.length + 2) * 60 : 0}ms`,
-            }}
-            onClick={() => setOpen(false)}
-          >
-            Get Started
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          )}
         </div>
       </div>
     </header>

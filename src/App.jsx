@@ -1,73 +1,105 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
-import LearnMoreSection from './components/LearnMoreSection'; // <-- LearnMoreSection import kar diya hai
+import LearnMoreSection from './components/LearnMoreSection';
 import Feedback from './components/Feedback';
+import Support from './components/Support';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 
-function App() {
+import Login from './components/Login';
+import SignUp from './components/SignUp';
+import ForgotPassword from './components/ForgotPassword';
+import ProfilePage from './components/ProfilePage';
+
+// Session Key Constant
+const LOCAL_STORAGE_SESSION_KEY = 'manovedh_current_user';
+
+export default function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Session restore on reload
+  useEffect(() => {
+    const activeSession = localStorage.getItem(LOCAL_STORAGE_SESSION_KEY);
+    if (activeSession) {
+      try {
+        setCurrentUser(JSON.parse(activeSession));
+      } catch (err) {
+        console.error("Failed to parse session", err);
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  // Login/SignUp Handler
+  const handleAuthSuccess = (userData) => {
+    setCurrentUser(userData);
+    localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, JSON.stringify(userData));
+  };
+
+  // Logout Handler
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem(LOCAL_STORAGE_SESSION_KEY);
+  };
+
+  // Loading state jar session check hot asel
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#12241C] flex items-center justify-center text-white font-serif">
+        <p className="text-lg animate-pulse">Loading Manovedh...</p>
+      </div>
+    );
+  }
+
   return (
     <Router>
-      <div className="min-h-screen bg-white text-[#1b3328] font-sans antialiased selection:bg-emerald-200 selection:text-emerald-900 flex flex-col justify-between">
-        
-        {/* Navigation Bar */}
-        <Navbar />
+      <Routes>
+        {/* AUTH PAGES (Standalone without global layout overlapping) */}
+        <Route 
+          path="/login" 
+          element={currentUser ? <Navigate to="/" replace /> : <Login onLoginSuccess={handleAuthSuccess} />} 
+        />
+        <Route 
+          path="/signup" 
+          element={currentUser ? <Navigate to="/" replace /> : <SignUp onSignUpSuccess={handleAuthSuccess} />} 
+        />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Main Routing Container */}
-        <main className="flex-grow">
-          <Routes>
-            {/* Home Page: Hero Section + Feedback Section */}
-            <Route 
-              path="/" 
-              element={
-                <>
-                  <HeroSection />
-                  <Feedback />
-                </>
-              } 
-            />
-
-            {/* Separate Learn More / About Page */}
-            <Route 
-              path="/about" 
-              element={
-                <div className="pt-20 sm:pt-24">
-                  <LearnMoreSection />
-                </div>
-              } 
-            />
-
-            {/* Separate Feedback Page */}
-            <Route 
-              path="/feedback" 
-              element={
-                <div className="pt-28 sm:pt-36">
-                  <Feedback />
-                </div>
-              } 
-            />
-
-            {/* Separate Contact Page */}
-            <Route 
-              path="/contact" 
-              element={
-                <div className="pt-28 sm:pt-36">
-                  <ContactSection />
-                </div>
-              } 
-            />
-          </Routes>
-        </main>
-
-        {/* Footer Component */}
-        <Footer />
-
-      </div>
+        {/* MAIN WEBSITE PAGES (With Global Navbar & Footer layout) */}
+        <Route 
+          path="/*" 
+          element={
+            <div className="min-h-screen bg-white text-[#1b3328] font-sans flex flex-col justify-between">
+              <Navbar />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<><HeroSection user={currentUser} /><Feedback /></>} />
+                  <Route path="/about" element={<div className="pt-24"><LearnMoreSection /></div>} />
+                  <Route path="/feedback" element={<div className="pt-28"><Feedback /></div>} />
+                  <Route path="/support" element={<div className="pt-28"><Support /></div>} />
+                  <Route path="/contact" element={<div className="pt-28"><ContactSection /></div>} />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      currentUser ? (
+                        <div className="pt-28 px-4 max-w-4xl mx-auto"><ProfilePage user={currentUser} /></div>
+                      ) : (
+                        <Navigate to="/login" replace />
+                      )
+                    } 
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          } 
+        />
+      </Routes>
     </Router>
   );
 }
-
-export default App;
