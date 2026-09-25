@@ -139,8 +139,8 @@ export default function ProfilePage({ setActiveTab }) {
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <div className="w-full bg-white font-sans text-[#1b3328] pt-0 pb-20 px-0 mx-0">
-      <div className="w-full space-y-6 px-0 mx-0">
+    <div className="w-full bg-white font-sans text-[#1b3328] pt-0 pb-0 px-0 mx-0 flex flex-col min-h-screen justify-between">
+      <div className="w-full space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pt-6">
 
         {/* SUCCESS NOTIFICATION TOAST */}
         {savedSuccess && (
@@ -151,10 +151,10 @@ export default function ProfilePage({ setActiveTab }) {
         )}
 
         {/* FORM CONTAINER */}
-        <form onSubmit={handleSaveChanges} className="space-y-6 w-full px-0 mx-0">
+        <form onSubmit={handleSaveChanges} className="space-y-6 w-full">
           
           {/* TOP PROFILE SETTINGS CARD */}
-          <div id="profile-settings" className="bg-gradient-to-r from-[#f7fbf9] to-[#edf4f0] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 w-full m-0 scroll-mt-6">
+          <div id="profile-settings" className="bg-gradient-to-r from-[#f7fbf9] to-[#edf4f0] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 w-full scroll-mt-6">
             <div className="flex items-center justify-between pb-6 border-b border-emerald-900/10 w-full">
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2e5b45] to-[#1b3328] text-white flex items-center justify-center shadow-md p-2.5">
@@ -214,10 +214,10 @@ export default function ProfilePage({ setActiveTab }) {
               </div>
 
               {/* Middle Inputs */}
-              <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+              <div className="lg:col-span-6 flex flex-col gap-4 w-full">
                 
-                {/* Full Name Full Width */}
-                <div className="space-y-1.5 w-full sm:col-span-2">
+                {/* Full Name */}
+                <div className="space-y-1.5 w-full">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-stone-600">
                     Full Name
                   </label>
@@ -270,7 +270,7 @@ export default function ProfilePage({ setActiveTab }) {
                 </div>
 
                 {/* AVATAR SELECTION */}
-                <div className="space-y-1.5 w-full sm:col-span-2 pt-2">
+                <div className="space-y-1.5 w-full pt-1">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-stone-600">
                     Choose Your Avatar (Boy / Girl)
                   </label>
@@ -328,11 +328,11 @@ export default function ProfilePage({ setActiveTab }) {
             </div>
           </div>
 
-          {/* TWO COLUMN MIDDLE SECTION (Account Settings & Notifications) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full px-0 mx-0">
+          {/* TWO COLUMN MIDDLE SECTION */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
             
             {/* ACCOUNT SETTINGS */}
-            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 flex flex-col justify-between w-full m-0">
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 flex flex-col justify-between w-full">
               <div className="w-full">
                 <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
                   <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
@@ -401,7 +401,7 @@ export default function ProfilePage({ setActiveTab }) {
             </div>
 
             {/* NOTIFICATIONS */}
-            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full m-0">
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full">
               <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
                 <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
                   <img src={bellIcon} alt="Bell" className="w-full h-full object-contain" />
@@ -483,9 +483,9 @@ export default function ProfilePage({ setActiveTab }) {
 
           </div>
 
-          {/* LOWER SECTION (Availability Card centered/full width neatly) */}
-          <div className="w-full">
-            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full m-0">
+          {/* LOWER SECTION (Availability Card) */}
+          <div className="w-full pb-6">
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full">
               <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
                 <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
                   <img src={calendarIcon} alt="Calendar" className="w-full h-full object-contain" />
@@ -541,7 +541,18 @@ export default function ProfilePage({ setActiveTab }) {
           </div>
 
         </form>
+
       </div>
+
+      {/* FULL-WIDTH CORNER-TO-CORNER GREEN FOOTER (No Left/Right Gap) */}
+      <footer className="w-full bg-[#1b3328] py-6 px-4 text-center text-xs text-stone-300 mt-12 border-t border-[#2e5b45]">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-2">
+          <span>Copyright © 2026 Manovedh AI. All rights reserved.</span>
+          <span className="hidden sm:inline text-[#a08a4a]">•</span>
+          <span className="text-emerald-400 font-medium">Crafted with 💚 for Mindful Living</span>
+        </div>
+      </footer>
+
     </div>
   );
 }
