@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Send, Heart } from 'lucide-react';
 
 // LOGO & ASSETS IMPORTS
@@ -41,6 +42,7 @@ export default function Footer() {
                 alt="Manovedh Logo" 
                 className="h-10 w-auto object-contain drop-shadow-md"
               />
+
               <h2 
                 className="text-2xl sm:text-3xl font-bold tracking-tight text-white"
                 style={{ fontFamily: "'Playfair Display', serif" }}
@@ -54,70 +56,119 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* CONTACT INFO COLUMN WITH CUSTOM ICONS */}
+          {/* CONTACT INFO COLUMN */}
           <div className="lg:col-span-3 space-y-4">
             <h3 className="text-emerald-300 uppercase tracking-widest text-[12px] font-semibold">
               Get In Touch
             </h3>
+
             <ul className="space-y-3 text-[13.5px] text-gray-200">
+
+              {/* LOCATION */}
               <li className="flex items-start gap-3">
                 <img 
                   src={locationIcon} 
                   alt="Location" 
                   className="w-4 h-4 object-contain opacity-90 shrink-0 mt-1" 
                 />
+
                 <span className="leading-relaxed">
                   Survey No: 374/1, Gaulkhed Road,<br />
                   Shegaon, Maharashtra 444203
                 </span>
               </li>
+
+              {/* PHONE */}
               <li className="flex items-center gap-3">
                 <img 
                   src={callIcon} 
                   alt="Phone" 
                   className="w-4 h-4 object-contain opacity-90 shrink-0" 
                 />
-                <a href="tel:+919223456789" className="hover:text-amber-200 transition-colors">
+
+                <a 
+                  href="tel:+919223456789" 
+                  className="hover:text-amber-200 transition-colors"
+                >
                   +91 92234 56789
                 </a>
               </li>
+
+              {/* EMAIL */}
               <li className="flex items-center gap-3">
                 <img 
                   src={emailIcon} 
                   alt="Email" 
                   className="w-4 h-4 object-contain opacity-90 shrink-0" 
                 />
-                <a href="mailto:mindspace.aisense@gmail.com" className="hover:text-amber-200 transition-colors break-all">
+
+                <a 
+                  href="mailto:mindspace.aisense@gmail.com" 
+                  className="hover:text-amber-200 transition-colors break-all"
+                >
                   mindspace.aisense@gmail.com
                 </a>
               </li>
+
             </ul>
           </div>
 
-          {/* QUICK LINKS COLUMN */}
+          {/* SUPPORT COLUMN */}
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-emerald-300 uppercase tracking-widest text-[12px] font-semibold">
               Support
             </h3>
+
             <ul className="space-y-3 text-[14px] text-gray-200">
+
+              {/* HELP CENTER */}
               <li>
-                <a href="#help" className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group">
-                  <img src={helpIcon} alt="Help Center" className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0" />
+                <a 
+                  href="#help" 
+                  className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
+                >
+                  <img 
+                    src={helpIcon} 
+                    alt="Help Center" 
+                    className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0" 
+                  />
+
                   <span>Help Center</span>
                 </a>
               </li>
+
+              {/* TERMS OF SERVICE */}
               <li>
-                <a href="#terms" className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group">
-                  <img src={termsIcon} alt="Terms of Service" className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0" />
+                <Link
+                  to="/terms-and-conditions"
+                  className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
+                >
+                  <img
+                    src={termsIcon}
+                    alt="Terms of Service"
+                    className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
+                  />
+
                   <span>Terms of Service</span>
-                </a>
+                </Link>
               </li>
+
+              {/* PRIVACY POLICY */}
               <li>
-                <a href="#privacy" className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group">
-                  <img src={privacyIcon} alt="Privacy Policy" className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0" />
+                <a 
+                  href="#privacy" 
+                  className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
+                >
+                  <img 
+                    src={privacyIcon} 
+                    alt="Privacy Policy" 
+                    className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0" 
+                  />
+
                   <span>Privacy Policy</span>
                 </a>
               </li>
+
             </ul>
           </div>
 
@@ -126,10 +177,15 @@ export default function Footer() {
             <h3 className="text-emerald-300 uppercase tracking-widest text-[12px] font-semibold">
               Stay up to date
             </h3>
+
             <p className="text-gray-200 text-[13.5px] break-words">
               Subscribe to get mindful tips and updates delivered straight to your inbox.
             </p>
-            <form onSubmit={handleSubmit} className="relative max-w-sm w-full">
+
+            <form 
+              onSubmit={handleSubmit} 
+              className="relative max-w-sm w-full"
+            >
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -138,6 +194,7 @@ export default function Footer() {
                 required
                 className="w-full bg-[#183226] text-white placeholder-gray-400 px-5 py-3 rounded-full border border-emerald-500/30 focus:outline-none focus:border-emerald-400 focus:bg-[#1e3b2e] transition-all text-[13.5px] pr-14 shadow-inner"
               />
+
               <button
                 type="submit"
                 aria-label="Send email"
@@ -157,11 +214,23 @@ export default function Footer() {
       {/* BOTTOM COPYRIGHT SECTION */}
       <div className="relative max-w-7xl mx-auto px-4 py-6 text-center">
         <p className="text-[13px] text-gray-300 font-medium flex items-center justify-center gap-1.5 flex-wrap">
-          <span>Copyright © 2026 Manovedh AI. All rights reserved.</span>
-          <span className="hidden sm:inline text-emerald-600">•</span>
-          <span className="flex items-center gap-1 text-emerald-300">
-            Crafted with <Heart className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" /> for Mindful Living
+
+          <span>
+            Copyright © 2026 Manovedh AI. All rights reserved.
           </span>
+
+          <span className="hidden sm:inline text-emerald-600">
+            •
+          </span>
+
+          <span className="flex items-center gap-1 text-emerald-300">
+            Crafted with 
+            <Heart 
+              className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" 
+            /> 
+            for Mindful Living
+          </span>
+
         </p>
       </div>
 
