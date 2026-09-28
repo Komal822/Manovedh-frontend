@@ -16,6 +16,10 @@ import emailIcon from "../../assets/communication.png";
 export default function Footer() {
   const [email, setEmail] = useState('');
 
+  // ======================================================
+  // NEWSLETTER SUBMIT
+  // ======================================================
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -23,6 +27,43 @@ export default function Footer() {
       alert(`Subscribed successfully with: ${email}`);
       setEmail('');
     }
+  };
+
+  // ======================================================
+  // HELP CENTER NAVIGATION
+  // ======================================================
+  // Help Center opens the Get Help section on Home page.
+  // If already on Home → smooth scroll.
+  // If on another page → go to Home first, then scroll.
+  // ======================================================
+
+  const handleHelpCenterClick = (e) => {
+    e.preventDefault();
+
+    const scrollToGetHelp = () => {
+      const section = document.getElementById('get-help');
+
+      if (section) {
+        section.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    };
+
+    // Already on Home page
+    if (window.location.pathname === '/') {
+      scrollToGetHelp();
+      return;
+    }
+
+    // Go to Home first
+    window.location.href = '/';
+
+    // Fallback for navigation
+    setTimeout(() => {
+      scrollToGetHelp();
+    }, 150);
   };
 
   return (
@@ -88,6 +129,7 @@ export default function Footer() {
 
               </li>
 
+
               {/* PHONE */}
               <li className="flex items-center gap-3">
 
@@ -105,6 +147,7 @@ export default function Footer() {
                 </a>
 
               </li>
+
 
               {/* EMAIL */}
               <li className="flex items-center gap-3">
@@ -142,16 +185,21 @@ export default function Footer() {
               <li>
 
                 <a
-                  href="#help"
+                  href="#get-help"
+                  onClick={handleHelpCenterClick}
                   className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
                 >
+
                   <img
                     src={helpIcon}
                     alt="Help Center"
                     className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
                   />
 
-                  <span>Help Center</span>
+                  <span>
+                    Help Center
+                  </span>
+
                 </a>
 
               </li>
@@ -164,13 +212,17 @@ export default function Footer() {
                   to="/terms-and-conditions"
                   className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
                 >
+
                   <img
                     src={termsIcon}
                     alt="Terms of Service"
                     className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
                   />
 
-                  <span>Terms of Service</span>
+                  <span>
+                    Terms of Service
+                  </span>
+
                 </Link>
 
               </li>
@@ -183,13 +235,17 @@ export default function Footer() {
                   to="/privacy-policy"
                   className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
                 >
+
                   <img
                     src={privacyIcon}
                     alt="Privacy Policy"
                     className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
                   />
 
-                  <span>Privacy Policy</span>
+                  <span>
+                    Privacy Policy
+                  </span>
+
                 </Link>
 
               </li>
@@ -259,11 +315,15 @@ export default function Footer() {
           </span>
 
           <span className="flex items-center gap-1 text-emerald-300">
+
             Crafted with
+
             <Heart
               className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400"
             />
+
             for Mindful Living
+
           </span>
 
         </p>

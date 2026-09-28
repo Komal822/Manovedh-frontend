@@ -2,140 +2,87 @@ import React, { useState, useEffect } from 'react';
 import {
   Routes,
   Route,
-  Navigate,
-  useLocation
+  Navigate
 } from 'react-router-dom';
 
-import Navbar from './components/Landing_Page/Navbar';
-import HeroSection from './components/HeroSection';
-import LearnMoreSection from './components/LearnMoreSection';
-import Feedback from './components/Feedback';
+// ============================================================
+// MAIN HOME PAGE
+// ============================================================
+
+import Home from './components/Landing_Page/Home';
+
+// ============================================================
+// OTHER PAGES
+// ============================================================
+
 import Support from './components/Support';
 import ContactSection from './components/ContactSection';
+import LearnMoreSection from './components/LearnMoreSection';
+
+// ============================================================
+// NAVBAR & FOOTER
+// ============================================================
+
+import Navbar from './components/Landing_Page/Navbar';
 import Footer from './components/Landing_Page/Footer';
 
-// Authentication Pages
+// ============================================================
+// AUTHENTICATION PAGES
+// ============================================================
+
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import ForgotPassword from './components/ForgotPassword';
 import ProfilePage from './components/ProfilePage';
 
-// Legal Pages
+// ============================================================
+// LEGAL PAGES
+// ============================================================
+
 import TermsAndConditions from './components/Landing_Page/TermsAndConditions';
 import PrivacyPolicy from './components/Landing_Page/PrivacyPolicy';
 
-// Wellness Partner Pages
+// ============================================================
+// WELLNESS PARTNER PAGES
+// ============================================================
+
 import WellnessPartnerLogin from './components/GetStarted_Pages/WellnessPartner_Login';
 import WellnessPartnerSignup from './components/GetStarted_Pages/WellnessPartner_Signup';
 
-// Session Key Constants
+// ============================================================
+// SESSION KEY CONSTANTS
+// ============================================================
+
 const LOCAL_STORAGE_SESSION_KEY = 'manovedh_current_user';
-const LOCAL_STORAGE_PARTNER_SESSION_KEY = 'manovedh_current_partner';
 
+const LOCAL_STORAGE_PARTNER_SESSION_KEY =
+  'manovedh_current_partner';
 
 // ============================================================
-// MAIN WEBSITE LAYOUT
+// COMMON PAGE LAYOUT
+// ============================================================
+// Used only for separate pages:
+// Navbar → Page Content → Footer
 // ============================================================
 
-function MainLayout({ currentUser }) {
-  const location = useLocation();
-
-  // Footer is hidden on Profile page
-  const isProfilePage = location.pathname === '/profile';
-
+function PageLayout({ children }) {
   return (
-    <div className="min-h-screen bg-white text-[#1b3328] font-sans flex flex-col justify-between">
+    <div className="min-h-screen bg-white text-[#1b3328] font-sans flex flex-col">
 
       {/* NAVBAR */}
       <Navbar />
 
-      {/* MAIN CONTENT */}
-      <main className="flex-grow">
-
-        <Routes>
-
-          {/* HOME */}
-          <Route
-            path="/"
-            element={
-              <>
-                <HeroSection user={currentUser} />
-                <Feedback />
-              </>
-            }
-          />
-
-          {/* ABOUT */}
-          <Route
-            path="/about"
-            element={
-              <div className="pt-24">
-                <LearnMoreSection />
-              </div>
-            }
-          />
-
-          {/* FEEDBACK */}
-          <Route
-            path="/feedback"
-            element={
-              <div className="pt-28">
-                <Feedback />
-              </div>
-            }
-          />
-
-          {/* SUPPORT */}
-          <Route
-            path="/support"
-            element={
-              <div className="pt-28">
-                <Support />
-              </div>
-            }
-          />
-
-          {/* CONTACT */}
-          <Route
-            path="/contact"
-            element={
-              <div className="pt-28">
-                <ContactSection />
-              </div>
-            }
-          />
-
-          {/* PROFILE */}
-          <Route
-            path="/profile"
-            element={
-              currentUser ? (
-                <div className="pt-28 px-4 max-w-4xl mx-auto">
-                  <ProfilePage user={currentUser} />
-                </div>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          {/* FALLBACK */}
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
-          />
-
-        </Routes>
-
+      {/* PAGE CONTENT */}
+      <main className="flex-grow pt-20">
+        {children}
       </main>
 
       {/* FOOTER */}
-      {!isProfilePage && <Footer />}
+      <Footer />
 
     </div>
   );
 }
-
 
 // ============================================================
 // APP
@@ -145,7 +92,6 @@ export default function App() {
 
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
 
   // ==========================================================
   // RESTORE USER SESSION
@@ -184,7 +130,6 @@ export default function App() {
 
   }, []);
 
-
   // ==========================================================
   // LOGIN / SIGNUP SUCCESS
   // ==========================================================
@@ -199,7 +144,6 @@ export default function App() {
     );
 
   };
-
 
   // ==========================================================
   // LOADING SCREEN
@@ -219,7 +163,6 @@ export default function App() {
 
   }
 
-
   // ==========================================================
   // APPLICATION ROUTES
   // ==========================================================
@@ -229,6 +172,96 @@ export default function App() {
     <Routes>
 
       {/* ======================================================
+          HOME
+
+          Home.jsx contains:
+          Navbar
+          HeroSection
+          FeaturesSection
+          Feature1
+          GetHelp
+          Activity
+          Feedback
+          Footer
+
+          Navbar links for these sections scroll on this page.
+          They do NOT need separate routes.
+          ====================================================== */}
+
+      <Route
+        path="/"
+        element={
+          <Home
+
+            onOpenCommunity={() => {}}
+
+            onOpenWellnessLogin={() => {
+              window.location.href = '/partner-login';
+            }}
+
+            onOpenWellnessSignup={() => {
+              window.location.href = '/partner-signup';
+            }}
+
+          />
+        }
+      />
+
+      {/* ======================================================
+          ABOUT / LEARN MORE
+
+          Separate page:
+          Navbar
+          LearnMoreSection
+          Footer
+          ====================================================== */}
+
+      <Route
+        path="/about"
+        element={
+          <PageLayout>
+            <LearnMoreSection />
+          </PageLayout>
+        }
+      />
+
+      {/* ======================================================
+          SUPPORT
+
+          Separate page:
+          Navbar
+          Support
+          Footer
+          ====================================================== */}
+
+      <Route
+        path="/support"
+        element={
+          <PageLayout>
+            <Support />
+          </PageLayout>
+        }
+      />
+
+      {/* ======================================================
+          CONTACT
+
+          Separate page:
+          Navbar
+          ContactSection
+          Footer
+          ====================================================== */}
+
+      <Route
+        path="/contact"
+        element={
+          <PageLayout>
+            <ContactSection />
+          </PageLayout>
+        }
+      />
+
+      {/* ======================================================
           USER LOGIN
           ====================================================== */}
 
@@ -236,7 +269,10 @@ export default function App() {
         path="/login"
         element={
           currentUser ? (
-            <Navigate to="/" replace />
+            <Navigate
+              to="/"
+              replace
+            />
           ) : (
             <Login
               onLoginSuccess={handleAuthSuccess}
@@ -244,7 +280,6 @@ export default function App() {
           )
         }
       />
-
 
       {/* ======================================================
           USER SIGNUP
@@ -254,7 +289,10 @@ export default function App() {
         path="/signup"
         element={
           currentUser ? (
-            <Navigate to="/" replace />
+            <Navigate
+              to="/"
+              replace
+            />
           ) : (
             <SignUp
               onSignUpSuccess={handleAuthSuccess}
@@ -262,7 +300,6 @@ export default function App() {
           )
         }
       />
-
 
       {/* ======================================================
           FORGOT PASSWORD
@@ -275,6 +312,33 @@ export default function App() {
         }
       />
 
+      {/* ======================================================
+          PROFILE
+          ====================================================== */}
+
+      <Route
+        path="/profile"
+        element={
+          currentUser ? (
+            <PageLayout>
+
+              <div className="px-4 max-w-4xl mx-auto">
+
+                <ProfilePage
+                  user={currentUser}
+                />
+
+              </div>
+
+            </PageLayout>
+          ) : (
+            <Navigate
+              to="/login"
+              replace
+            />
+          )
+        }
+      />
 
       {/* ======================================================
           TERMS AND CONDITIONS
@@ -287,7 +351,6 @@ export default function App() {
         }
       />
 
-
       {/* ======================================================
           PRIVACY POLICY
           ====================================================== */}
@@ -299,7 +362,6 @@ export default function App() {
         }
       />
 
-
       {/* ======================================================
           WELLNESS PARTNER LOGIN
           ====================================================== */}
@@ -308,6 +370,7 @@ export default function App() {
         path="/partner-login"
         element={
           <WellnessPartnerLogin
+
             onLoginSuccess={(partner) => {
 
               localStorage.setItem(
@@ -330,10 +393,10 @@ export default function App() {
             onSwitchToUserLogin={() => {
               window.location.href = '/login';
             }}
+
           />
         }
       />
-
 
       {/* ======================================================
           WELLNESS PARTNER SIGNUP
@@ -343,6 +406,7 @@ export default function App() {
         path="/partner-signup"
         element={
           <WellnessPartnerSignup
+
             onSignupSuccess={() => {
               window.location.href = '/partner-login';
             }}
@@ -358,20 +422,21 @@ export default function App() {
             onSwitchToUserLogin={() => {
               window.location.href = '/login';
             }}
+
           />
         }
       />
 
-
       {/* ======================================================
-          MAIN WEBSITE
+          FALLBACK
           ====================================================== */}
 
       <Route
-        path="/*"
+        path="*"
         element={
-          <MainLayout
-            currentUser={currentUser}
+          <Navigate
+            to="/"
+            replace
           />
         }
       />

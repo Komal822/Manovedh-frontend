@@ -1,170 +1,211 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
-// Import assets from assets directory
-import heroBgImage from '../assets/image.png';
-import rightIcon from '../assets/right.png';
+import heroBgImage from "../../assets/image.png";
+import rightIcon from "../../assets/right.png";
 
-const HeroSection = () => {
+function HeroSection({
+  onOpenWellnessLogin,
+  onOpenWellnessSignup,
+}) {
   return (
-    <section 
-      id="home" 
-      className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-24 sm:pt-32 pb-16 sm:pb-20 select-none bg-[#1b3328]"
+    <section
+      id="home"
+      className="relative min-h-screen overflow-hidden bg-[#12241C] text-white"
     >
-      {/* 1. BACKGROUND IMAGE - FULL COVER WITH FOCUS ON CHARACTER FOR MOBILE */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
+      {/* =========================================================
+          HERO BACKGROUND
+      ========================================================= */}
+      <div className="absolute inset-0">
         <img
           src={heroBgImage}
-          alt="Peaceful meditation during sunset"
-          className="w-full h-full object-cover object-[82%_center] sm:object-center brightness-[0.90] sm:brightness-[0.95] contrast-[1.05] animate-smooth-zoom"
+          alt="Manovedh Wellness"
+          className="h-full w-full object-cover"
         />
+
+        <div className="absolute inset-0 bg-gradient-to-r from-[#10251C]/95 via-[#10251C]/70 to-[#10251C]/20" />
+        <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      {/* 2. GRADIENT OVERLAY - SMOOTH DARK LEFT GRADIENT FOR READABILITY */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent sm:from-black/70 sm:via-black/30 z-10 transition-all duration-700 ease-in-out" />
+      {/* =========================================================
+          HERO CONTENT
+      ========================================================= */}
+      <div className="relative z-10 flex min-h-screen items-center">
+        <div className="mx-auto w-full max-w-7xl px-6 pb-20 pt-32 sm:px-10 lg:px-16">
 
-      {/* 3. AMBIENT FLOATING PARTICLES */}
-      <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden hidden sm:block">
-        <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-[#e3d19b]/50 rounded-full animate-particle-slow" />
-        <div className="absolute top-[50%] left-[40%] w-3 h-3 bg-white/25 rounded-full animate-particle-fast" />
-        <div className="absolute bottom-[30%] left-[20%] w-1.5 h-1.5 bg-white/40 rounded-full animate-particle-normal" />
-        <div className="absolute top-[70%] right-[15%] w-2.5 h-2.5 bg-[#e3d19b]/45 rounded-full animate-particle-slow" />
-        <div className="absolute top-[30%] right-[30%] w-2.5 h-2.5 bg-emerald-100/30 rounded-full animate-particle-normal" />
-      </div>
+          <div className="max-w-3xl">
 
-      {/* 4. MAIN HERO CONTENT */}
-      <div className="relative w-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-16 z-30">
-        <div className="max-w-2xl space-y-4 sm:space-y-8 text-left">
+            {/* Small Heading */}
+            <div className="mb-6 flex items-center gap-3">
+              <span className="h-px w-10 bg-[#a08a4a]" />
 
-          {/* MAIN HEADING */}
-          <h1
-            className="text-4xl sm:text-6xl lg:text-[76px] leading-[1.12] sm:leading-[1.08] tracking-tight font-bold drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            <span className="block font-medium italic text-[#ffd700] drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)] animate-ultra-smooth-text-1">
-              Your Well-Being
-            </span>
-            <span className="block text-white animate-ultra-smooth-text-2 mt-1 sm:mt-0">
-              Matters
-            </span>
-          </h1>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-100/80 sm:text-xs">
+                A Calmer Mind&nbsp;&nbsp; A Brighter You
+              </p>
+            </div>
 
-          {/* SUBTITLE TEXT */}
-          <p className="text-[14px] sm:text-[18px] text-white/95 leading-relaxed max-w-md sm:max-w-xl font-normal drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)] animate-ultra-smooth-text-3">
-            Manovedh helps you understand your emotions, build healthier habits, and track your progress with calm AI-powered support.
-          </p>
-
-          {/* CALL TO ACTION BUTTONS */}
-          <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 animate-ultra-smooth-text-4">
-            {/* GET STARTED BUTTON - LINKED TO /login ROUTE */}
-            <Link
-              to="/login"
-              className="relative group inline-flex items-center gap-2.5 sm:gap-3 overflow-hidden rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold uppercase tracking-wider text-white shadow-xl shadow-[#1b3328]/35 transition-all duration-500 ease-out hover:shadow-2xl hover:scale-105 active:scale-95"
-              style={{ background: "linear-gradient(145deg, #4E8A6B, #234A38)" }}
-            >
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-              
-              <span className="relative z-10 flex items-center gap-2 transition-transform duration-300">
-                Get Started
-                <img 
-                  src={rightIcon} 
-                  alt="Right Arrow" 
-                  className="w-4 h-4 sm:w-5 sm:h-5 object-contain transition-transform duration-300 ease-out group-hover:translate-x-2" 
-                />
+            {/* Main Heading */}
+            <h1 className="max-w-3xl font-serif text-5xl font-bold leading-[0.98] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
+              <span className="text-white">
+                Your Well-Being
               </span>
-            </Link>
+              <br />
+              <span className="text-[#9acbb0]">
+                Matters.
+              </span>
+            </h1>
 
-            {/* LEARN MORE BUTTON - LINKED TO /about ROUTE */}
-            <Link
-              to="/about"
-              className="inline-flex items-center justify-center rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold tracking-wide text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-lg transition-all duration-300 ease-out hover:scale-105 active:scale-95"
-            >
-              Learn More
-            </Link>
+            {/* Description */}
+            <p className="mt-7 max-w-xl text-sm leading-7 text-emerald-50/80 sm:text-base sm:leading-8">
+              Manovedh helps you understand your emotions,
+              <br className="hidden sm:block" />
+              build healthier habits, and track your progress
+              <br className="hidden sm:block" />
+              with calm AI-powered support.
+            </p>
+
+            {/* =====================================================
+                CTA BUTTONS
+            ===================================================== */}
+            <div className="mt-9 flex flex-wrap items-center gap-4">
+
+              {/* Get Started */}
+              <Link
+                to="/login"
+                className="group inline-flex items-center gap-3 rounded-full bg-[#9acbb0] px-7 py-3.5 text-sm font-bold text-[#173326] shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-[#b0dbc2] hover:shadow-xl"
+              >
+                <span>Get Started</span>
+
+                <span className="transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+
+              {/* =================================================
+                  LEARN MORE
+                  Opens LearnMoreSection through /about
+              ================================================= */}
+              <Link
+                to="/about"
+                className="group inline-flex items-center gap-3 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/50 hover:bg-white/10"
+              >
+                <span>Learn More</span>
+
+                <span className="transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+
+            </div>
+
+            {/* =====================================================
+                FEATURE POINTS
+            ===================================================== */}
+            <div className="mt-12 flex flex-wrap gap-x-10 gap-y-6">
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 backdrop-blur-md">
+                  <span className="text-lg">⌁</span>
+                </div>
+
+                <p className="text-xs font-medium leading-5 text-white/80">
+                  Understand
+                  <br />
+                  Your Emotions
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 backdrop-blur-md">
+                  <span className="text-lg">↗</span>
+                </div>
+
+                <p className="text-xs font-medium leading-5 text-white/80">
+                  Build
+                  <br />
+                  Healthier Habits
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 backdrop-blur-md">
+                  <span className="text-lg">♡</span>
+                </div>
+
+                <p className="text-xs font-medium leading-5 text-white/80">
+                  Find Your
+                  <br />
+                  Balance
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* =========================================================
+              RIGHT SIDE MESSAGE
+          ========================================================= */}
+          <div className="absolute bottom-28 right-8 hidden max-w-[220px] text-right lg:block xl:right-16">
+
+            <p className="font-serif text-3xl italic leading-tight text-white/90">
+              Better
+              <br />
+              Thoughts
+              <br />
+              <span className="text-[#9acbb0]">
+                Brighter Days
+              </span>
+            </p>
+
+            <div className="ml-auto mt-4 h-px w-16 bg-[#9acbb0]" />
           </div>
 
         </div>
       </div>
 
-      {/* 5. BOTTOM WAVY SECTION DIVIDER */}
-      <div className="absolute bottom-0 left-0 right-0 leading-none pointer-events-none z-25">
-        <svg 
-          viewBox="0 0 1440 120" 
-          className="w-full h-10 sm:h-20 text-[#f4f1ea] fill-current" 
+      {/* =========================================================
+          SCROLL INDICATOR
+      ========================================================= */}
+      <div className="absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 sm:flex">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60">
+          Scroll to explore
+        </span>
+
+        <span className="animate-bounce text-white/70">
+          ↓
+        </span>
+      </div>
+
+      {/* =========================================================
+          WAVE DIVIDER
+      ========================================================= */}
+      <div className="absolute bottom-0 left-0 z-20 w-full overflow-hidden leading-[0]">
+        <svg
+          viewBox="0 0 1440 120"
+          xmlns="http://www.w3.org/2000/svg"
+          className="relative block h-[70px] w-full sm:h-[90px]"
           preserveAspectRatio="none"
         >
-          <path d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,120 L0,120 Z" />
+          <path
+            d="M0,64 C180,120 360,120 540,72 C720,24 900,24 1080,64 C1260,104 1350,108 1440,80 L1440,120 L0,120 Z"
+            fill="#F8F6F0"
+          />
         </svg>
       </div>
 
-      {/* 6. CUSTOM CSS ANIMATIONS AND STYLES */}
-      <style>{`
-        /* Smooth Scale zoom effect for background image */
-        @keyframes smoothZoom {
-          0% { transform: scale(1.02); }
-          50% { transform: scale(1.08); }
-          100% { transform: scale(1.02); }
-        }
-
-        /* Ultra smooth staggered text reveal effect */
-        @keyframes ultraSmoothReveal {
-          0% {
-            opacity: 0;
-            transform: translateY(20px) scale(0.98);
-            filter: blur(4px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0px);
-          }
-        }
-
-        /* Floating particles keyframes */
-        @keyframes particleSlow {
-          0%, 100% { transform: translateY(0px) translateX(0px) scale(0.9); opacity: 0.2; }
-          50% { transform: translateY(-40px) translateX(20px) scale(1.2); opacity: 0.8; }
-        }
-        @keyframes particleFast {
-          0%, 100% { transform: translateY(0px) translateX(0px) scale(0.8); opacity: 0.15; }
-          50% { transform: translateY(-70px) translateX(-30px) scale(1.3); opacity: 0.75; }
-        }
-        @keyframes particleNormal {
-          0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.3; }
-          50% { transform: translateY(-55px) translateX(15px); opacity: 0.6; }
-        }
-
-        /* Animation utility classes */
-        .animate-smooth-zoom {
-          animation: smoothZoom 28s ease-in-out infinite;
-        }
-
-        /* Staggered text animation classes */
-        .animate-ultra-smooth-text-1 {
-          opacity: 0;
-          animation: ultraSmoothReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
-        }
-        .animate-ultra-smooth-text-2 {
-          opacity: 0;
-          animation: ultraSmoothReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
-        }
-        .animate-ultra-smooth-text-3 {
-          opacity: 0;
-          animation: ultraSmoothReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
-        }
-        .animate-ultra-smooth-text-4 {
-          opacity: 0;
-          animation: ultraSmoothReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
-        }
-
-        /* Particle animations trigger classes */
-        .animate-particle-slow { animation: particleSlow 8s ease-in-out infinite; }
-        .animate-particle-fast { animation: particleFast 5s ease-in-out infinite; }
-        .animate-particle-normal { animation: particleNormal 6.5s ease-in-out infinite; }
-      `}</style>
-
+      {/* =========================================================
+          SMALL RIGHT ICON
+      ========================================================= */}
+      <div className="absolute bottom-20 right-6 z-20 hidden sm:block">
+        <img
+          src={rightIcon}
+          alt=""
+          className="h-10 w-10 object-contain opacity-70"
+        />
+      </div>
     </section>
   );
-};
+}
 
 export default HeroSection;
