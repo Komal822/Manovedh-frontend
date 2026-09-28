@@ -233,8 +233,9 @@ export default function Login({ onLoginSuccess }) {
 
           <div className="relative z-10 my-auto py-2 flex flex-col justify-center pr-14 lg:pr-20">
             <div className="mb-2 min-h-[3.5rem] sm:min-h-[4rem]">
-              <h2 className="text-lg sm:text-xl font-serif font-normal leading-tight bg-gradient-to-r from-[#b8860b] via-[#ffd700] to-[#daa520] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(218,165,32,0.4)]">
-                {displayedText}
+              <h2 className="text-lg sm:text-xl font-serif font-normal leading-tight drop-shadow-[0_2px_10px_rgba(218,165,32,0.4)]">
+                <span className="text-[#B8860B]">A HEALTHIER MIND A </span>
+                <span className="text-[#D4AF37]">BRIGHTER YOU</span>
                 <span className="inline-block w-[2px] h-5 ml-0.5 bg-[#b8860b] animate-pulse align-middle"></span>
               </h2>
             </div>
@@ -311,34 +312,34 @@ export default function Login({ onLoginSuccess }) {
                 </div>
 
                 <form onSubmit={handleLoginSubmit} className="space-y-2">
-                  <div className="relative">
-                    <Mail className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                  <div className="relative flex items-center">
+                    <Mail className="w-4 h-4 absolute left-3.5 text-[#738279]" />
                     <input
                       type="email"
                       required
                       placeholder="Email address"
                       value={loginData.email}
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                      className="w-full pl-10 pr-3 py-2 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      className="w-full pl-10 pr-3 py-2.5 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                     />
                   </div>
 
-                  <div className="relative">
-                    <Lock className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                  <div className="relative flex items-center">
+                    <Lock className="w-4 h-4 absolute left-3.5 text-[#738279]" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
                       placeholder="Password"
                       value={loginData.password}
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                      className="w-full pl-10 pr-10 py-2 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                      className="absolute right-3.5 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                     >
-                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
 
@@ -354,7 +355,7 @@ export default function Login({ onLoginSuccess }) {
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 mt-0.5 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    className="w-full py-3 mt-0.5 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <span>Login</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -369,9 +370,9 @@ export default function Login({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  className="w-full py-2 mb-2.5 rounded-xl bg-white hover:bg-gray-50 border border-black/10 text-[#1b3328] font-semibold text-xs shadow-sm flex items-center justify-center gap-2.5 cursor-pointer transition-all"
+                  className="w-full py-3 mb-2.5 rounded-xl bg-white hover:bg-gray-50 border border-black/10 text-[#1b3328] font-semibold text-xs shadow-sm flex items-center justify-center gap-2.5 cursor-pointer transition-all"
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
@@ -400,21 +401,21 @@ export default function Login({ onLoginSuccess }) {
                 </div>
 
                 <form onSubmit={handleSendOtp} className="space-y-2.5">
-                  <div className="relative">
-                    <Mail className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                  <div className="relative flex items-center">
+                    <Mail className="w-4 h-4 absolute left-3.5 text-[#738279]" />
                     <input
                       type="email"
                       required
                       placeholder="Enter your registered email"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      className="w-full pl-10 pr-3 py-2.5 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    className="w-full py-3 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <span>Send OTP</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -452,13 +453,13 @@ export default function Login({ onLoginSuccess }) {
                       placeholder="Enter 4-digit OTP"
                       value={enteredOtp}
                       onChange={(e) => setEnteredOtp(e.target.value)}
-                      className="w-full px-3 py-2 text-center tracking-[1em] text-sm font-bold bg-white border border-black/10 rounded-xl text-[#1b3328] placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      className="w-full px-3 py-2.5 text-center tracking-[1em] text-sm font-bold bg-white border border-black/10 rounded-xl text-[#1b3328] placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    className="w-full py-3 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <span>Verify OTP</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -488,47 +489,47 @@ export default function Login({ onLoginSuccess }) {
                 </div>
 
                 <form onSubmit={handleResetPasswordSubmit} className="space-y-2">
-                  <div className="relative">
-                    <Lock className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                  <div className="relative flex items-center">
+                    <Lock className="w-4 h-4 absolute left-3.5 text-[#738279]" />
                     <input
                       type={showNewPassword ? 'text' : 'password'}
                       required
                       placeholder="New Password"
                       value={newPasswordData.newPassword}
                       onChange={(e) => setNewPasswordData({ ...newPasswordData, newPassword: e.target.value })}
-                      className="w-full pl-10 pr-10 py-2 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                      className="absolute right-3.5 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                     >
-                      {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
 
-                  <div className="relative">
-                    <Lock className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                  <div className="relative flex items-center">
+                    <Lock className="w-4 h-4 absolute left-3.5 text-[#738279]" />
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       required
                       placeholder="Confirm New Password"
                       value={newPasswordData.confirmPassword}
                       onChange={(e) => setNewPasswordData({ ...newPasswordData, confirmPassword: e.target.value })}
-                      className="w-full pl-10 pr-10 py-2 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                      className="absolute right-3.5 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                     >
-                      {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 mt-0.5 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    className="w-full py-3 mt-0.5 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <span>Update Password</span>
                     <ArrowRight className="w-3.5 h-3.5" />

@@ -47,7 +47,7 @@ export default function Signup({ onSignupSuccess }) {
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Typewriter effect state for Golden Heading
+  // Typewriter effect state for Heading
   const fullHeadingText = "BEGIN YOUR JOURNEY TOWARDS INNER PEACE";
   const [typedHeading, setTypedHeading] = useState('');
   const [charIndex, setCharIndex] = useState(0);
@@ -185,12 +185,12 @@ export default function Signup({ onSignupSuccess }) {
             </div>
           </div>
 
-          {/* Center Content: Typewriter Golden Heading & 10 Yoga Images Scrolling Showcase */}
+          {/* Center Content: Typewriter Bold Golden Heading & 10 Yoga Images Scrolling Showcase */}
           <div className="relative z-10 my-auto py-2 flex flex-col justify-center pr-14 lg:pr-20">
             <div className="mb-2 min-h-[3.5rem] sm:min-h-[4rem]">
-              <h2 className="text-lg sm:text-xl font-serif font-normal leading-tight bg-gradient-to-r from-[#b8860b] via-[#ffd700] to-[#daa520] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(218,165,32,0.4)]">
+              <h2 className="text-lg sm:text-xl font-serif font-black tracking-wide leading-tight bg-gradient-to-r from-[#b38f1d] via-[#e6c229] to-[#dfb115] bg-clip-text text-transparent drop-shadow-[0_1px_8px_rgba(179,143,29,0.3)]">
                 {typedHeading}
-                <span className="inline-block w-0.5 h-4 ml-0.5 bg-[#ffd700] animate-pulse"></span>
+                <span className="inline-block w-0.5 h-4 ml-0.5 bg-[#e6c229] animate-pulse"></span>
               </h2>
             </div>
 
@@ -276,7 +276,7 @@ export default function Signup({ onSignupSuccess }) {
 
             <form onSubmit={handleSignupSubmit} className="space-y-2">
               <div className="relative">
-                <User className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
                 <input
                   type="text"
                   required
@@ -288,7 +288,7 @@ export default function Signup({ onSignupSuccess }) {
               </div>
 
               <div className="relative">
-                <Mail className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
                 <input
                   type="email"
                   required
@@ -300,7 +300,7 @@ export default function Signup({ onSignupSuccess }) {
               </div>
 
               <div className="relative">
-                <Lock className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -314,12 +314,12 @@ export default function Signup({ onSignupSuccess }) {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
               <div className="relative">
-                <Lock className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
@@ -333,7 +333,7 @@ export default function Signup({ onSignupSuccess }) {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
