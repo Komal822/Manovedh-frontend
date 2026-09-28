@@ -14,15 +14,17 @@ import Support from './components/Support';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Landing_Page/Footer';
 
-// Terms & Conditions is inside Landing_Page
-import TermsAndConditions from './components/Landing_Page/TermsAndConditions';
-
+// Authentication Pages
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import ForgotPassword from './components/ForgotPassword';
 import ProfilePage from './components/ProfilePage';
 
-// Wellness Partner Components
+// Legal Pages
+import TermsAndConditions from './components/Landing_Page/TermsAndConditions';
+import PrivacyPolicy from './components/Landing_Page/PrivacyPolicy';
+
+// Wellness Partner Pages
 import WellnessPartnerLogin from './components/GetStarted_Pages/WellnessPartner_Login';
 import WellnessPartnerSignup from './components/GetStarted_Pages/WellnessPartner_Signup';
 
@@ -52,9 +54,7 @@ function MainLayout({ currentUser }) {
 
         <Routes>
 
-          {/* ==================================================
-              HOME
-              ================================================== */}
+          {/* HOME */}
           <Route
             path="/"
             element={
@@ -65,9 +65,7 @@ function MainLayout({ currentUser }) {
             }
           />
 
-          {/* ==================================================
-              ABOUT
-              ================================================== */}
+          {/* ABOUT */}
           <Route
             path="/about"
             element={
@@ -77,9 +75,7 @@ function MainLayout({ currentUser }) {
             }
           />
 
-          {/* ==================================================
-              FEEDBACK
-              ================================================== */}
+          {/* FEEDBACK */}
           <Route
             path="/feedback"
             element={
@@ -89,9 +85,7 @@ function MainLayout({ currentUser }) {
             }
           />
 
-          {/* ==================================================
-              SUPPORT
-              ================================================== */}
+          {/* SUPPORT */}
           <Route
             path="/support"
             element={
@@ -101,9 +95,7 @@ function MainLayout({ currentUser }) {
             }
           />
 
-          {/* ==================================================
-              CONTACT
-              ================================================== */}
+          {/* CONTACT */}
           <Route
             path="/contact"
             element={
@@ -113,9 +105,7 @@ function MainLayout({ currentUser }) {
             }
           />
 
-          {/* ==================================================
-              PROFILE
-              ================================================== */}
+          {/* PROFILE */}
           <Route
             path="/profile"
             element={
@@ -129,9 +119,7 @@ function MainLayout({ currentUser }) {
             }
           />
 
-          {/* ==================================================
-              FALLBACK
-              ================================================== */}
+          {/* FALLBACK */}
           <Route
             path="*"
             element={<Navigate to="/" replace />}
@@ -180,14 +168,16 @@ export default function App() {
       } catch (err) {
 
         console.error(
-          'Failed to parse session:',
+          'Failed to parse session',
           err
         );
 
         localStorage.removeItem(
           LOCAL_STORAGE_SESSION_KEY
         );
+
       }
+
     }
 
     setLoading(false);
@@ -207,6 +197,7 @@ export default function App() {
       LOCAL_STORAGE_SESSION_KEY,
       JSON.stringify(userData)
     );
+
   };
 
 
@@ -225,6 +216,7 @@ export default function App() {
 
       </div>
     );
+
   }
 
 
@@ -285,13 +277,25 @@ export default function App() {
 
 
       {/* ======================================================
-          TERMS & CONDITIONS
+          TERMS AND CONDITIONS
           ====================================================== */}
 
       <Route
         path="/terms-and-conditions"
         element={
           <TermsAndConditions />
+        }
+      />
+
+
+      {/* ======================================================
+          PRIVACY POLICY
+          ====================================================== */}
+
+      <Route
+        path="/privacy-policy"
+        element={
+          <PrivacyPolicy />
         }
       />
 
@@ -304,7 +308,6 @@ export default function App() {
         path="/partner-login"
         element={
           <WellnessPartnerLogin
-
             onLoginSuccess={(partner) => {
 
               localStorage.setItem(
@@ -327,7 +330,6 @@ export default function App() {
             onSwitchToUserLogin={() => {
               window.location.href = '/login';
             }}
-
           />
         }
       />
@@ -341,7 +343,6 @@ export default function App() {
         path="/partner-signup"
         element={
           <WellnessPartnerSignup
-
             onSignupSuccess={() => {
               window.location.href = '/partner-login';
             }}
@@ -357,7 +358,6 @@ export default function App() {
             onSwitchToUserLogin={() => {
               window.location.href = '/login';
             }}
-
           />
         }
       />
@@ -377,5 +377,6 @@ export default function App() {
       />
 
     </Routes>
+
   );
 }

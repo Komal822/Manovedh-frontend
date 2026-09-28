@@ -18,6 +18,7 @@ export default function Footer() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (email) {
       alert(`Subscribed successfully with: ${email}`);
       setEmail('');
@@ -26,38 +27,45 @@ export default function Footer() {
 
   return (
     <footer className="w-full bg-[#12241C] text-white font-sans relative overflow-x-hidden border-t border-[#1e3b2e]">
-      
+
       {/* BACKGROUND AMBIENT GLOW */}
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 max-w-full h-96 bg-[#1e3b2e]/40 rounded-full blur-3xl pointer-events-none" />
 
       {/* TOP FOOTER CONTENT */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 pt-16 pb-12">
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
-          
+
           {/* BRAND COLUMN */}
           <div className="lg:col-span-4 space-y-4">
+
             <div className="flex items-center gap-3">
-              <img 
-                src={logoImg} 
-                alt="Manovedh Logo" 
+
+              <img
+                src={logoImg}
+                alt="Manovedh Logo"
                 className="h-10 w-auto object-contain drop-shadow-md"
               />
 
-              <h2 
+              <h2
                 className="text-2xl sm:text-3xl font-bold tracking-tight text-white"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Manovedh
               </h2>
+
             </div>
 
             <p className="text-emerald-100/80 text-[14px] leading-relaxed max-w-md font-normal break-words">
               Empowering your emotional well-being through mindful living and intelligent AI support. Your journey to inner peace starts here.
             </p>
+
           </div>
 
-          {/* CONTACT INFO COLUMN */}
+
+          {/* CONTACT INFO */}
           <div className="lg:col-span-3 space-y-4">
+
             <h3 className="text-emerald-300 uppercase tracking-widest text-[12px] font-semibold">
               Get In Touch
             </h3>
@@ -66,55 +74,64 @@ export default function Footer() {
 
               {/* LOCATION */}
               <li className="flex items-start gap-3">
-                <img 
-                  src={locationIcon} 
-                  alt="Location" 
-                  className="w-4 h-4 object-contain opacity-90 shrink-0 mt-1" 
+
+                <img
+                  src={locationIcon}
+                  alt="Location"
+                  className="w-4 h-4 object-contain opacity-90 shrink-0 mt-1"
                 />
 
                 <span className="leading-relaxed">
                   Survey No: 374/1, Gaulkhed Road,<br />
                   Shegaon, Maharashtra 444203
                 </span>
+
               </li>
 
               {/* PHONE */}
               <li className="flex items-center gap-3">
-                <img 
-                  src={callIcon} 
-                  alt="Phone" 
-                  className="w-4 h-4 object-contain opacity-90 shrink-0" 
+
+                <img
+                  src={callIcon}
+                  alt="Phone"
+                  className="w-4 h-4 object-contain opacity-90 shrink-0"
                 />
 
-                <a 
-                  href="tel:+919223456789" 
+                <a
+                  href="tel:+919223456789"
                   className="hover:text-amber-200 transition-colors"
                 >
                   +91 92234 56789
                 </a>
+
               </li>
 
               {/* EMAIL */}
               <li className="flex items-center gap-3">
-                <img 
-                  src={emailIcon} 
-                  alt="Email" 
-                  className="w-4 h-4 object-contain opacity-90 shrink-0" 
+
+                <img
+                  src={emailIcon}
+                  alt="Email"
+                  className="w-4 h-4 object-contain opacity-90 shrink-0"
                 />
 
-                <a 
-                  href="mailto:mindspace.aisense@gmail.com" 
+                <a
+                  href="mailto:mindspace.aisense@gmail.com"
                   className="hover:text-amber-200 transition-colors break-all"
                 >
                   mindspace.aisense@gmail.com
                 </a>
+
               </li>
 
             </ul>
+
           </div>
+
 
           {/* SUPPORT COLUMN */}
           <div className="lg:col-span-2 space-y-4">
+
             <h3 className="text-emerald-300 uppercase tracking-widest text-[12px] font-semibold">
               Support
             </h3>
@@ -123,22 +140,26 @@ export default function Footer() {
 
               {/* HELP CENTER */}
               <li>
-                <a 
-                  href="#help" 
+
+                <a
+                  href="#help"
                   className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
                 >
-                  <img 
-                    src={helpIcon} 
-                    alt="Help Center" 
-                    className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0" 
+                  <img
+                    src={helpIcon}
+                    alt="Help Center"
+                    className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
                   />
 
                   <span>Help Center</span>
                 </a>
+
               </li>
+
 
               {/* TERMS OF SERVICE */}
               <li>
+
                 <Link
                   to="/terms-and-conditions"
                   className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
@@ -151,29 +172,36 @@ export default function Footer() {
 
                   <span>Terms of Service</span>
                 </Link>
+
               </li>
+
 
               {/* PRIVACY POLICY */}
               <li>
-                <a 
-                  href="#privacy" 
+
+                <Link
+                  to="/privacy-policy"
                   className="flex items-center gap-2.5 hover:text-amber-200 transition-colors duration-200 group"
                 >
-                  <img 
-                    src={privacyIcon} 
-                    alt="Privacy Policy" 
-                    className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0" 
+                  <img
+                    src={privacyIcon}
+                    alt="Privacy Policy"
+                    className="w-4 h-4 object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
                   />
 
                   <span>Privacy Policy</span>
-                </a>
+                </Link>
+
               </li>
 
             </ul>
+
           </div>
 
-          {/* NEWSLETTER COLUMN */}
+
+          {/* NEWSLETTER */}
           <div className="lg:col-span-3 space-y-4">
+
             <h3 className="text-emerald-300 uppercase tracking-widest text-[12px] font-semibold">
               Stay up to date
             </h3>
@@ -182,10 +210,11 @@ export default function Footer() {
               Subscribe to get mindful tips and updates delivered straight to your inbox.
             </p>
 
-            <form 
-              onSubmit={handleSubmit} 
+            <form
+              onSubmit={handleSubmit}
               className="relative max-w-sm w-full"
             >
+
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -202,17 +231,23 @@ export default function Footer() {
               >
                 <Send className="w-4 h-4" />
               </button>
+
             </form>
+
           </div>
 
         </div>
+
       </div>
 
-      {/* DIVIDER LINE */}
+
+      {/* DIVIDER */}
       <div className="w-full border-t border-emerald-900/50" />
 
-      {/* BOTTOM COPYRIGHT SECTION */}
+
+      {/* COPYRIGHT */}
       <div className="relative max-w-7xl mx-auto px-4 py-6 text-center">
+
         <p className="text-[13px] text-gray-300 font-medium flex items-center justify-center gap-1.5 flex-wrap">
 
           <span>
@@ -224,14 +259,15 @@ export default function Footer() {
           </span>
 
           <span className="flex items-center gap-1 text-emerald-300">
-            Crafted with 
-            <Heart 
-              className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" 
-            /> 
+            Crafted with
+            <Heart
+              className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400"
+            />
             for Mindful Living
           </span>
 
         </p>
+
       </div>
 
     </footer>
