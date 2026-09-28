@@ -32,7 +32,7 @@ export default function Support() {
       description:
         "Forgot password, email verification, login issues, or account access problems.",
       linkText: "Recover account",
-      linkTo: "/login?forgot=true", // Login aslo kinva logout aslo, he nehamich forgot password page var jail
+      linkTo: "/login?forgot=true",
     },
     {
       id: "usage",
@@ -84,12 +84,9 @@ export default function Support() {
         {/* PREMIUM HERO / HEADER SECTION */}
         <div className="relative text-center space-y-5 max-w-3xl mx-auto pt-2 pb-2">
           
-          {/* Subtle Background Glow behind Header */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#d2e4c4]/50 rounded-full blur-3xl -z-10 pointer-events-none" />
-
-          {/* Main Title with Premium Gradient */}
+          {/* Main Title with Solid Dark Color to prevent wash-out */}
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-[#1b3328] leading-[1.15]">
-            How can we <span className="bg-gradient-to-r from-[#1b3328] via-[#2e5b45] to-[#407a5d] bg-clip-text text-transparent">support you</span> today?
+            How can we <span className="text-[#2e5b45]">support you</span> today?
           </h1>
           
           {/* Subtitle */}
@@ -178,7 +175,7 @@ export default function Support() {
         </div>
 
         {/* EMERGENCY WARNING BANNER */}
-        <div className="bg-[#fdf2f2] **border** border-[#f8d7d7] rounded-2xl p-5 flex items-start gap-4 text-[#9b1c1c] shadow-2xs">
+        <div className="bg-[#fdf2f2] border border-[#f8d7d7] rounded-2xl p-5 flex items-start gap-4 text-[#9b1c1c] shadow-2xs">
           <AlertTriangle className="w-5 h-5 text-[#d93838] shrink-0 mt-0.5" />
           <div className="text-xs sm:text-sm leading-relaxed font-medium">
             <span className="font-bold">Important Notice: </span>

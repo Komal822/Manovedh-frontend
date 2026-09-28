@@ -52,10 +52,10 @@ export default function ContactSection() {
         {/* MAIN CONTACT CARD */}
         <div className="bg-white/95 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl border border-black/5 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
           
-          {/* LEFT SIDE: INFO PANEL */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#18362A] via-[#1E4334] to-[#0F261D] text-white p-8 sm:p-10 lg:p-12 flex flex-col justify-center relative overflow-hidden">
+          {/* LEFT SIDE: INFO PANEL (Lighter Dark Theme) */}
+          <div className="lg:col-span-5 bg-[#143126] text-white p-8 sm:p-10 lg:p-12 flex flex-col justify-center relative overflow-hidden">
             <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full border-[30px] border-white/5 pointer-events-none" />
-            <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-[#A08A4A]/20 blur-2xl pointer-events-none" />
+            <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-[#A08A4A]/15 blur-2xl pointer-events-none" />
             
             <div className="relative z-10">
               <h3 className="text-2xl sm:text-3xl font-bold font-serif mb-3 tracking-tight">
@@ -73,7 +73,7 @@ export default function ContactSection() {
                   href="tel:+919223456789" 
                   className="flex items-center gap-4 group p-2.5 sm:p-3 rounded-2xl transition-all duration-300 hover:bg-white/10"
                 >
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center p-2 transition-all duration-300 shadow-sm shrink-0">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center p-2 transition-all duration-300 shadow-sm shrink-0">
                     <img 
                       src={callIcon} 
                       alt="Call Icon" 
@@ -93,7 +93,7 @@ export default function ContactSection() {
                   href="mailto:mindspace.aisense@gmail.com" 
                   className="flex items-center gap-4 group p-2.5 sm:p-3 rounded-2xl transition-all duration-300 hover:bg-white/10"
                 >
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center p-2 transition-all duration-300 shadow-sm shrink-0">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center p-2 transition-all duration-300 shadow-sm shrink-0">
                     <img 
                       src={emailIcon} 
                       alt="Email Icon" 
@@ -110,7 +110,7 @@ export default function ContactSection() {
 
                 {/* LOCATION ITEM */}
                 <div className="flex items-start gap-4 p-2.5 sm:p-3 rounded-2xl">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center p-2 shadow-sm shrink-0 mt-1">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center p-2 shadow-sm shrink-0 mt-1">
                     <img 
                       src={locationIcon} 
                       alt="Location Icon" 

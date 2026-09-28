@@ -38,10 +38,10 @@ const HeroSection = () => {
 
           {/* MAIN HEADING */}
           <h1
-            className="text-4xl sm:text-6xl lg:text-[76px] leading-[1.12] sm:leading-[1.08] tracking-tight font-bold drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+            className="text-4xl sm:text-6xl lg:text-[76px] leading-[1.12] sm:leading-[1.08] tracking-tight font-bold drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            <span className="block font-medium italic bg-gradient-to-r from-[#ffe59e] via-[#f8b500] to-[#e3d19b] bg-clip-text text-transparent animate-ultra-smooth-text-1">
+            <span className="block font-medium italic text-[#ffd700] drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)] animate-ultra-smooth-text-1">
               Your Well-Being
             </span>
             <span className="block text-white animate-ultra-smooth-text-2 mt-1 sm:mt-0">
