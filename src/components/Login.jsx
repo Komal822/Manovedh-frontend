@@ -42,7 +42,10 @@ export default function Login({ onLoginSuccess }) {
 
   const [flowState, setFlowState] = useState(isForgotParam ? 'forgot_email' : 'login');
 
-  const fullText = "A HEALTHIER MIND A BRIGHTER YOU";
+  // --- Typewriter Effect Logic ---
+  const text1 = "A HEALTHIER MIND A ";
+  const text2 = "BRIGHTER YOU";
+  const fullText = text1 + text2;
   const [displayedText, setDisplayedText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [loopNum, setLoopNum] = useState(0);
@@ -79,6 +82,7 @@ export default function Login({ onLoginSuccess }) {
     const ticker = setTimeout(handleTyping, typingSpeed);
     return () => clearTimeout(ticker);
   }, [displayedText, isDeleting, loopNum, typingSpeed]);
+  // --- End Typewriter Logic ---
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [resetEmail, setResetEmail] = useState('');
@@ -233,11 +237,13 @@ export default function Login({ onLoginSuccess }) {
 
           <div className="relative z-10 my-auto py-2 flex flex-col justify-center pr-14 lg:pr-20">
             <div className="mb-2 min-h-[3.5rem] sm:min-h-[4rem]">
+              {/* --- Updated Heading with Typewriter Effect & Colors --- */}
               <h2 className="text-lg sm:text-xl font-serif font-normal leading-tight drop-shadow-[0_2px_10px_rgba(218,165,32,0.4)]">
-                <span className="text-[#B8860B]">A HEALTHIER MIND A </span>
-                <span className="text-[#D4AF37]">BRIGHTER YOU</span>
+                <span className="text-[#B8860B]">{displayedText.substring(0, text1.length)}</span>
+                <span className="text-[#D4AF37]">{displayedText.substring(text1.length)}</span>
                 <span className="inline-block w-[2px] h-5 ml-0.5 bg-[#b8860b] animate-pulse align-middle"></span>
               </h2>
+              {/* --- End --- */}
             </div>
 
             <div className="relative w-full h-48 sm:h-56 flex items-center justify-start z-10 -ml-3 sm:-ml-5">
@@ -502,7 +508,7 @@ export default function Login({ onLoginSuccess }) {
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3.5 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -521,7 +527,7 @@ export default function Login({ onLoginSuccess }) {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3.5 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>

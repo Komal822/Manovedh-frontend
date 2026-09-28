@@ -48,7 +48,7 @@ export default function Signup({ onSignupSuccess }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Typewriter effect state for Heading
-  const fullHeadingText = "BEGIN YOUR JOURNEY TOWARDS INNER PEACE";
+  const fullHeadingText = "A HEALTHIER MIND A BRIGHTER YOU";
   const [typedHeading, setTypedHeading] = useState('');
   const [charIndex, setCharIndex] = useState(0);
 
@@ -62,15 +62,14 @@ export default function Signup({ onSignupSuccess }) {
 
   // Typewriter effect loop
   useEffect(() => {
-    if (charIndex < fullHeadingText.length) {
+    if (charIndex <= fullHeadingText.length) {
       const timeout = setTimeout(() => {
-        setTypedHeading((prev) => prev + fullHeadingText[charIndex]);
+        setTypedHeading(fullHeadingText.slice(0, charIndex));
         setCharIndex(charIndex + 1);
       }, 70);
       return () => clearTimeout(timeout);
     } else {
       const resetTimeout = setTimeout(() => {
-        setTypedHeading('');
         setCharIndex(0);
       }, 4000);
       return () => clearTimeout(resetTimeout);
@@ -140,6 +139,11 @@ export default function Signup({ onSignupSuccess }) {
     navigate('/');
   };
 
+  // Helper to split typed heading into two parts for respective colors
+  const splitIndex = "A HEALTHIER MIND A ".length;
+  const part1 = typedHeading.slice(0, splitIndex);
+  const part2 = typedHeading.slice(splitIndex);
+
   return (
     <div className="min-h-screen w-full bg-[#12241C] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 font-sans relative overflow-hidden">
       
@@ -185,12 +189,13 @@ export default function Signup({ onSignupSuccess }) {
             </div>
           </div>
 
-          {/* Center Content: Typewriter Bold Golden Heading & 10 Yoga Images Scrolling Showcase */}
-          <div className="relative z-10 my-auto py-2 flex flex-col justify-center pr-14 lg:pr-20">
-            <div className="mb-2 min-h-[3.5rem] sm:min-h-[4rem]">
-              <h2 className="text-lg sm:text-xl font-serif font-black tracking-wide leading-tight bg-gradient-to-r from-[#b38f1d] via-[#e6c229] to-[#dfb115] bg-clip-text text-transparent drop-shadow-[0_1px_8px_rgba(179,143,29,0.3)]">
-                {typedHeading}
-                <span className="inline-block w-0.5 h-4 ml-0.5 bg-[#e6c229] animate-pulse"></span>
+          {/* Center Content: Full Typewriter Heading & 10 Yoga Images Scrolling Showcase */}
+          <div className="relative z-30 my-auto py-2 flex flex-col justify-center pr-20 lg:pr-24">
+            <div className="mb-3 min-h-[3.5rem] sm:min-h-[4rem]">
+              <h2 className="text-base sm:text-lg font-serif font-black tracking-wide leading-snug">
+                <span className="text-[#B8860B]">{part1}</span>
+                <span className="text-[#D4AF37]">{part2}</span>
+                <span className="inline-block w-[2px] h-4 ml-0.5 bg-[#b8860b] animate-pulse align-middle"></span>
               </h2>
             </div>
 
@@ -275,8 +280,10 @@ export default function Signup({ onSignupSuccess }) {
             </div>
 
             <form onSubmit={handleSignupSubmit} className="space-y-2">
-              <div className="relative">
-                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 flex items-center justify-center pointer-events-none text-[#738279]">
+                  <User className="w-4 h-4" />
+                </span>
                 <input
                   type="text"
                   required
@@ -287,8 +294,10 @@ export default function Signup({ onSignupSuccess }) {
                 />
               </div>
 
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 flex items-center justify-center pointer-events-none text-[#738279]">
+                  <Mail className="w-4 h-4" />
+                </span>
                 <input
                   type="email"
                   required
@@ -299,8 +308,10 @@ export default function Signup({ onSignupSuccess }) {
                 />
               </div>
 
-              <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 flex items-center justify-center pointer-events-none text-[#738279]">
+                  <Lock className="w-4 h-4" />
+                </span>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -312,14 +323,16 @@ export default function Signup({ onSignupSuccess }) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                  className="absolute right-3.5 w-5 h-5 flex items-center justify-center text-[#738279] hover:text-[#1b3328] cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
-              <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279] pointer-events-none" />
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 flex items-center justify-center pointer-events-none text-[#738279]">
+                  <Lock className="w-4 h-4" />
+                </span>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
@@ -331,7 +344,7 @@ export default function Signup({ onSignupSuccess }) {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                  className="absolute right-3.5 w-5 h-5 flex items-center justify-center text-[#738279] hover:text-[#1b3328] cursor-pointer"
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
