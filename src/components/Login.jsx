@@ -13,6 +13,9 @@ import {
   AlertCircle 
 } from 'lucide-react';
 
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../firebase';
+
 import yoga1 from '../assets/yoga-1.png';
 import yoga2 from '../assets/yoga-2.png';
 import yoga3 from '../assets/yoga-3.png';
@@ -42,10 +45,7 @@ export default function Login({ onLoginSuccess }) {
 
   const [flowState, setFlowState] = useState(isForgotParam ? 'forgot_email' : 'login');
 
-  // --- Typewriter Effect Logic ---
-  const text1 = "A HEALTHIER MIND A ";
-  const text2 = "BRIGHTER YOU";
-  const fullText = text1 + text2;
+  const fullText = "A HEALTHIER MIND A BRIGHTER YOU";
   const [displayedText, setDisplayedText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [loopNum, setLoopNum] = useState(0);
@@ -82,7 +82,6 @@ export default function Login({ onLoginSuccess }) {
     const ticker = setTimeout(handleTyping, typingSpeed);
     return () => clearTimeout(ticker);
   }, [displayedText, isDeleting, loopNum, typingSpeed]);
-  // --- End Typewriter Logic ---
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [resetEmail, setResetEmail] = useState('');
@@ -114,23 +113,51 @@ export default function Login({ onLoginSuccess }) {
     }
   };
 
-  const handleGoogleLogin = () => {
-    const simulatedGoogleUser = {
-      fullName: 'Google User',
-      email: 'googleuser@manovedh.com',
-      password: 'oauth_google_user',
-    };
+  // Firebase Google Login
+  const handleGoogleLogin = async () => {
+    try {
+      setErrorMessage('');
 
-    let users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USERS_KEY)) || [];
-    const exists = users.find((u) => u.email === simulatedGoogleUser.email);
-    if (!exists) {
-      users.push(simulatedGoogleUser);
-      localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
+      const provider = new GoogleAuthProvider();
+
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      const userData = {
+        uid: firebaseUser.uid,
+        fullName: firebaseUser.displayName || '',
+        email: firebaseUser.email || '',
+        photoURL: firebaseUser.photoURL || '',
+        provider: 'google',
+      };
+
+      localStorage.setItem(
+        LOCAL_STORAGE_SESSION_KEY,
+        JSON.stringify(userData)
+      );
+
+      if (onLoginSuccess) {
+        onLoginSuccess(userData);
+      }
+
+      navigate('/');
+    } catch (error) {
+      console.error('Google Login Error:', error);
+
+      if (error.code === 'auth/popup-closed-by-user') {
+        setErrorMessage('Google login was cancelled.');
+      } else if (error.code === 'auth/popup-blocked') {
+        setErrorMessage(
+          'Google login popup was blocked. Please allow popups and try again.'
+        );
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
+        setErrorMessage(
+          'An account already exists with this email using a different login method.'
+        );
+      } else {
+        setErrorMessage('Google login failed. Please try again.');
+      }
     }
-
-    localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, JSON.stringify(simulatedGoogleUser));
-    if (onLoginSuccess) onLoginSuccess(simulatedGoogleUser);
-    navigate('/');
   };
 
   const handleSendOtp = (e) => {
@@ -217,6 +244,7 @@ export default function Login({ onLoginSuccess }) {
               <path d="M 120 0 C 260 220, 20 420, 220 620 C 280 690, 100 760, 250 800 L 300 800 L 300 0 Z"></path>
             </svg>
           </div>
+
           <div className="absolute right-0 top-0 bottom-0 w-60 pointer-events-none z-20 hidden lg:block opacity-90 overflow-hidden">
             <svg viewBox="0 0 300 800" preserveAspectRatio="none" className="w-full h-full fill-[#28503e]">
               <path d="M 160 0 C 280 260, 80 460, 240 690 C 280 750, 210 780, 270 800 L 300 800 L 300 0 Z"></path>
@@ -237,13 +265,11 @@ export default function Login({ onLoginSuccess }) {
 
           <div className="relative z-10 my-auto py-2 flex flex-col justify-center pr-14 lg:pr-20">
             <div className="mb-2 min-h-[3.5rem] sm:min-h-[4rem]">
-              {/* --- Updated Heading with Typewriter Effect & Colors --- */}
               <h2 className="text-lg sm:text-xl font-serif font-normal leading-tight drop-shadow-[0_2px_10px_rgba(218,165,32,0.4)]">
-                <span className="text-[#B8860B]">{displayedText.substring(0, text1.length)}</span>
-                <span className="text-[#D4AF37]">{displayedText.substring(text1.length)}</span>
+                <span className="text-[#B8860B]">A HEALTHIER MIND A </span>
+                <span className="text-[#D4AF37]">BRIGHTER YOU</span>
                 <span className="inline-block w-[2px] h-5 ml-0.5 bg-[#b8860b] animate-pulse align-middle"></span>
               </h2>
-              {/* --- End --- */}
             </div>
 
             <div className="relative w-full h-48 sm:h-56 flex items-center justify-start z-10 -ml-3 sm:-ml-5">
@@ -380,7 +406,7 @@ export default function Login({ onLoginSuccess }) {
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84c1.81 3.59 5.52 6.06 9.82 6.06z" />
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                   </svg>
@@ -508,7 +534,7 @@ export default function Login({ onLoginSuccess }) {
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                      className="absolute right-3.5 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -527,7 +553,7 @@ export default function Login({ onLoginSuccess }) {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                      className="absolute right-3.5 text-[#738279] hover:text-[#1b3328] cursor-pointer"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>

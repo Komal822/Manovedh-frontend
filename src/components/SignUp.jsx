@@ -12,6 +12,9 @@ import {
   AlertCircle 
 } from 'lucide-react';
 
+import { auth } from '../firebase';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+
 import yoga1 from '../assets/yoga-1.png';
 import yoga2 from '../assets/yoga-2.png';
 import yoga3 from '../assets/yoga-3.png';
@@ -120,23 +123,72 @@ export default function Signup({ onSignupSuccess }) {
     navigate('/');
   };
 
-  const handleGoogleSignup = () => {
-    const simulatedGoogleUser = {
-      fullName: 'Google User',
-      email: 'googleuser@manovedh.com',
-      password: 'oauth_google_user',
-    };
+  const handleGoogleSignup = async () => {
+    setErrorMessage('');
 
-    let users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USERS_KEY)) || [];
-    const exists = users.find((u) => u.email === simulatedGoogleUser.email);
-    if (!exists) {
-      users.push(simulatedGoogleUser);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      const googleUser = {
+        fullName: firebaseUser.displayName || 'Google User',
+        email: firebaseUser.email || '',
+        password: '',
+        uid: firebaseUser.uid,
+        photoURL: firebaseUser.photoURL || '',
+        provider: 'google',
+      };
+
+      let users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_USERS_KEY)) || [];
+
+      const existingUserIndex = users.findIndex(
+        (u) =>
+          u.email &&
+          firebaseUser.email &&
+          u.email.toLowerCase() === firebaseUser.email.toLowerCase()
+      );
+
+      if (existingUserIndex === -1) {
+        users.push(googleUser);
+      } else {
+        users[existingUserIndex] = {
+          ...users[existingUserIndex],
+          fullName: googleUser.fullName,
+          email: googleUser.email,
+          uid: googleUser.uid,
+          photoURL: googleUser.photoURL,
+          provider: 'google',
+        };
+      }
+
       localStorage.setItem(LOCAL_STORAGE_USERS_KEY, JSON.stringify(users));
-    }
+      localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, JSON.stringify(googleUser));
 
-    localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, JSON.stringify(simulatedGoogleUser));
-    if (onSignupSuccess) onSignupSuccess(simulatedGoogleUser);
-    navigate('/');
+      if (onSignupSuccess) {
+        onSignupSuccess(googleUser);
+      }
+
+      navigate('/');
+    } catch (error) {
+      console.error('Google Signup Error:', error);
+
+      if (error.code === 'auth/popup-closed-by-user') {
+        setErrorMessage('Google sign-in was cancelled.');
+      } else if (error.code === 'auth/popup-blocked') {
+        setErrorMessage(
+          'Google sign-in popup was blocked. Please allow popups for this site.'
+        );
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
+        setErrorMessage(
+          'An account already exists with this email. Please login using your existing method.'
+        );
+      } else {
+        setErrorMessage(
+          error.message || 'Google sign-up failed. Please try again.'
+        );
+      }
+    }
   };
 
   // Helper to split typed heading into two parts for respective colors
