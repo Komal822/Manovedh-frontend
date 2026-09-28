@@ -82,6 +82,13 @@ export default function ProfilePage({ setActiveTab }) {
     }));
   };
 
+  const toggleNotification = (key) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
   const toggleWorkingDay = (day) => {
     setFormData((prev) => {
       const current = prev.workingDays;
@@ -155,7 +162,7 @@ export default function ProfilePage({ setActiveTab }) {
           
           {/* TOP PROFILE SETTINGS CARD */}
           <div id="profile-settings" className="bg-gradient-to-r from-[#f7fbf9] to-[#edf4f0] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 w-full scroll-mt-6">
-            <div className="flex items-center justify-between pb-6 border-b border-emerald-900/10 w-full">
+            <div className="flex items-center justify-between gap-4 pb-6 border-b border-emerald-900/10 w-full">
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2e5b45] to-[#1b3328] text-white flex items-center justify-center shadow-md p-2.5">
                   <img src={userIcon} alt="User Icon" className="w-full h-full object-contain" />
@@ -170,17 +177,17 @@ export default function ProfilePage({ setActiveTab }) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                className="h-10 px-4 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm flex-shrink-0"
               >
                 <LogOut className="w-4 h-4" /> Log Out
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-6 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch pt-6 w-full">
               
               {/* Left Profile Avatar Box */}
-              <div className="lg:col-span-3 flex sm:flex-row lg:flex-col items-center gap-5 p-6 rounded-2xl bg-white border border-emerald-900/10 text-center shadow-sm w-full">
-                <div className="relative group">
+              <div className="lg:col-span-3 flex sm:flex-row lg:flex-col items-center justify-center gap-5 p-6 rounded-2xl bg-white border border-emerald-900/10 text-center shadow-sm w-full min-h-[220px]">
+                <div className="relative group flex-shrink-0">
                   <div className="w-24 h-24 rounded-full ring-4 ring-[#2e5b45]/20 overflow-hidden bg-[#1b3328] text-white flex items-center justify-center font-bold text-3xl shadow-md">
                     {formData.profilePic ? (
                       <img src={formData.profilePic} alt="Profile" className="w-full h-full object-cover" />
@@ -191,7 +198,7 @@ export default function ProfilePage({ setActiveTab }) {
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current.click()}
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-[#1b3328] hover:bg-[#2e5b45] text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-transform hover:scale-110 cursor-pointer"
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-[#1b3328] hover:bg-[#2e5b45] text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-transform hover:scale-110 cursor-pointer z-10"
                   >
                     <Camera className="w-4 h-4" />
                   </button>
@@ -214,21 +221,23 @@ export default function ProfilePage({ setActiveTab }) {
               </div>
 
               {/* Middle Inputs */}
-              <div className="lg:col-span-6 flex flex-col gap-4 w-full">
+              <div className="lg:col-span-6 flex flex-col gap-3.5 w-full">
                 
                 {/* Full Name */}
                 <div className="space-y-1.5 w-full">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-stone-600">
                     Full Name
                   </label>
-                  <div className="relative w-full">
-                    <img src={userIcon} alt="User" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
+                  <div className="relative w-full flex items-center">
+                    <div className="absolute left-3.5 w-5 h-5 flex items-center justify-center pointer-events-none z-10">
+                      <img src={userIcon} alt="User" className="w-4 h-4 object-contain opacity-75" />
+                    </div>
                     <input 
                       type="text" 
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
+                      className="w-full h-11 pl-11 pr-4 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
                       required
                     />
                   </div>
@@ -239,14 +248,16 @@ export default function ProfilePage({ setActiveTab }) {
                   <label className="text-[11px] font-bold uppercase tracking-wider text-stone-600">
                     Email Address
                   </label>
-                  <div className="relative w-full">
-                    <img src={mailIcon} alt="Mail" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
+                  <div className="relative w-full flex items-center">
+                    <div className="absolute left-3.5 w-5 h-5 flex items-center justify-center pointer-events-none z-10">
+                      <img src={mailIcon} alt="Mail" className="w-4 h-4 object-contain opacity-75" />
+                    </div>
                     <input 
                       type="email" 
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
+                      className="w-full h-11 pl-11 pr-4 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
                       required
                     />
                   </div>
@@ -257,14 +268,16 @@ export default function ProfilePage({ setActiveTab }) {
                   <label className="text-[11px] font-bold uppercase tracking-wider text-stone-600">
                     Phone Number
                   </label>
-                  <div className="relative w-full">
-                    <img src={mobileIcon} alt="Phone" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
+                  <div className="relative w-full flex items-center">
+                    <div className="absolute left-3.5 w-5 h-5 flex items-center justify-center pointer-events-none z-10">
+                      <img src={mobileIcon} alt="Phone" className="w-4 h-4 object-contain opacity-75" />
+                    </div>
                     <input 
                       type="text" 
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
+                      className="w-full h-11 pl-11 pr-4 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
                     />
                   </div>
                 </div>
@@ -298,9 +311,9 @@ export default function ProfilePage({ setActiveTab }) {
               </div>
 
               {/* Right Profile Photo Uploader Card */}
-              <div className="lg:col-span-3 flex flex-col gap-4 w-full">
-                <div className="border-2 border-dashed border-emerald-900/20 rounded-2xl p-6 text-center flex flex-col items-center justify-center space-y-3 bg-white shadow-sm w-full">
-                  <div className="w-12 h-12 rounded-full bg-[#2e5b45]/10 flex items-center justify-center text-[#2e5b45]">
+              <div className="lg:col-span-3 flex flex-col gap-3.5 w-full">
+                <div className="border-2 border-dashed border-emerald-900/20 rounded-2xl p-5 text-center flex flex-col items-center justify-center gap-2.5 bg-white shadow-sm w-full min-h-[164px]">
+                  <div className="w-11 h-11 rounded-full bg-[#2e5b45]/10 flex items-center justify-center text-[#2e5b45] flex-shrink-0">
                     <Camera className="w-6 h-6" />
                   </div>
                   <div>
@@ -308,9 +321,9 @@ export default function ProfilePage({ setActiveTab }) {
                     <p className="text-[10px] text-stone-500 mt-0.5">Upload from device<br />Max size 2MB</p>
                   </div>
                   <button 
-                    type="button"
+                    type="button" 
                     onClick={() => fileInputRef.current.click()}
-                    className="px-4 py-1.5 bg-white border border-[#2e5b45] text-[#2e5b45] hover:bg-[#2e5b45] hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
+                    className="h-9 px-4 bg-white border border-[#2e5b45] text-[#2e5b45] hover:bg-[#2e5b45] hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center justify-center"
                   >
                     Upload File
                   </button>
@@ -319,7 +332,7 @@ export default function ProfilePage({ setActiveTab }) {
                 {/* UPDATE PROFILE BUTTON */}
                 <button 
                   type="submit"
-                  className="w-full py-3 bg-[#2e5b45] hover:bg-[#1b3328] text-white rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full h-11 bg-[#2e5b45] hover:bg-[#1b3328] text-white rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <RefreshCw className="w-4 h-4 text-[#a08a4a]" /> Update Profile
                 </button>
@@ -332,11 +345,11 @@ export default function ProfilePage({ setActiveTab }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
             
             {/* ACCOUNT SETTINGS */}
-            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 flex flex-col justify-between w-full">
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 flex flex-col justify-between w-full">
               <div className="w-full">
-                <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
-                  <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
-                    <img src={lockIcon} alt="Lock" className="w-full h-full object-contain" />
+                <div className="flex items-center gap-3.5 pb-4 border-b border-emerald-900/10 w-full min-h-[57px]">
+                  <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 flex items-center justify-center p-2 flex-shrink-0">
+                    <img src={lockIcon} alt="Lock" className="w-5 h-5 object-contain" />
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Account Settings</h3>
@@ -344,37 +357,43 @@ export default function ProfilePage({ setActiveTab }) {
                   </div>
                 </div>
 
-                <div className="space-y-4 pt-4 w-full">
+                <div className="space-y-4 pt-5 w-full">
+                  {/* Password Field */}
                   <div className="space-y-1.5 w-full">
-                    <label className="text-[11px] font-bold text-stone-600 uppercase">Password</label>
-                    <div className="relative w-full">
-                      <img src={lockIcon} alt="Lock" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
+                    <label className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">Password</label>
+                    <div className="relative w-full flex items-center">
+                      <div className="absolute left-3.5 w-5 h-5 flex items-center justify-center pointer-events-none z-10">
+                        <img src={lockIcon} alt="Lock" className="w-4 h-4 object-contain opacity-70" />
+                      </div>
                       <input 
                         type={showPassword ? "text" : "password"}
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
+                        className="w-full h-11 pl-11 pr-11 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium shadow-sm"
                       />
                       <button 
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#1b3328]"
+                        className="absolute right-3.5 w-5 h-5 flex items-center justify-center text-stone-400 hover:text-[#1b3328] cursor-pointer"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
 
+                  {/* Language Field */}
                   <div className="space-y-1.5 w-full">
-                    <label className="text-[11px] font-bold text-stone-600 uppercase">Language</label>
-                    <div className="relative w-full">
-                      <img src={internetIcon} alt="Internet" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
+                    <label className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">Language</label>
+                    <div className="relative w-full flex items-center">
+                      <div className="absolute left-3.5 w-5 h-5 flex items-center justify-center pointer-events-none z-10">
+                        <img src={internetIcon} alt="Internet" className="w-4 h-4 object-contain opacity-70" />
+                      </div>
                       <select 
                         name="language"
                         value={formData.language}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium appearance-none cursor-pointer shadow-sm"
+                        className="w-full h-11 pl-11 pr-10 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium appearance-none cursor-pointer shadow-sm"
                       >
                         <option>English (US)</option>
                         <option>हिन्दी (Hindi)</option>
@@ -385,98 +404,98 @@ export default function ProfilePage({ setActiveTab }) {
                 </div>
               </div>
 
-              {/* Account safe banner */}
+              {/* Account Safe Banner */}
               <div className="mt-6 w-full">
-                <div className="p-4 rounded-2xl bg-white border border-emerald-100 flex items-center justify-between shadow-sm w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#2e5b45] text-white flex items-center justify-center">
-                      <ShieldCheck className="w-5 h-5 text-[#a08a4a]" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-[#1b3328]">Your account is safe</p>
-                    </div>
+                <div className="p-4 rounded-2xl bg-white border border-emerald-100 flex items-center gap-3.5 shadow-sm w-full">
+                  <div className="w-10 h-10 rounded-full bg-[#2e5b45] text-white flex items-center justify-center flex-shrink-0">
+                    <ShieldCheck className="w-5 h-5 text-[#a08a4a]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#1b3328]">Your account is safe</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* NOTIFICATIONS */}
-            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full">
-              <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
-                <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
-                  <img src={bellIcon} alt="Bell" className="w-full h-full object-contain" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Notifications</h3>
-                  <p className="text-xs text-stone-500">Choose what you want to be notified about</p>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-2 w-full">
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 p-2">
-                      <img src={mailIcon} alt="Mail" className="w-full h-full object-contain" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-[#1b3328]">Email Notifications</p>
-                      <p className="text-xs text-stone-500">Receive updates via email</p>
-                    </div>
+            <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 flex flex-col justify-between w-full">
+              <div>
+                <div className="flex items-center gap-3.5 pb-4 border-b border-emerald-900/10 w-full min-h-[57px]">
+                  <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 flex items-center justify-center p-2 flex-shrink-0">
+                    <img src={bellIcon} alt="Bell" className="w-5 h-5 object-contain" />
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      name="emailNotifications"
-                      checked={formData.emailNotifications}
-                      onChange={handleChange}
-                      className="sr-only peer" 
-                    />
-                    <div className="w-11 h-6 bg-stone-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2e5b45]"></div>
-                  </label>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Notifications</h3>
+                    <p className="text-xs text-stone-500">Choose what you want to be notified about</p>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 p-2">
-                      <img src={calendarIcon} alt="Calendar" className="w-full h-full object-contain" />
+                <div className="space-y-4 pt-5 w-full">
+                  {/* Email Notifications */}
+                  <div className="min-h-[68px] flex items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center p-2 flex-shrink-0">
+                        <img src={mailIcon} alt="Mail" className="w-5 h-5 object-contain" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#1b3328]">Email Notifications</p>
+                        <p className="text-xs text-stone-500">Receive updates via email</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-[#1b3328]">Session Reminders</p>
-                      <p className="text-xs text-stone-500">Get reminders for upcoming sessions</p>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleNotification("emailNotifications")}
+                      className={`w-12 h-6 rounded-full p-1 flex items-center transition-colors duration-200 cursor-pointer flex-shrink-0 ${
+                        formData.emailNotifications ? "bg-[#2e5b45] justify-end" : "bg-stone-300 justify-start"
+                      }`}
+                    >
+                      <span className="w-4 h-4 rounded-full bg-white shadow-sm block"></span>
+                    </button>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      name="sessionReminders"
-                      checked={formData.sessionReminders}
-                      onChange={handleChange}
-                      className="sr-only peer" 
-                    />
-                    <div className="w-11 h-6 bg-stone-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2e5b45]"></div>
-                  </label>
-                </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 p-2">
-                      <img src={bellIcon} alt="Bell" className="w-full h-full object-contain" />
+                  {/* Session Reminders */}
+                  <div className="min-h-[68px] flex items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center p-2 flex-shrink-0">
+                        <img src={calendarIcon} alt="Calendar" className="w-5 h-5 object-contain" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#1b3328]">Session Reminders</p>
+                        <p className="text-xs text-stone-500">Get reminders for upcoming sessions</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-[#1b3328]">Message Notifications</p>
-                      <p className="text-xs text-stone-500">Get notified for new messages</p>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleNotification("sessionReminders")}
+                      className={`w-12 h-6 rounded-full p-1 flex items-center transition-colors duration-200 cursor-pointer flex-shrink-0 ${
+                        formData.sessionReminders ? "bg-[#2e5b45] justify-end" : "bg-stone-300 justify-start"
+                      }`}
+                    >
+                      <span className="w-4 h-4 rounded-full bg-white shadow-sm block"></span>
+                    </button>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      name="messageNotifications"
-                      checked={formData.messageNotifications}
-                      onChange={handleChange}
-                      className="sr-only peer" 
-                    />
-                    <div className="w-11 h-6 bg-stone-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2e5b45]"></div>
-                  </label>
+
+                  {/* Message Notifications */}
+                  <div className="min-h-[68px] flex items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-emerald-900/10 shadow-sm w-full">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center p-2 flex-shrink-0">
+                        <img src={bellIcon} alt="Bell" className="w-5 h-5 object-contain" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#1b3328]">Message Notifications</p>
+                        <p className="text-xs text-stone-500">Get notified for new messages</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleNotification("messageNotifications")}
+                      className={`w-12 h-6 rounded-full p-1 flex items-center transition-colors duration-200 cursor-pointer flex-shrink-0 ${
+                        formData.messageNotifications ? "bg-[#2e5b45] justify-end" : "bg-stone-300 justify-start"
+                      }`}
+                    >
+                      <span className="w-4 h-4 rounded-full bg-white shadow-sm block"></span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -486,9 +505,9 @@ export default function ProfilePage({ setActiveTab }) {
           {/* LOWER SECTION (Availability Card) */}
           <div className="w-full pb-6">
             <div className="bg-[#f7fbf9] rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-900/10 space-y-6 w-full">
-              <div className="flex items-center gap-3 pb-4 border-b border-emerald-900/10 w-full">
-                <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 text-[#2e5b45] flex items-center justify-center font-bold p-2.5">
-                  <img src={calendarIcon} alt="Calendar" className="w-full h-full object-contain" />
+              <div className="flex items-center gap-3.5 pb-4 border-b border-emerald-900/10 w-full min-h-[57px]">
+                <div className="w-10 h-10 rounded-2xl bg-[#2e5b45]/10 flex items-center justify-center p-2 flex-shrink-0">
+                  <img src={calendarIcon} alt="Calendar" className="w-5 h-5 object-contain" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-[#1b3328]">Availability</h3>
@@ -498,7 +517,7 @@ export default function ProfilePage({ setActiveTab }) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 w-full">
                 <div className="space-y-2 w-full">
-                  <label className="text-[11px] font-bold uppercase text-stone-600">Working Days</label>
+                  <label className="text-[11px] font-bold uppercase text-stone-600 tracking-wider">Working Days</label>
                   <div className="flex flex-wrap gap-2 w-full">
                     {daysOfWeek.map((day) => {
                       const isSelected = formData.workingDays.includes(day);
@@ -521,14 +540,16 @@ export default function ProfilePage({ setActiveTab }) {
                 </div>
 
                 <div className="space-y-2 w-full">
-                  <label className="text-[11px] font-bold uppercase text-stone-600">Default Session Duration</label>
-                  <div className="relative w-full">
-                    <img src={calendarIcon} alt="Calendar" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 object-contain opacity-70" />
+                  <label className="text-[11px] font-bold uppercase text-stone-600 tracking-wider">Default Session Duration</label>
+                  <div className="relative w-full flex items-center">
+                    <div className="absolute left-3.5 w-5 h-5 flex items-center justify-center pointer-events-none z-10">
+                      <img src={calendarIcon} alt="Calendar" className="w-4 h-4 object-contain opacity-70" />
+                    </div>
                     <select 
                       name="sessionDuration"
                       value={formData.sessionDuration}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium cursor-pointer shadow-sm"
+                      className="w-full h-11 pl-11 pr-4 rounded-xl bg-white border border-emerald-900/10 focus:outline-none focus:ring-2 focus:ring-[#2e5b45] text-sm font-medium cursor-pointer shadow-sm"
                     >
                       <option>30 Minutes</option>
                       <option>50 Minutes</option>
@@ -544,7 +565,7 @@ export default function ProfilePage({ setActiveTab }) {
 
       </div>
 
-      {/* FULL-WIDTH CORNER-TO-CORNER GREEN FOOTER (No Left/Right Gap) */}
+      {/* FULL-WIDTH CORNER-TO-CORNER GREEN FOOTER */}
       <footer className="w-full bg-[#1b3328] py-6 px-4 text-center text-xs text-stone-300 mt-12 border-t border-[#2e5b45]">
         <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-2">
           <span>Copyright © 2026 Manovedh AI. All rights reserved.</span>
