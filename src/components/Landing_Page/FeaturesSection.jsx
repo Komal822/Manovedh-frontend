@@ -60,7 +60,7 @@ export default function BalancedLifeFeatures() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full min-h-screen bg-[#ffffff] pt-16 pb-40 px-4 sm:px-6 lg:px-8 overflow-hidden font-sans scroll-mt-24"
+      className="relative w-full min-h-screen bg-[#ffffff] pt-16 pb-40 px-4 sm:px-6 lg:px-8 overflow-hidden font-sans"
     >
       {/* Custom CSS for Smooth Scroll Entrance & Floating Animations */}
       <style>{`

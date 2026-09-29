@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, X, User, BookOpen, LogIn, UserPlus } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, User, BookOpen } from 'lucide-react';
 
 // Import background image from assets directory
 import heroBgImage from '../../assets/image.png';
+import rightIcon from '../../assets/right.png';
 
 const HeroSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState(null); // 'user' or 'partner'
   const navigate = useNavigate();
 
-  // Reset modal state when closed
+  // Close the role selection modal
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedRole(null);
   };
 
   return (
@@ -45,6 +44,7 @@ const HeroSection = () => {
             <span className="block font-medium italic text-[#ffe59e] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] animate-ultra-smooth-text-1">
               Your Well-Being
             </span>
+
             <span className="block text-white animate-ultra-smooth-text-2 mt-1 sm:mt-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
               Matters
             </span>
@@ -55,25 +55,34 @@ const HeroSection = () => {
           </p>
 
           <div className="pt-3 sm:pt-4 flex flex-wrap items-center gap-4 animate-ultra-smooth-text-4">
+
+            {/* GET STARTED */}
             <button
               onClick={() => setIsModalOpen(true)}
               className="relative group inline-flex items-center gap-2.5 sm:gap-3 overflow-hidden rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold uppercase tracking-wider text-white shadow-xl shadow-[#1b3328]/35 transition-all duration-500 ease-out hover:shadow-2xl hover:scale-105 active:scale-95 cursor-pointer"
               style={{ background: "linear-gradient(145deg, #4E8A6B, #234A38)" }}
             >
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-              
+
               <span className="relative z-10 flex items-center gap-2 transition-transform duration-300">
                 Get Started
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ease-out group-hover:translate-x-2" />
+
+                <img
+                  src={rightIcon}
+                  alt=""
+                  className="w-4 h-4 sm:w-5 sm:h-5 object-contain transition-transform duration-300 ease-out group-hover:translate-x-2"
+                />
               </span>
             </button>
 
-            <a
-              href="#about"
+            {/* LEARN MORE - ROUTES TO /about */}
+            <Link
+              to="/about"
               className="inline-flex items-center justify-center rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold tracking-wide text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-lg transition-all duration-300 ease-out hover:scale-105 active:scale-95"
             >
               Learn More
-            </a>
+            </Link>
+
           </div>
 
         </div>
@@ -82,132 +91,106 @@ const HeroSection = () => {
       {/* DYNAMIC POPUP MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
+
           <div className="relative w-full max-w-lg bg-[#EAF3EC] rounded-[28px] p-8 shadow-2xl border border-[#d6e8da] text-gray-800">
-            
+
             {/* Close Button */}
-            <button 
+            <button
               onClick={closeModal}
               className="absolute top-6 right-6 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:bg-black/5 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* STEP 1: CHOOSE ROLE (USER vs WELLNESS PARTNER) */}
-            {!selectedRole ? (
-              <div>
-                <div className="mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-[#1b3328] flex items-center justify-center text-[#ffea9f] mb-4 shadow-md font-serif font-bold text-lg">
-                    M
-                  </div>
-                  <h3 className="text-2xl font-serif font-bold text-[#1b3328]">Join Manovedh</h3>
-                  <p className="text-sm text-gray-600 mt-1">Choose how you'd like to get started</p>
+            {/* ROLE SELECTION */}
+            <div>
+
+              <div className="mb-6">
+
+                <div className="w-12 h-12 rounded-2xl bg-[#1b3328] flex items-center justify-center text-[#ffea9f] mb-4 shadow-md font-serif font-bold text-lg">
+                  M
                 </div>
 
-                <div className="space-y-4">
-                  {/* User Option Card */}
-                  <button 
-                    onClick={() => setSelectedRole('user')}
-                    className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
-                        <User className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-base text-[#1b3328]">User</h4>
-                        <p className="text-xs text-gray-500 mt-0.5">Access wellness activities, tracking & support</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-[#1b3328] group-hover:translate-x-1 transition-all" />
-                  </button>
+                <h3 className="text-2xl font-serif font-bold text-[#1b3328]">
+                  Join Manovedh
+                </h3>
 
-                  {/* Wellness Partner Option Card */}
-                  <button 
-                    onClick={() => setSelectedRole('partner')}
-                    className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
-                        <BookOpen className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-base text-[#1b3328]">Wellness Partner</h4>
-                        <p className="text-xs text-gray-500 mt-0.5">Provide professional guidance & manage clients</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-[#1b3328] group-hover:translate-x-1 transition-all" />
-                  </button>
-                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Choose how you'd like to get started
+                </p>
+
               </div>
-            ) : (
-              /* STEP 2: CHOOSE ACTION (LOGIN vs SIGN UP) BASED ON SELECTED ROLE */
-              <div>
-                <div className="mb-6 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-serif font-bold text-[#1b3328]">
-                      {selectedRole === 'user' ? 'User Portal' : 'Partner Portal'}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">Would you like to Sign In or Sign Up?</p>
+
+              <div className="space-y-4">
+
+                {/* USER OPTION */}
+                <button
+                  onClick={() => {
+                    closeModal();
+                    navigate('/signup');
+                  }}
+                  className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex items-center space-x-4">
+
+                    <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
+                      <User className="w-6 h-6" />
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-base text-[#1b3328]">
+                        User
+                      </h4>
+
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Access wellness activities, tracking & support
+                      </p>
+                    </div>
+
                   </div>
-                  <button 
-                    onClick={() => setSelectedRole(null)}
-                    className="text-xs font-semibold text-[#1b3328] bg-white/60 hover:bg-white px-3 py-1.5 rounded-full border border-[#d6e8da] transition cursor-pointer"
-                  >
-                    Back
-                  </button>
-                </div>
 
-                <div className="space-y-4">
-                  {/* LOGIN BUTTON */}
-                  <button 
-                    onClick={() => {
-                      closeModal();
-                      if (selectedRole === 'user') {
-                        navigate('/login');
-                      } else {
-                        navigate('/partner-login');
-                      }
-                    }}
-                    className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
-                        <LogIn className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-base text-[#1b3328]">Login</h4>
-                        <p className="text-xs text-gray-500 mt-0.5">Already have an account? Sign in here</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-[#1b3328] group-hover:translate-x-1 transition-all" />
-                  </button>
+                  <img
+                    src={rightIcon}
+                    alt=""
+                    className="w-5 h-5 object-contain text-gray-400 group-hover:translate-x-1 transition-all"
+                  />
+                </button>
 
-                  {/* SIGN UP BUTTON */}
-                  <button 
-                    onClick={() => {
-                      closeModal();
-                      if (selectedRole === 'user') {
-                        navigate('/signup');
-                      } else {
-                        navigate('/partner-signup');
-                      }
-                    }}
-                    className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
-                        <UserPlus className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-base text-[#1b3328]">Sign Up</h4>
-                        <p className="text-xs text-gray-500 mt-0.5">New here? Create your account</p>
-                      </div>
+                {/* WELLNESS PARTNER OPTION */}
+                <button
+                  onClick={() => {
+                    closeModal();
+                    navigate('/partner-login');
+                  }}
+                  className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex items-center space-x-4">
+
+                    <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
+                      <BookOpen className="w-6 h-6" />
                     </div>
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-[#1b3328] group-hover:translate-x-1 transition-all" />
-                  </button>
-                </div>
+
+                    <div>
+                      <h4 className="font-bold text-base text-[#1b3328]">
+                        Wellness Partner
+                      </h4>
+
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Provide professional guidance & manage clients
+                      </p>
+                    </div>
+
+                  </div>
+
+                  <img
+                    src={rightIcon}
+                    alt=""
+                    className="w-5 h-5 object-contain text-gray-400 group-hover:translate-x-1 transition-all"
+                  />
+                </button>
+
               </div>
-            )}
+            </div>
 
           </div>
         </div>
@@ -215,6 +198,7 @@ const HeroSection = () => {
 
       {/* 4. BOTTOM WAVY SECTION DIVIDER */}
       <div className="absolute bottom-0 left-0 right-0 leading-none pointer-events-none z-25">
+
         <svg 
           viewBox="0 0 1440 120" 
           className="w-full h-12 sm:h-20 text-[#ffffff] fill-current" 
@@ -222,24 +206,56 @@ const HeroSection = () => {
         >
           <path d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,120 L0,120 Z" />
         </svg>
+
       </div>
 
+      {/* 5. ANIMATIONS */}
       <style>{`
         @keyframes smoothZoom {
           0% { transform: scale(1.02); }
           50% { transform: scale(1.08); }
           100% { transform: scale(1.02); }
         }
+
         @keyframes ultraSmoothReveal {
-          0% { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(4px); }
-          100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            filter: blur(4px);
+          }
+
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0px);
+          }
         }
-        .animate-smooth-zoom { animation: smoothZoom 28s ease-in-out infinite; }
-        .animate-ultra-smooth-text-1 { opacity: 0; animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards; }
-        .animate-ultra-smooth-text-2 { opacity: 0; animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards; }
-        .animate-ultra-smooth-text-3 { opacity: 0; animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards; }
-        .animate-ultra-smooth-text-4 { opacity: 0; animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards; }
+
+        .animate-smooth-zoom {
+          animation: smoothZoom 28s ease-in-out infinite;
+        }
+
+        .animate-ultra-smooth-text-1 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+        }
+
+        .animate-ultra-smooth-text-2 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
+        }
+
+        .animate-ultra-smooth-text-3 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+        }
+
+        .animate-ultra-smooth-text-4 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
+        }
       `}</style>
+
     </section>
   );
 };

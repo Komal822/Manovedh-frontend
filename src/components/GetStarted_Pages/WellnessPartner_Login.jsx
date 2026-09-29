@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Mail, 
   Lock, 
@@ -17,6 +18,7 @@ const LOCAL_STORAGE_PARTNERS_KEY = 'manovedh_wellness_partners';
 const LOCAL_STORAGE_PARTNER_SESSION_KEY = 'manovedh_current_partner';
 
 export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onSwitchToSignup, onSwitchToUserLogin }) {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -66,6 +68,7 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
       const partnerUser = foundPartner || { email: loginData.email, fullName: 'Wellness Partner' };
       localStorage.setItem(LOCAL_STORAGE_PARTNER_SESSION_KEY, JSON.stringify(partnerUser));
       if (onLoginSuccess) onLoginSuccess(partnerUser);
+      else navigate('/profile');
     } else {
       setErrorMessage('Invalid partner credentials. Please check and try again.');
     }
@@ -76,13 +79,14 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
     if (onBackToHome) {
       onBackToHome();
     } else {
-      window.location.href = '/';
+      navigate('/');
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-[#12241C] flex flex-col items-center justify-center pt-2 pb-6 px-4 font-sans relative overflow-hidden">
       
+      {/* Top Bar Navigation */}
       <div className="w-full max-w-5xl mb-4 flex items-center justify-between z-30 px-1 sm:px-0">
         <button 
           onClick={handleBackToHome}
@@ -98,20 +102,20 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
 
       <div className="relative w-full max-w-5xl bg-[#ECE7DE] rounded-[32px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[580px] border border-[#2e5b45]/25">
 
-        {/* LEFT SIDE: ORGANIC WAVE PANEL */}
+        {/* LEFT SIDE: ORGANIC WAVE PANEL WITH DARKER & SMALLER TEXT */}
         <div className="lg:col-span-5 relative p-6 sm:p-8 flex flex-col justify-between overflow-hidden bg-[#ECE7DE]">
-          <div className="absolute right-0 top-0 bottom-0 w-80 pointer-events-none z-20 hidden lg:block overflow-hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-80 pointer-events-none z-10 hidden lg:block overflow-hidden">
             <svg viewBox="0 0 300 800" preserveAspectRatio="none" className="w-full h-full fill-[#1e3d30]">
               <path d="M 120 0 C 260 220, 20 420, 220 620 C 280 690, 100 760, 250 800 L 300 800 L 300 0 Z"></path>
             </svg>
           </div>
-          <div className="absolute right-0 top-0 bottom-0 w-60 pointer-events-none z-20 hidden lg:block opacity-90 overflow-hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-60 pointer-events-none z-10 hidden lg:block opacity-90 overflow-hidden">
             <svg viewBox="0 0 300 800" preserveAspectRatio="none" className="w-full h-full fill-[#28503e]">
               <path d="M 160 0 C 280 260, 80 460, 240 690 C 280 750, 210 780, 270 800 L 300 800 L 300 0 Z"></path>
             </svg>
           </div>
 
-          <div className="relative z-30 flex items-center justify-between">
+          <div className="relative z-40 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#1e3d30] flex items-center justify-center text-white font-bold shadow-md text-sm">
                 🌿
@@ -123,16 +127,17 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
             </div>
           </div>
 
-          <div className="relative z-10 my-auto py-4 flex flex-col justify-center pr-10 lg:pr-14">
-            <div className="mb-4 min-h-[3.5rem] sm:min-h-[4rem]">
-              <h2 className="text-lg sm:text-xl font-serif font-normal leading-tight bg-gradient-to-r from-[#b8860b] via-[#ffd700] to-[#daa520] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(218,165,32,0.4)]">
+          <div className="relative z-40 my-auto py-4 flex flex-col justify-center pr-4">
+            {/* DARKER & SMALLER TEXT WITH CLEAN GRADIENT */}
+            <div className="mb-4 min-h-[3rem] sm:min-h-[3.5rem]">
+              <h2 className="text-sm sm:text-base font-serif font-bold leading-snug text-[#854d0e] tracking-wide drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)]">
                 {displayedText}
-                <span className="inline-block w-[2px] h-5 ml-0.5 bg-[#b8860b] animate-pulse align-middle"></span>
+                <span className="inline-block w-[2px] h-4 ml-0.5 bg-[#854d0e] animate-pulse align-middle"></span>
               </h2>
             </div>
 
-            <div className="space-y-3 z-30 mt-1">
-              <div className="flex items-center gap-3 p-3 bg-white/50 backdrop-blur-md rounded-2xl border border-black/5 shadow-sm">
+            <div className="space-y-3 mt-1">
+              <div className="flex items-center gap-3 p-3 bg-white/80 backdrop-blur-md rounded-2xl border border-black/5 shadow-sm">
                 <div className="w-9 h-9 rounded-xl bg-[#1e3d30] text-white flex items-center justify-center shadow-md flex-shrink-0">
                   <Stethoscope className="w-4 h-4 text-[#ffd700]" />
                 </div>
@@ -142,7 +147,7 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-white/50 backdrop-blur-md rounded-2xl border border-black/5 shadow-sm">
+              <div className="flex items-center gap-3 p-3 bg-white/80 backdrop-blur-md rounded-2xl border border-black/5 shadow-sm">
                 <div className="w-9 h-9 rounded-xl bg-[#1e3d30] text-white flex items-center justify-center shadow-md flex-shrink-0">
                   <CalendarCheck className="w-4 h-4 text-[#ffd700]" />
                 </div>
@@ -152,7 +157,7 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-white/50 backdrop-blur-md rounded-2xl border border-black/5 shadow-sm">
+              <div className="flex items-center gap-3 p-3 bg-white/80 backdrop-blur-md rounded-2xl border border-black/5 shadow-sm">
                 <div className="w-9 h-9 rounded-xl bg-[#1e3d30] text-white flex items-center justify-center shadow-md flex-shrink-0">
                   <HeartHandshake className="w-4 h-4 text-[#ffd700]" />
                 </div>
@@ -164,7 +169,7 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
             </div>
           </div>
 
-          <div className="relative z-30 flex flex-col items-start gap-2 mt-2">
+          <div className="relative z-40 flex flex-col items-start gap-2 mt-2">
             <p className="text-[11px] text-[#55635b] font-medium">Empowering minds, transforming lives together.</p>
           </div>
         </div>
@@ -174,14 +179,20 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
 
           <div className="max-w-sm mx-auto w-full z-20 my-auto">
 
-            {/* IMAGE SARKHI LOGIN/SIGNUP PILL SWITCH BUTTON */}
-            <div className="bg-[#E6E0D4] p-1 rounded-full flex items-center mb-5 shadow-inner">
+            {/* SWITCH PILL (Navigates to Signup) */}
+            <div className="bg-[#E6E0D4] p-1 rounded-full flex items-center mb-4 shadow-inner">
               <div className="flex-1 py-1.5 text-center rounded-full text-xs font-bold bg-[#2c5341] text-white shadow-md cursor-pointer transition-all">
                 Login
               </div>
               <button 
                 type="button"
-                onClick={() => { if (onSwitchToSignup) onSwitchToSignup(); }}
+                onClick={() => {
+                   if (onSwitchToSignup) {
+                     onSwitchToSignup();
+                   } else {
+                     navigate('/wellness-partner-signup');
+                   }
+                 }}
                 className="flex-1 py-1.5 text-center rounded-full text-xs font-bold text-[#5a6b62] hover:text-[#1b3328] transition-all cursor-pointer bg-transparent border-none"
               >
                 Sign Up
@@ -195,44 +206,44 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
               </div>
             )}
 
-            <div className="mb-4">
+            <div className="mb-3">
               <h3 className="text-xl font-serif font-bold text-[#1b3328]">Partner Dashboard Access</h3>
-              <p className="text-[11px] text-[#5a6b62] mt-0.5">Sign in to manage patient appointments and counselling sessions.</p>
+              <p className="text-[11px] text-[#55635b] mt-0.5">Sign in to manage patient appointments and counselling sessions.</p>
             </div>
 
-            <form onSubmit={handleLoginSubmit} className="space-y-3">
+            <form onSubmit={handleLoginSubmit} className="space-y-2.5">
               <div className="relative">
-                <Mail className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                <Mail className="w-3.5 h-3.5 absolute left-3.5 inset-y-0 my-auto text-[#738279]" />
                 <input
                   type="email"
                   required
                   placeholder="partner@manovedh.com"
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                  className="w-full pl-10 pr-3 py-2.5 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                  className="w-full pl-10 pr-3 py-2 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                 />
               </div>
 
               <div className="relative">
-                <Lock className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#738279]" />
+                <Lock className="w-3.5 h-3.5 absolute left-3.5 inset-y-0 my-auto text-[#738279]" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="Password"
                   value={loginData.password}
                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                  className="w-full pl-10 pr-10 py-2.5 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                  className="w-full pl-10 pr-10 py-2 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                  className="absolute right-3.5 inset-y-0 my-auto text-[#738279] hover:text-[#1b3328] cursor-pointer flex items-center justify-center"
                 >
                   {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-[#5a6b62] pt-1">
+              <div className="flex items-center justify-between text-[11px] text-[#5a6b62]">
                 <label className="flex items-center gap-1.5 cursor-pointer">
                   <input type="checkbox" className="rounded border-black/20 text-[#2c5341] focus:ring-[#2c5341]" />
                   <span>Remember for 30 days</span>
@@ -242,18 +253,18 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
 
               <button
                 type="submit"
-                className="w-full py-2.5 mt-2 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                className="w-full py-2.5 mt-1 rounded-xl bg-[#2c5341] hover:bg-[#203e31] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
                 <span>Login to Dashboard</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </form>
 
-            <div className="mt-5 text-center space-y-1.5 text-[11px] text-[#5a6b62]">
+            <div className="mt-4 text-center space-y-1 text-[11px] text-[#5a6b62]">
               <p>
                 Are you a regular user?{' '}
                 <button 
-                  onClick={() => { if (onSwitchToUserLogin) onSwitchToUserLogin(); }}
+                  onClick={() => { if (onSwitchToUserLogin) onSwitchToUserLogin(); else navigate('/login'); }}
                   className="text-[#2c5341] font-bold underline cursor-pointer bg-transparent border-none p-0 inline"
                 >
                   User Login
@@ -263,7 +274,7 @@ export default function WellnessPartnerLogin({ onLoginSuccess, onBackToHome, onS
 
           </div>
 
-          <div className="mt-4 pt-3 border-t border-black/5 grid grid-cols-3 text-center text-[9px] text-[#738279] z-20">
+          <div className="mt-3 pt-2 border-t border-black/5 grid grid-cols-3 text-center text-[9px] text-[#738279] z-20">
             <div className="flex items-center justify-center gap-1">
               <ShieldCheck className="w-3 h-3 text-[#2c5341]" />
               <span>Secure & encrypted</span>

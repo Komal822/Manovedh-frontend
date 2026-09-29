@@ -22,7 +22,7 @@ import logoImg from "../../assets/logo.png";
 // Features   → #features
 // Get Help   → #get-help
 // Activity   → #activity
-// Feedback  → #feedback
+// Feedback   → #feedback
 //
 // Separate pages:
 // Support    → /support
@@ -173,26 +173,41 @@ export default function Navbar() {
         setScrolled(false);
       }
 
-      // Detect the currently visible Home page section
+      // Detect currently visible Home page section
       if (location.pathname === "/") {
-        const sectionIds = ["home", "features", "get-help", "activity", "feedback"];
+
+        const sectionIds = [
+          "home",
+          "features",
+          "get-help",
+          "activity",
+          "feedback"
+        ];
+
         const navbarOffset = 110;
 
         let currentSection = "home";
 
         for (const sectionId of sectionIds) {
-          const section = document.getElementById(sectionId);
+
+          const section =
+            document.getElementById(sectionId);
 
           if (section) {
-            const sectionTop = section.getBoundingClientRect().top;
+
+            const sectionTop =
+              section.getBoundingClientRect().top;
 
             if (sectionTop <= navbarOffset) {
               currentSection = sectionId;
             }
+
           }
+
         }
 
         setActiveSection(currentSection);
+
       }
 
     };
@@ -302,13 +317,6 @@ export default function Navbar() {
   // ======================================================
   // HOME SECTION SCROLL
   // ======================================================
-  // If already on Home:
-  //     scroll directly to section
-  //
-  // If on another page:
-  //     go to Home first
-  //     then scroll to requested section
-  // ======================================================
 
   const handleSectionNavigation = (sectionId) => {
 
@@ -316,13 +324,21 @@ export default function Navbar() {
 
     const scrollToSection = () => {
 
-      const section = document.getElementById(sectionId);
+      const section =
+        document.getElementById(sectionId);
 
       if (section) {
 
-        section.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
+        const navbarOffset = 80;
+
+        const sectionTop =
+          section.getBoundingClientRect().top +
+          window.pageYOffset -
+          navbarOffset;
+
+        window.scrollTo({
+          top: sectionTop,
+          behavior: "smooth"
         });
 
       }
@@ -340,7 +356,6 @@ export default function Navbar() {
     // Coming from another page
     navigate("/");
 
-    // Wait for Home to render
     setTimeout(() => {
       scrollToSection();
     }, 150);
@@ -358,7 +373,9 @@ export default function Navbar() {
 
       event.preventDefault();
 
-      handleSectionNavigation(link.sectionId);
+      handleSectionNavigation(
+        link.sectionId
+      );
 
       return;
 
@@ -366,6 +383,12 @@ export default function Navbar() {
 
     // Separate pages
     closeMenus();
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant"
+    });
 
   };
 
@@ -435,6 +458,7 @@ export default function Navbar() {
 
           </Link>
 
+
           {/* ==================================================
               DESKTOP CONTENT
               ================================================== */}
@@ -449,12 +473,14 @@ export default function Navbar() {
 
               {NAV_LINKS.map((link) => {
 
-                const isHome = location.pathname === "/";
+                const isHome =
+                  location.pathname === "/";
 
                 const isActive =
                   link.type === "page"
                     ? location.pathname === link.path
-                    : isHome && activeSection === link.sectionId;
+                    : isHome &&
+                      activeSection === link.sectionId;
 
                 return (
 
@@ -468,7 +494,10 @@ export default function Navbar() {
                       <a
                         href={`#${link.sectionId}`}
                         onClick={(event) =>
-                          handleNavClick(link, event)
+                          handleNavClick(
+                            link,
+                            event
+                          )
                         }
                         className={`relative z-10 px-4 py-1.5 text-[14px] font-semibold tracking-wide rounded-full transition-all duration-300 block ${
                           isActive
@@ -484,7 +513,10 @@ export default function Navbar() {
                       <Link
                         to={link.path}
                         onClick={(event) =>
-                          handleNavClick(link, event)
+                          handleNavClick(
+                            link,
+                            event
+                          )
                         }
                         className={`relative z-10 px-4 py-1.5 text-[14px] font-semibold tracking-wide rounded-full transition-all duration-300 block ${
                           isActive
@@ -512,6 +544,7 @@ export default function Navbar() {
               })}
 
             </ul>
+
 
             {/* ==================================================
                 LANGUAGE SELECTOR
@@ -575,6 +608,7 @@ export default function Navbar() {
               )}
 
             </div>
+
 
             {/* ==================================================
                 LOGGED-IN USER
@@ -640,6 +674,7 @@ export default function Navbar() {
 
                 </button>
 
+
                 {profileOpen && (
 
                   <div className="absolute right-0 mt-3 w-72 bg-[#1b3328] text-white rounded-2xl shadow-2xl border border-white/10 py-3 z-50 overflow-hidden backdrop-blur-xl">
@@ -696,27 +731,44 @@ export default function Navbar() {
 
                     </div>
 
+
                     <div className="py-2 border-b border-white/10">
 
                       <Link
                         to="/profile"
-                        onClick={() => setProfileOpen(false)}
+                        onClick={() =>
+                          setProfileOpen(false)
+                        }
                         className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all"
                       >
+
                         <User className="w-4 h-4 text-[#a08a4a]" />
+
                         My Profile
+
                       </Link>
 
+
+                      {/* Saved Items
+                          Kept clickable without changing
+                          the existing navigation structure. */}
+
                       <Link
-                        to="/saved"
-                        onClick={() => setProfileOpen(false)}
+                        to="/profile"
+                        onClick={() =>
+                          setProfileOpen(false)
+                        }
                         className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all"
                       >
+
                         <Bookmark className="w-4 h-4 text-[#a08a4a]" />
+
                         Saved Items
+
                       </Link>
 
                     </div>
+
 
                     <div className="pt-1">
 
@@ -747,12 +799,20 @@ export default function Navbar() {
 
               <div className="flex items-center gap-3">
 
+                {/* USER LOGIN */}
+
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-[14px] font-bold text-[#1b3328] hover:text-[#2e5b45] transition-colors cursor-pointer"
+                  onClick={() => {
+                    closeMenus();
+                  }}
+                  className="inline-flex items-center justify-center px-5 py-2.5 text-[14px] font-bold text-[#1b3328] bg-white border border-black/10 rounded-full shadow-sm hover:bg-[#f3eee3] hover:border-[#2e5b45]/20 hover:shadow-md transition-all duration-300 cursor-pointer"
                 >
                   Login
                 </Link>
+
+
+                {/* GET STARTED */}
 
                 <button
                   onClick={() =>
@@ -764,7 +824,11 @@ export default function Navbar() {
                       "linear-gradient(145deg, #4E8A6B, #234A38)"
                   }}
                 >
-                  <span>Get Started</span>
+
+                  <span>
+                    Get Started
+                  </span>
+
                 </button>
 
               </div>
@@ -772,6 +836,7 @@ export default function Navbar() {
             )}
 
           </div>
+
 
           {/* ==================================================
               MOBILE MENU BUTTON
@@ -793,6 +858,7 @@ export default function Navbar() {
           </button>
 
         </nav>
+
 
         {/* ==================================================
             MOBILE MENU
@@ -830,7 +896,9 @@ export default function Navbar() {
                     }`}
                     onClick={(event) => {
                       event.preventDefault();
-                      handleSectionNavigation(link.sectionId);
+                      handleSectionNavigation(
+                        link.sectionId
+                      );
                     }}
                   >
                     {link.label}
@@ -859,6 +927,7 @@ export default function Navbar() {
 
             })}
 
+
             {user ? (
 
               <button
@@ -872,15 +941,20 @@ export default function Navbar() {
 
               <div className="flex flex-col gap-2.5 pt-3">
 
+                {/* USER LOGIN */}
+
                 <Link
                   to="/login"
                   className="py-2.5 text-center text-[15px] font-bold text-[#1b3328] bg-black/5 rounded-full"
                   onClick={() =>
-                    setOpen(false)
+                    closeMenus()
                   }
                 >
                   Login
                 </Link>
+
+
+                {/* GET STARTED */}
 
                 <button
                   onClick={() =>
@@ -905,6 +979,7 @@ export default function Navbar() {
 
       </header>
 
+
       {/* ======================================================
           ROLE SELECTION MODAL
           ====================================================== */}
@@ -926,6 +1001,7 @@ export default function Navbar() {
               <X className="w-4 h-4" />
             </button>
 
+
             <div className="text-center mb-6 mt-2">
 
               <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-[#1e3d30] flex items-center justify-center text-white shadow-md text-base">
@@ -941,6 +1017,7 @@ export default function Navbar() {
               </p>
 
             </div>
+
 
             <div className="space-y-3">
 
@@ -972,6 +1049,7 @@ export default function Navbar() {
                 </div>
 
               </button>
+
 
               {/* Wellness Partner */}
 

@@ -126,13 +126,13 @@ export default function GetHelp() {
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full min-h-screen bg-gradient-to-b from-[#F2F8F2] via-[#E8F3E8] to-[#DEF0DE] flex flex-col justify-between py-16 px-4 sm:px-12 font-sans overflow-hidden scroll-mt-24"
+      className="relative w-full min-h-screen bg-white flex flex-col justify-between py-16 px-4 sm:px-12 font-sans overflow-hidden scroll-mt-24"
     >
       <style>{floatAnimation}</style>
 
-      <div className="absolute top-1/4 left-5 w-[420px] h-[420px] bg-emerald-200/50 rounded-full filter blur-[140px] pointer-events-none animate-pulse"></div>
+      <div className="absolute top-1/4 left-5 w-[420px] h-[420px] bg-slate-100/45 rounded-full filter blur-[140px] pointer-events-none"></div>
 
-      <div className="absolute bottom-10 right-5 w-[420px] h-[420px] bg-teal-200/40 rounded-full filter blur-[140px] pointer-events-none"></div>
+      <div className="absolute bottom-10 right-5 w-[420px] h-[420px] bg-slate-100/55 rounded-full filter blur-[140px] pointer-events-none"></div>
 
       <div
         className={`relative z-10 text-center max-w-2xl mx-auto space-y-4 mb-8 transition-all duration-1000 transform ${
@@ -141,7 +141,7 @@ export default function GetHelp() {
             : 'opacity-0 -translate-y-6'
         }`}
       >
-        <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/90 mx-auto backdrop-blur-md">
+        <div className="inline-flex items-center px-4 py-2 rounded-full bg-white mx-auto shadow-[0_4px_14px_rgba(15,23,42,0.08)] border border-slate-100">
           <span className="text-xs font-bold text-emerald-800 tracking-wider">
             GET HELP & SUPPORT
           </span>
@@ -195,8 +195,8 @@ export default function GetHelp() {
                   }}
                   className={`absolute w-full group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl cursor-pointer transition-all duration-700 backdrop-blur-md ${
                     isActive
-                      ? 'bg-white text-black shadow-xl shadow-emerald-900/10 border-2 border-emerald-400 opacity-100'
-                      : 'bg-white/80 text-black border border-emerald-200/80 shadow-md opacity-40 hover:opacity-75 blur-[0.2px]'
+                      ? 'bg-white text-black shadow-[0_12px_30px_rgba(15,23,42,0.12)] border-2 border-emerald-400 opacity-100'
+                      : 'bg-white text-black border border-slate-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] opacity-40 hover:opacity-75 blur-[0.2px]'
                   }`}
                 >
                   <div className="flex items-center gap-3 relative z-10">
@@ -223,7 +223,7 @@ export default function GetHelp() {
         <div className="lg:col-span-4 flex flex-col items-center justify-center relative py-6">
           <div className="relative group w-full flex justify-center items-center">
 
-            <div className="absolute w-72 h-72 bg-emerald-300/40 rounded-full filter blur-3xl -z-10 animate-pulse"></div>
+            <div className="absolute w-72 h-72 bg-slate-200/50 rounded-full filter blur-3xl -z-10"></div>
 
             <img
               src={chakraImg}
@@ -272,8 +272,8 @@ export default function GetHelp() {
                   }}
                   className={`absolute w-full group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl cursor-pointer transition-all duration-700 backdrop-blur-md ${
                     isActive
-                      ? 'bg-white text-black shadow-xl shadow-emerald-900/10 border-2 border-emerald-400 opacity-100'
-                      : 'bg-white/80 text-black border border-emerald-200/80 shadow-md opacity-40 hover:opacity-75 blur-[0.2px]'
+                      ? 'bg-white text-black shadow-[0_12px_30px_rgba(15,23,42,0.12)] border-2 border-emerald-400 opacity-100'
+                      : 'bg-white text-black border border-slate-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] opacity-40 hover:opacity-75 blur-[0.2px]'
                   }`}
                 >
                   <div className="flex items-center gap-3 relative z-10">
@@ -351,7 +351,7 @@ export default function GetHelp() {
         </div>
       )}
 
-      <div className="relative z-10 flex items-center justify-center max-w-7xl mx-auto w-full pt-10 border-t border-emerald-900/10">
+      <div className="relative z-10 flex items-center justify-center max-w-7xl mx-auto w-full pt-10 border-t border-slate-200">
         <span className="lowercase tracking-wide font-medium italic text-emerald-800/70 text-sm">
           you're never alone on this journey
         </span>

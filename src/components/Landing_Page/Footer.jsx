@@ -273,20 +273,27 @@ export default function Footer() {
 
               <input
                 type="email"
-                placeholder="your@email.com"
+                placeholder="yourmail@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-[#183226] text-white placeholder-gray-400 px-5 py-3 rounded-full border border-emerald-500/30 focus:outline-none focus:border-emerald-400 focus:bg-[#1e3b2e] transition-all text-[13.5px] pr-14 shadow-inner"
+                className="w-full h-[58px] bg-[#183226] text-white placeholder-gray-400 px-5 pr-14 rounded-full border border-emerald-500/30 focus:outline-none focus:border-emerald-400 focus:bg-[#1e3b2e] transition-all text-[13.5px] shadow-inner"
               />
 
-              <button
-                type="submit"
-                aria-label="Send email"
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-[#4E8A6B] to-[#234A38] hover:scale-105 active:scale-95 text-white rounded-full transition-all duration-300 shadow-md cursor-pointer"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+              <div className="absolute inset-y-0 right-2 flex items-center justify-center">
+
+                <button
+                  type="submit"
+                  aria-label="Send email"
+                  className="w-9 h-9 flex items-center justify-center bg-gradient-to-r from-[#4E8A6B] to-[#234A38] hover:scale-105 active:scale-95 text-white rounded-full transition-all duration-300 shadow-md cursor-pointer"
+                >
+                  <Send
+                    className="w-[17px] h-[17px] shrink-0"
+                    strokeWidth={2}
+                  />
+                </button>
+
+              </div>
 
             </form>
 

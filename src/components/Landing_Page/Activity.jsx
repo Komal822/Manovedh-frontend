@@ -82,14 +82,9 @@ export default function Activity({ onOpenCommunity }) {
         </svg>
       </div>
 
-      {/* Watermarks */}
-      <div className="absolute top-10 right-6 pointer-events-none text-emerald-900/30 font-serif italic text-sm tracking-wide hidden md:block rotate-3 z-10">
-        Ideas Heal Together
-      </div>
+   
 
-      <div className="absolute bottom-10 right-12 pointer-events-none text-emerald-900/30 font-serif italic text-sm tracking-wide hidden lg:block -rotate-2 z-10">
-        Small Ideas Brighter Lives
-      </div>
+   
 
       {/* Main Container */}
       <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10 my-auto py-12">
@@ -170,7 +165,7 @@ export default function Activity({ onOpenCommunity }) {
 
         {/* Right Section: Preview Card */}
         <div className="lg:col-span-6 w-full flex justify-center">
-          <div className="bg-white/90 backdrop-blur-md rounded-[28px] p-5 sm:p-6 shadow-[0_20px_50px_rgba(31,63,44,0.08)] border border-emerald-100/80 w-full max-w-lg relative transition-all duration-500 hover:shadow-[0_25px_60px_rgba(31,63,44,0.12)] hover:-translate-y-1">
+          <div className="rounded-[28px] p-5 sm:p-6 w-full max-w-lg relative transition-all duration-500">
             
             {/* Card Header */}
             <div className="flex items-center justify-between mb-4">
@@ -179,15 +174,12 @@ export default function Activity({ onOpenCommunity }) {
                   <Users size={15} />
                 </div>
 
-                <span className="font-bold text-emerald-950 text-sm sm:text-base">
+                <span className="font-bold text-[#11261B] text-sm sm:text-base">
                   Community Idea
                 </span>
               </div>
               
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF3D6] text-amber-800 text-xs font-semibold">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                <span>Under Review</span>
-              </div>
+
             </div>
 
             {/* Banner Illustration Box using activity-bg.png */}
@@ -244,7 +236,7 @@ export default function Activity({ onOpenCommunity }) {
 
             {/* Text message replacing quote */}
             <div className="text-center py-1">
-              <span className="text-emerald-900/70 font-medium text-xs">
+              <span className="text-[#1b3328] font-semibold text-xs">
                 Small ideas can create a big positive impact.
               </span>
             </div>

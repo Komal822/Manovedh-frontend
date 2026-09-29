@@ -91,7 +91,7 @@ export default function Feedback() {
   return (
     <section
       id="feedback"
-      className="relative w-full py-12 sm:py-16 bg-[#eae5db]/40 text-[#1b3328] font-sans scroll-mt-22"
+      className="relative w-full py-12 sm:py-16 bg-white text-[#1b3328] font-sans scroll-mt-22"
     >
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-16 z-10">

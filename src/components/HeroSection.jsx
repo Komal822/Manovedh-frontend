@@ -46,10 +46,14 @@ function HeroSection({
 
             {/* Main Heading */}
             <h1 className="max-w-3xl font-serif text-5xl font-bold leading-[0.98] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-              <span className="text-white">
+              
+              {/* Updated: darker & stronger visibility */}
+              <span className="text-[#E8D18A] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
                 Your Well-Being
               </span>
+
               <br />
+
               <span className="text-[#9acbb0]">
                 Matters.
               </span>
