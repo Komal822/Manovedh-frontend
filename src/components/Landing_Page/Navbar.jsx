@@ -1,0 +1,1102 @@
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+import {
+  Menu,
+  X,
+  Globe,
+  ChevronDown,
+  User,
+  Bookmark,
+  LogOut,
+  Stethoscope
+} from "lucide-react";
+
+import logoImg from "../../assets/logo.png";
+import { useLanguage } from "../../LanguageContext";
+
+// ======================================================
+// NAVIGATION LINKS
+// ======================================================
+
+const NAV_LINKS = [
+  {
+    label: "Home",
+    type: "scroll",
+    sectionId: "home"
+  },
+  {
+    label: "Features",
+    type: "scroll",
+    sectionId: "features"
+  },
+  {
+    label: "Get Help",
+    type: "scroll",
+    sectionId: "get-help"
+  },
+  {
+    label: "Activity",
+    type: "scroll",
+    sectionId: "activity"
+  },
+  {
+    label: "Support",
+    type: "page",
+    path: "/support"
+  },
+  {
+    label: "Feedback",
+    type: "scroll",
+    sectionId: "feedback"
+  },
+  {
+    label: "Contact",
+    type: "page",
+    path: "/contact"
+  }
+];
+
+// ======================================================
+// LANGUAGES
+// ======================================================
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिन्दी (Hindi)" },
+  { code: "mr", label: "मराठी (Marathi)" }
+];
+
+// ======================================================
+// NAVBAR
+// ======================================================
+
+export default function Navbar() {
+
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+
+  // Profile
+  const [user, setUser] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  // Language
+  // Language is now controlled globally through LanguageContext
+  const { language, setLanguage } = useLanguage();
+  const [langOpen, setLangOpen] = useState(false);
+
+  // Role Modal
+  const [roleModalOpen, setRoleModalOpen] = useState(false);
+
+  const langDropdownRef = useRef(null);
+  const profileDropdownRef = useRef(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // ======================================================
+  // CHECK USER SESSION
+  // ======================================================
+
+  useEffect(() => {
+
+    const checkUserSession = () => {
+
+      const activeUser = localStorage.getItem(
+        "manovedh_current_user"
+      );
+
+      if (activeUser) {
+
+        try {
+
+          setUser(JSON.parse(activeUser));
+
+        } catch (error) {
+
+          console.error(
+            "Failed to parse user session:",
+            error
+          );
+
+          setUser(null);
+
+        }
+
+      } else {
+
+        setUser(null);
+
+      }
+
+    };
+
+    checkUserSession();
+
+    window.addEventListener(
+      "storage",
+      checkUserSession
+    );
+
+    return () => {
+
+      window.removeEventListener(
+        "storage",
+        checkUserSession
+      );
+
+    };
+
+  }, [location]);
+
+  // ======================================================
+  // SCROLL & OUTSIDE CLICK
+  // ======================================================
+
+  useEffect(() => {
+
+    const handleScroll = () => {
+
+      if (window.scrollY > 30) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+
+      // Detect currently visible Home page section
+      if (location.pathname === "/") {
+
+        const sectionIds = [
+          "home",
+          "features",
+          "get-help",
+          "activity",
+          "feedback"
+        ];
+
+        const navbarOffset = 110;
+
+        let currentSection = "home";
+
+        for (const sectionId of sectionIds) {
+
+          const section =
+            document.getElementById(sectionId);
+
+          if (section) {
+
+            const sectionTop =
+              section.getBoundingClientRect().top;
+
+            if (sectionTop <= navbarOffset) {
+              currentSection = sectionId;
+            }
+
+          }
+
+        }
+
+        setActiveSection(currentSection);
+
+      }
+
+    };
+
+    const handleClickOutside = (event) => {
+
+      if (
+        langDropdownRef.current &&
+        !langDropdownRef.current.contains(event.target)
+      ) {
+
+        setLangOpen(false);
+
+      }
+
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+
+        setProfileOpen(false);
+
+      }
+
+    };
+
+    handleScroll();
+
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      { passive: true }
+    );
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () => {
+
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+    };
+
+  }, [location.pathname]);
+
+  // ======================================================
+  // LOGOUT
+  // ======================================================
+
+  const handleLogout = () => {
+
+    localStorage.removeItem(
+      "manovedh_current_user"
+    );
+
+    setUser(null);
+    setProfileOpen(false);
+    setOpen(false);
+
+    navigate("/login");
+
+  };
+
+  // ======================================================
+  // ROLE SELECTION
+  // ======================================================
+
+  const handleRoleSelect = (role) => {
+
+    setRoleModalOpen(false);
+    setOpen(false);
+
+    if (role === "user") {
+
+      navigate("/signup");
+
+    } else if (role === "partner") {
+
+      navigate("/partner-login");
+
+    }
+
+  };
+
+  // ======================================================
+  // CLOSE MENUS
+  // ======================================================
+
+  const closeMenus = () => {
+
+    setOpen(false);
+    setProfileOpen(false);
+    setLangOpen(false);
+
+  };
+
+  // ======================================================
+  // HOME SECTION SCROLL
+  // ======================================================
+
+  const handleSectionNavigation = (sectionId) => {
+
+    closeMenus();
+
+    const scrollToSection = () => {
+
+      const section =
+        document.getElementById(sectionId);
+
+      if (section) {
+
+        const navbarOffset = 80;
+
+        const sectionTop =
+          section.getBoundingClientRect().top +
+          window.pageYOffset -
+          navbarOffset;
+
+        window.scrollTo({
+          top: sectionTop,
+          behavior: "smooth"
+        });
+
+      }
+
+    };
+
+    // Already on Home
+    if (location.pathname === "/") {
+
+      scrollToSection();
+      return;
+
+    }
+
+    // Coming from another page
+    navigate("/");
+
+    setTimeout(() => {
+      scrollToSection();
+    }, 150);
+
+  };
+
+  // ======================================================
+  // NAVIGATION HANDLER
+  // ======================================================
+
+  const handleNavClick = (link, event) => {
+
+    // Home page section links
+    if (link.type === "scroll") {
+
+      event.preventDefault();
+
+      handleSectionNavigation(
+        link.sectionId
+      );
+
+      return;
+
+    }
+
+    // Separate pages
+    closeMenus();
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant"
+    });
+
+  };
+
+  // ======================================================
+  // LANGUAGE HANDLER
+  // ======================================================
+
+  const handleLanguageChange = (langCode) => {
+
+    setLanguage(langCode);
+    setLangOpen(false);
+
+  };
+
+  // Current language object
+  const currentLanguage =
+    LANGUAGES.find(
+      (lang) => lang.code === language
+    ) || LANGUAGES[0];
+
+  // ======================================================
+  // RENDER
+  // ======================================================
+
+  return (
+    <>
+      {/* ==================================================
+          HEADER
+          ================================================== */}
+
+      <header className="fixed top-0 left-0 w-full z-50 font-sans">
+
+        <nav
+          className={`flex items-center justify-between px-6 sm:px-10 lg:px-16 transition-all duration-300 bg-white ${
+            scrolled
+              ? "py-2 shadow-md border-b border-black/5 text-[#1b3328]"
+              : "py-3 border-b border-black/5 text-[#1b3328]"
+          }`}
+        >
+
+          {/* ==================================================
+              LOGO
+              ================================================== */}
+
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              handleSectionNavigation("home");
+            }}
+            className="group flex items-center gap-3.5 py-1"
+          >
+
+            <img
+              src={logoImg}
+              alt="Manovedh Logo"
+              className={`w-auto object-contain transition-all duration-300 drop-shadow-sm group-hover:scale-105 ${
+                scrolled
+                  ? "h-10 md:h-12"
+                  : "h-12 md:h-14 lg:h-16"
+              }`}
+            />
+
+            <span className="flex flex-col leading-tight">
+
+              <span
+                className={`font-bold tracking-tight text-[#1b3328] transition-all duration-300 group-hover:text-[#2e5b45] ${
+                  scrolled
+                    ? "text-[22px] md:text-[24px]"
+                    : "text-[26px] md:text-[30px]"
+                }`}
+                style={{
+                  fontFamily: "'Playfair Display', serif"
+                }}
+              >
+                Manovedh
+              </span>
+
+              <span className="text-[10px] md:text-[11px] tracking-[0.22em] text-[#a08a4a] uppercase font-bold">
+                Mindful living
+              </span>
+
+            </span>
+
+          </Link>
+
+          {/* ==================================================
+              DESKTOP CONTENT
+              ================================================== */}
+
+          <div className="hidden lg:flex items-center gap-6">
+
+            {/* ==================================================
+                NAVIGATION
+                ================================================== */}
+
+            <ul className="flex items-center gap-1 bg-black/5 border border-black/5 rounded-full px-3 py-1">
+
+              {NAV_LINKS.map((link) => {
+
+                const isHome =
+                  location.pathname === "/";
+
+                const isActive =
+                  link.type === "page"
+                    ? location.pathname === link.path
+                    : isHome &&
+                      activeSection === link.sectionId;
+
+                return (
+
+                  <li
+                    key={link.label}
+                    className="relative group"
+                  >
+
+                    {link.type === "scroll" ? (
+
+                      <a
+                        href={`#${link.sectionId}`}
+                        onClick={(event) =>
+                          handleNavClick(
+                            link,
+                            event
+                          )
+                        }
+                        className={`relative z-10 px-4 py-1.5 text-[14px] font-semibold tracking-wide rounded-full transition-all duration-300 block ${
+                          isActive
+                            ? "text-[#1b3328]"
+                            : "text-[#4a5850] hover:text-[#1b3328]"
+                        }`}
+                      >
+                        {link.label}
+                      </a>
+
+                    ) : (
+
+                      <Link
+                        to={link.path}
+                        onClick={(event) =>
+                          handleNavClick(
+                            link,
+                            event
+                          )
+                        }
+                        className={`relative z-10 px-4 py-1.5 text-[14px] font-semibold tracking-wide rounded-full transition-all duration-300 block ${
+                          isActive
+                            ? "text-[#1b3328]"
+                            : "text-[#4a5850] hover:text-[#1b3328]"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+
+                    )}
+
+                    <span
+                      className={`absolute inset-0 bg-white shadow-sm rounded-full transition-all duration-300 pointer-events-none ${
+                        isActive
+                          ? "opacity-100 scale-100"
+                          : "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"
+                      }`}
+                    />
+
+                  </li>
+
+                );
+
+              })}
+
+            </ul>
+
+            {/* ==================================================
+                LANGUAGE SELECTOR
+                ================================================== */}
+
+            <div
+              className="relative"
+              ref={langDropdownRef}
+            >
+
+              <button
+                onClick={() =>
+                  setLangOpen((prev) => !prev)
+                }
+                className="flex items-center gap-2 px-3.5 py-1.5 text-[13.5px] font-semibold text-[#1b3328] bg-black/5 hover:bg-black/10 border border-black/5 rounded-full transition-all cursor-pointer"
+              >
+
+                <Globe className="w-4 h-4 text-[#2e5b45]" />
+
+                <span>
+                  {currentLanguage.label.split(" ")[0]}
+                </span>
+
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-[#4a5850] transition-transform ${
+                    langOpen
+                      ? "rotate-180"
+                      : ""
+                  }`}
+                />
+
+              </button>
+
+              {langOpen && (
+
+                <div className="absolute right-0 mt-2 w-44 bg-[#1b3328] text-white rounded-2xl shadow-xl border border-white/10 py-2 z-50 overflow-hidden">
+
+                  {LANGUAGES.map((lang) => (
+
+                    <button
+                      key={lang.code}
+                      onClick={() =>
+                        handleLanguageChange(
+                          lang.code
+                        )
+                      }
+                      className={`w-full text-left px-4 py-2 text-[13px] font-medium transition-colors flex items-center justify-between cursor-pointer ${
+                        language === lang.code
+                          ? "bg-[#2e5b45] text-white font-semibold"
+                          : "text-emerald-100/80 hover:bg-[#28493a]"
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+
+                  ))}
+
+                </div>
+
+              )}
+
+            </div>
+
+            {/* ==================================================
+                LOGGED-IN USER
+                ================================================== */}
+
+            {user ? (
+
+              <div
+                className="relative"
+                ref={profileDropdownRef}
+              >
+
+                <button
+                  onClick={() =>
+                    setProfileOpen((prev) => !prev)
+                  }
+                  className="flex items-center gap-2.5 p-1.5 pl-2 pr-3 rounded-full bg-black/5 hover:bg-black/10 border border-black/5 transition-all duration-300 cursor-pointer group"
+                >
+
+                  <div className="relative">
+
+                    <div className="w-8 h-8 rounded-full bg-[#2e5b45] text-white flex items-center justify-center font-bold text-sm ring-2 ring-[#a08a4a] overflow-hidden">
+
+                      {user.profilePic ? (
+
+                        <img
+                          src={user.profilePic}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+
+                      ) : (
+
+                        <span>
+                          {user.fullName
+                            ? user.fullName
+                                .charAt(0)
+                                .toUpperCase()
+                            : "U"}
+                        </span>
+
+                      )}
+
+                    </div>
+
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
+
+                  </div>
+
+                  <span className="text-[13.5px] font-semibold text-[#1b3328] group-hover:text-[#2e5b45]">
+                    {user.fullName
+                      ? user.fullName.split(" ")[0]
+                      : "User"}
+                  </span>
+
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-[#4a5850] transition-transform ${
+                      profileOpen
+                        ? "rotate-180"
+                        : ""
+                    }`}
+                  />
+
+                </button>
+
+                {profileOpen && (
+
+                  <div className="absolute right-0 mt-3 w-72 bg-[#1b3328] text-white rounded-2xl shadow-2xl border border-white/10 py-3 z-50 overflow-hidden backdrop-blur-xl">
+
+                    <div className="px-5 py-3 border-b border-white/10 bg-gradient-to-r from-white/5 to-transparent">
+
+                      <div className="flex items-center gap-3">
+
+                        <div className="w-10 h-10 rounded-full bg-[#2e5b45] text-white flex items-center justify-center font-bold text-base ring-2 ring-[#a08a4a] overflow-hidden flex-shrink-0">
+
+                          {user.profilePic ? (
+
+                            <img
+                              src={user.profilePic}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                            />
+
+                          ) : (
+
+                            <span>
+                              {user.fullName
+                                ? user.fullName
+                                    .charAt(0)
+                                    .toUpperCase()
+                                : "U"}
+                            </span>
+
+                          )}
+
+                        </div>
+
+                        <div className="flex flex-col overflow-hidden">
+
+                          <span className="font-bold text-[15px] text-white truncate">
+                            {user.fullName || "User"}
+                          </span>
+
+                          <span className="text-[12px] text-emerald-100/70 truncate">
+                            {user.email}
+                          </span>
+
+                          <div className="mt-1.5 flex items-center gap-1.5 w-fit px-3 py-1 rounded-full bg-[#a08a4a]/20 border border-[#a08a4a]/40 text-[#d4af37] text-[11px] font-bold uppercase tracking-wider">
+
+                            <User className="w-4 h-4" />
+
+                            User
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                    <div className="py-2 border-b border-white/10">
+
+                      <Link
+                        to="/profile"
+                        onClick={() =>
+                          setProfileOpen(false)
+                        }
+                        className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all"
+                      >
+
+                        <User className="w-4 h-4 text-[#a08a4a]" />
+
+                        My Profile
+
+                      </Link>
+
+                      <Link
+                        to="/profile"
+                        onClick={() =>
+                          setProfileOpen(false)
+                        }
+                        className="flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-medium text-emerald-100/80 hover:bg-[#28493a] hover:text-white transition-all"
+                      >
+
+                        <Bookmark className="w-4 h-4 text-[#a08a4a]" />
+
+                        Saved Items
+
+                      </Link>
+
+                    </div>
+
+                    <div className="pt-1">
+
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-5 py-2.5 text-[13.5px] font-semibold text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-all cursor-pointer"
+                      >
+
+                        <LogOut className="w-4 h-4 text-rose-400" />
+
+                        Log Out
+
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                )}
+
+              </div>
+
+            ) : (
+
+              <div className="flex items-center gap-3">
+
+                <Link
+                  to="/login"
+                  onClick={() => {
+                    closeMenus();
+                  }}
+                  className="inline-flex items-center justify-center px-5 py-2.5 text-[14px] font-bold text-[#1b3328] bg-white border border-black/10 rounded-full shadow-sm hover:bg-[#f3eee3] hover:border-[#2e5b45]/20 hover:shadow-md transition-all duration-300 cursor-pointer"
+                >
+                  Login
+                </Link>
+
+                <button
+                  onClick={() =>
+                    setRoleModalOpen(true)
+                  }
+                  className="relative inline-flex items-center justify-center overflow-hidden rounded-full px-5 py-2.5 text-[13.5px] font-bold uppercase tracking-wider text-white shadow-md transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
+                  style={{
+                    background:
+                      "linear-gradient(145deg, #4E8A6B, #234A38)"
+                  }}
+                >
+
+                  <span>
+                    Get Started
+                  </span>
+
+                </button>
+
+              </div>
+
+            )}
+
+          </div>
+
+          {/* ==================================================
+              MOBILE MENU BUTTON
+              ================================================== */}
+
+          <button
+            className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-black/10 text-[#1b3328]"
+            onClick={() =>
+              setOpen((v) => !v)
+            }
+          >
+
+            {open ? (
+              <X className="w-5 h-5 text-[#2e5b45]" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+
+          </button>
+
+        </nav>
+
+        {/* ==================================================
+            MOBILE MENU
+            ================================================== */}
+
+        <div
+          className={`lg:hidden overflow-hidden bg-white border-b border-black/10 transition-all duration-500 ${
+            open
+              ? "max-h-[700px] opacity-100"
+              : "max-h-0 opacity-0"
+          }`}
+        >
+
+          <div className="flex flex-col gap-2 px-8 py-6">
+
+            {NAV_LINKS.map((link) => {
+
+              const isActive =
+                link.type === "page"
+                  ? location.pathname === link.path
+                  : location.pathname === "/" &&
+                    activeSection === link.sectionId;
+
+              return (
+
+                link.type === "scroll" ? (
+
+                  <a
+                    key={link.label}
+                    href={`#${link.sectionId}`}
+                    className={`py-2.5 text-[16px] font-semibold border-b border-black/5 transition-colors ${
+                      isActive
+                        ? "text-[#2e5b45]"
+                        : "text-[#1b3328]"
+                    }`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      handleSectionNavigation(
+                        link.sectionId
+                      );
+                    }}
+                  >
+                    {link.label}
+                  </a>
+
+                ) : (
+
+                  <Link
+                    key={link.label}
+                    to={link.path}
+                    className={`py-2.5 text-[16px] font-semibold border-b border-black/5 transition-colors ${
+                      isActive
+                        ? "text-[#2e5b45]"
+                        : "text-[#1b3328]"
+                    }`}
+                    onClick={() =>
+                      closeMenus()
+                    }
+                  >
+                    {link.label}
+                  </Link>
+
+                )
+
+              );
+
+            })}
+
+            {/* MOBILE LANGUAGE SELECTOR */}
+
+            <div className="pt-3 border-b border-black/5 pb-3">
+
+              <p className="text-[12px] font-semibold text-[#55635b] mb-2">
+                Language
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+
+                {LANGUAGES.map((lang) => (
+
+                  <button
+                    key={lang.code}
+                    onClick={() =>
+                      handleLanguageChange(
+                        lang.code
+                      )
+                    }
+                    className={`px-4 py-2 rounded-full text-[13px] font-semibold transition-all ${
+                      language === lang.code
+                        ? "bg-[#2e5b45] text-white"
+                        : "bg-black/5 text-[#1b3328] hover:bg-black/10"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+
+                ))}
+
+              </div>
+
+            </div>
+
+            {user ? (
+
+              <button
+                onClick={handleLogout}
+                className="mt-4 py-3 bg-rose-500 text-white font-bold rounded-full text-center"
+              >
+                Logout ({user.fullName})
+              </button>
+
+            ) : (
+
+              <div className="flex flex-col gap-2.5 pt-3">
+
+                <Link
+                  to="/login"
+                  className="py-2.5 text-center text-[15px] font-bold text-[#1b3328] bg-black/5 rounded-full"
+                  onClick={() =>
+                    closeMenus()
+                  }
+                >
+                  Login
+                </Link>
+
+                <button
+                  onClick={() =>
+                    setRoleModalOpen(true)
+                  }
+                  className="flex items-center justify-center py-3 text-[14px] font-bold uppercase text-white rounded-full shadow-md cursor-pointer"
+                  style={{
+                    background:
+                      "linear-gradient(145deg, #4E8A6B, #234A38)"
+                  }}
+                >
+                  Get Started
+                </button>
+
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+      </header>
+
+      {/* ======================================================
+          ROLE SELECTION MODAL
+          ====================================================== */}
+
+      {roleModalOpen && (
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+
+          <div className="relative w-full max-w-md bg-[#ECE7DE] rounded-[28px] p-6 shadow-2xl border border-[#2e5b45]/30">
+
+            {/* Close */}
+
+            <button
+              onClick={() =>
+                setRoleModalOpen(false)
+              }
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-[#1b3328] transition-all cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="text-center mb-6 mt-2">
+
+              <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-[#1e3d30] flex items-center justify-center text-white shadow-md text-base">
+                🌿
+              </div>
+
+              <h3 className="text-xl font-serif font-bold text-[#1b3328]">
+                Welcome to Manovedh
+              </h3>
+
+              <p className="text-xs text-[#55635b] mt-1">
+                Please select your portal to continue
+              </p>
+
+            </div>
+
+            <div className="space-y-3">
+
+              {/* User */}
+
+              <button
+                onClick={() =>
+                  handleRoleSelect("user")
+                }
+                className="w-full p-4 bg-white hover:bg-[#f3eee3] border border-black/10 rounded-2xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer group text-left"
+              >
+
+                <div className="w-12 h-12 rounded-xl bg-[#2c5341] text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+
+                  <User className="w-5 h-5 text-[#ffd700]" />
+
+                </div>
+
+                <div>
+
+                  <h4 className="text-sm font-bold text-[#1b3328]">
+                    User / Patient Portal
+                  </h4>
+
+                  <p className="text-[11px] text-[#55635b]">
+                    Access counseling, book sessions, and wellness tools.
+                  </p>
+
+                </div>
+
+              </button>
+
+              {/* Wellness Partner */}
+
+              <button
+                onClick={() =>
+                  handleRoleSelect("partner")
+                }
+                className="w-full p-4 bg-white hover:bg-[#f3eee3] border border-black/10 rounded-2xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer group text-left"
+              >
+
+                <div className="w-12 h-12 rounded-xl bg-[#1e3d30] text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+
+                  <Stethoscope className="w-5 h-5 text-[#ffd700]" />
+
+                </div>
+
+                <div>
+
+                  <h4 className="text-sm font-bold text-[#1b3328]">
+                    Wellness Partner Portal
+                  </h4>
+
+                  <p className="text-[11px] text-[#55635b]">
+                    Manage patient appointments and professional sessions.
+                  </p>
+
+                </div>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
+    </>
+  );
+}

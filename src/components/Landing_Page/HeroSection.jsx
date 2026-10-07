@@ -1,0 +1,300 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, User, BookOpen } from 'lucide-react';
+
+import { useLanguage } from "../../LanguageContext";
+import { marathi } from "../../translations/marathi";
+import { hindi } from "../../translations/hindi";
+
+// Import background image from assets directory
+import heroBgImage from '../../assets/image.png';
+import rightIcon from '../../assets/right.png';
+
+const HeroSection = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const { language } = useLanguage();
+
+  // Hero content based on selected global language
+  const heroContent =
+    language === 'mr'
+      ? marathi.home.hero
+      : language === 'hi'
+      ? hindi.home.hero
+      : {
+          title: 'Your Well-Being Matters.',
+          description:
+            'Manovedh helps you understand your emotions, build healthier habits, and track your progress with calm AI-powered support.',
+        };
+
+  // Close the role selection modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <section
+      id="home"
+      className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20 pb-20 sm:pb-24 select-none bg-[#1b3328]"
+    >
+      {/* 1. BACKGROUND IMAGE */}
+      <div
+        className={`absolute inset-0 w-full h-full overflow-hidden z-0 transition-all duration-500 ${
+          isModalOpen ? 'filter blur-md scale-105' : ''
+        }`}
+      >
+        <img
+          src={heroBgImage}
+          alt="Peaceful meditation during sunset"
+          className="w-full h-full object-cover object-[82%_center] sm:object-center brightness-[0.90] sm:brightness-[0.95] contrast-[1.05] animate-smooth-zoom"
+        />
+      </div>
+
+      {/* 2. GRADIENT OVERLAYS */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent sm:from-black/75 sm:via-black/35 z-10 transition-all duration-700 ease-in-out ${
+          isModalOpen ? 'backdrop-blur-sm' : ''
+        }`}
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-t from-[#1b3328]/90 via-transparent to-transparent z-15 pointer-events-none" />
+
+      {/* 3. MAIN HERO CONTENT */}
+      <div
+        className={`relative w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 z-30 transition-all duration-500 ${
+          isModalOpen
+            ? 'filter blur-sm select-none pointer-events-none'
+            : ''
+        }`}
+      >
+        <div className="max-w-2xl space-y-6 sm:space-y-8 text-left">
+
+          <h1
+            className="text-4xl sm:text-6xl lg:text-[76px] leading-[1.12] sm:leading-[1.08] tracking-tight font-bold drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] text-white"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {language === 'en' ? (
+              <>
+                <span className="block font-medium italic text-[#ffe59e] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] animate-ultra-smooth-text-1">
+                  Your Well-Being
+                </span>
+
+                <span className="block text-white animate-ultra-smooth-text-2 mt-1 sm:mt-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                  Matters
+                </span>
+              </>
+            ) : (
+              <span className="block text-white animate-ultra-smooth-text-1">
+                {heroContent.title}
+              </span>
+            )}
+          </h1>
+
+          <p className="text-[15px] sm:text-[18px] text-white/95 leading-relaxed max-w-md sm:max-w-xl font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] animate-ultra-smooth-text-3">
+            {heroContent.description}
+          </p>
+
+          <div className="pt-3 sm:pt-4 flex flex-wrap items-center gap-4 animate-ultra-smooth-text-4">
+
+            {/* GET STARTED */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="relative group inline-flex items-center gap-2.5 sm:gap-3 overflow-hidden rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold uppercase tracking-wider text-white shadow-xl shadow-[#1b3328]/35 transition-all duration-500 ease-out hover:shadow-2xl hover:scale-105 active:scale-95 cursor-pointer"
+              style={{
+                background: 'linear-gradient(145deg, #4E8A6B, #234A38)',
+              }}
+            >
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+
+              <span className="relative z-10 flex items-center gap-2 transition-transform duration-300">
+                Get Started
+
+                <img
+                  src={rightIcon}
+                  alt=""
+                  className="w-4 h-4 sm:w-5 sm:h-5 object-contain transition-transform duration-300 ease-out group-hover:translate-x-2"
+                />
+              </span>
+            </button>
+
+            {/* LEARN MORE - ROUTES TO /about */}
+            <Link
+              to="/about"
+              className="inline-flex items-center justify-center rounded-full px-7 py-3.5 sm:px-8 sm:py-4 text-[13px] sm:text-[15.5px] font-bold tracking-wide text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-lg transition-all duration-300 ease-out hover:scale-105 active:scale-95"
+            >
+              Learn More
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* DYNAMIC POPUP MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
+
+          <div className="relative w-full max-w-lg bg-[#EAF3EC] rounded-[28px] p-8 shadow-2xl border border-[#d6e8da] text-gray-800">
+
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-6 right-6 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:bg-black/5 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* ROLE SELECTION */}
+            <div>
+              <div className="mb-6">
+
+                <div className="w-12 h-12 rounded-2xl bg-[#1b3328] flex items-center justify-center text-[#ffea9f] mb-4 shadow-md font-serif font-bold text-lg">
+                  M
+                </div>
+
+                <h3 className="text-2xl font-serif font-bold text-[#1b3328]">
+                  Join Manovedh
+                </h3>
+
+                <p className="text-sm text-gray-600 mt-1">
+                  Choose how you'd like to get started
+                </p>
+              </div>
+
+              <div className="space-y-4">
+
+                {/* USER OPTION */}
+                <button
+                  onClick={() => {
+                    closeModal();
+                    navigate('/signup');
+                  }}
+                  className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex items-center space-x-4">
+
+                    <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
+                      <User className="w-6 h-6" />
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-base text-[#1b3328]">
+                        User
+                      </h4>
+
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Access wellness activities, tracking & support
+                      </p>
+                    </div>
+                  </div>
+
+                  <img
+                    src={rightIcon}
+                    alt=""
+                    className="w-5 h-5 object-contain text-gray-400 group-hover:translate-x-1 transition-all"
+                  />
+                </button>
+
+                {/* WELLNESS PARTNER OPTION */}
+                <button
+                  onClick={() => {
+                    closeModal();
+                    navigate('/partner-login');
+                  }}
+                  className="w-full text-left group flex items-center justify-between p-4 bg-white/80 hover:bg-white rounded-2xl border border-[#d6e8da] shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                >
+                  <div className="flex items-center space-x-4">
+
+                    <div className="w-12 h-12 rounded-xl bg-[#dcf0e2] flex items-center justify-center text-[#1b3328]">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-base text-[#1b3328]">
+                        Wellness Partner
+                      </h4>
+
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Provide professional guidance & manage clients
+                      </p>
+                    </div>
+                  </div>
+
+                  <img
+                    src={rightIcon}
+                    alt=""
+                    className="w-5 h-5 object-contain text-gray-400 group-hover:translate-x-1 transition-all"
+                  />
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 4. BOTTOM WAVY SECTION DIVIDER */}
+      <div className="absolute bottom-0 left-0 right-0 leading-none pointer-events-none z-25">
+
+        <svg
+          viewBox="0 0 1440 120"
+          className="w-full h-12 sm:h-20 text-[#ffffff] fill-current"
+          preserveAspectRatio="none"
+        >
+          <path d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,120 L0,120 Z" />
+        </svg>
+
+      </div>
+
+      {/* 5. ANIMATIONS */}
+      <style>{`
+        @keyframes smoothZoom {
+          0% { transform: scale(1.02); }
+          50% { transform: scale(1.08); }
+          100% { transform: scale(1.02); }
+        }
+
+        @keyframes ultraSmoothReveal {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            filter: blur(4px);
+          }
+
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0px);
+          }
+        }
+
+        .animate-smooth-zoom {
+          animation: smoothZoom 28s ease-in-out infinite;
+        }
+
+        .animate-ultra-smooth-text-1 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+        }
+
+        .animate-ultra-smooth-text-2 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
+        }
+
+        .animate-ultra-smooth-text-3 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+        }
+
+        .animate-ultra-smooth-text-4 {
+          opacity: 0;
+          animation: ultraSmoothReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards;
+        }
+      `}</style>
+
+    </section>
+  );
+};
+
+export default HeroSection;

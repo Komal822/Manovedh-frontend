@@ -1,0 +1,883 @@
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import {
+  ArrowLeft,
+  ArrowRight,
+  Upload,
+  CheckCircle2,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  User,
+  Phone,
+  Calendar,
+  Mail,
+  MapPin,
+  Briefcase,
+  Award,
+  Lock
+} from 'lucide-react';
+
+import counsellor1 from '../../assets/councellor-1.png';
+import counsellor2 from '../../assets/councellor-2.png';
+import counsellor3 from '../../assets/councellor-3.png';
+import counsellor4 from '../../assets/councellor-4.png';
+
+const LOCAL_STORAGE_PARTNERS_KEY = 'manovedh_wellness_partners';
+
+export default function CounsellorSignup({
+  onSwitchToLogin,
+  onSignupSuccess
+}) {
+  const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const counsellorImages = [
+    counsellor1,
+    counsellor2,
+    counsellor3,
+    counsellor4
+  ];
+
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    gender: '',
+    dob: '',
+    email: '',
+    address: '',
+    profession: '',
+    specialization: '',
+    password: '',
+    confirmPassword: '',
+    certificateName: ''
+  });
+
+  // =========================================================
+  // IMAGE SLIDER
+  // =========================================================
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImageIndex(
+        (prevIndex) =>
+          (prevIndex + 1) % counsellorImages.length
+      );
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [counsellorImages.length]);
+
+  // =========================================================
+  // INPUT HANDLER
+  // =========================================================
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // =========================================================
+  // CERTIFICATE UPLOAD
+  // =========================================================
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setErrorMessage('');
+
+    const isPDF =
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf');
+
+    const isWithinSizeLimit =
+      file.size <= 5 * 1024 * 1024;
+
+    if (!isPDF) {
+      setErrorMessage('Please upload a PDF certificate only.');
+      e.target.value = '';
+      return;
+    }
+
+    if (!isWithinSizeLimit) {
+      setErrorMessage('Certificate must be under 5MB.');
+      e.target.value = '';
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      certificateName: file.name
+    }));
+  };
+
+  // =========================================================
+  // SIGNUP SUBMIT
+  // =========================================================
+
+  const handleSignupSubmit = (e) => {
+    e.preventDefault();
+
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    const email = formData.email.trim().toLowerCase();
+    const fullName = formData.fullName.trim();
+
+    // Required field validation
+
+    if (
+      !fullName ||
+      !formData.phoneNumber.trim() ||
+      !formData.gender ||
+      !formData.dob ||
+      !email ||
+      !formData.address.trim() ||
+      !formData.profession ||
+      !formData.specialization.trim() ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      setErrorMessage('Please complete all required fields.');
+      return;
+    }
+
+    // Password validation
+
+    if (formData.password.length < 8) {
+      setErrorMessage(
+        'Password must contain at least 8 characters.'
+      );
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage(
+        'Passwords do not match. Please check.'
+      );
+      return;
+    }
+
+    // Phone validation
+
+    const phone = formData.phoneNumber.replace(/\D/g, '');
+
+    if (phone.length < 10 || phone.length > 15) {
+      setErrorMessage(
+        'Please enter a valid phone number.'
+      );
+      return;
+    }
+
+    // Date validation
+
+    const birthDate = new Date(formData.dob);
+
+    if (
+      Number.isNaN(birthDate.getTime()) ||
+      birthDate >= new Date()
+    ) {
+      setErrorMessage('Please enter a valid date of birth.');
+      return;
+    }
+
+    // Read existing partner accounts safely
+
+    let existingPartners = [];
+
+    try {
+      const storedPartners = localStorage.getItem(
+        LOCAL_STORAGE_PARTNERS_KEY
+      );
+
+      existingPartners = storedPartners
+        ? JSON.parse(storedPartners)
+        : [];
+
+      if (!Array.isArray(existingPartners)) {
+        existingPartners = [];
+      }
+    } catch (error) {
+      console.error('Partner storage error:', error);
+
+      setErrorMessage(
+        'Unable to access partner accounts. Please try again.'
+      );
+
+      return;
+    }
+
+    // Check duplicate email
+
+    const emailExists = existingPartners.some(
+      (partner) =>
+        String(partner.email || '')
+          .trim()
+          .toLowerCase() === email
+    );
+
+    if (emailExists) {
+      setErrorMessage(
+        'An account with this email already exists. Please login.'
+      );
+      return;
+    }
+
+    // Create new partner account
+
+    const newPartner = {
+      id: `partner_${Date.now()}`,
+      fullName,
+      phoneNumber: formData.phoneNumber.trim(),
+      gender: formData.gender,
+      dob: formData.dob,
+      email,
+      address: formData.address.trim(),
+      profession: formData.profession,
+      specialization: formData.specialization.trim(),
+      password: formData.password,
+      certificateName: formData.certificateName,
+      profileCompleted: false,
+      createdAt: new Date().toISOString()
+    };
+
+    // Save partner account
+
+    try {
+      existingPartners.push(newPartner);
+
+      localStorage.setItem(
+        LOCAL_STORAGE_PARTNERS_KEY,
+        JSON.stringify(existingPartners)
+      );
+    } catch (error) {
+      console.error('Partner registration error:', error);
+
+      setErrorMessage(
+        'Registration failed. Please try again.'
+      );
+
+      return;
+    }
+
+    // Registration successful
+
+    setSuccessMessage(
+      'Registration successful! Redirecting to login...'
+    );
+
+    // Signup → Login → Profile Step 1 → Profile Step 2 → Dashboard
+
+    setTimeout(() => {
+      if (typeof onSignupSuccess === 'function') {
+        onSignupSuccess(newPartner);
+      } else {
+        navigate('/partner-login', {
+          replace: true
+        });
+      }
+    }, 1500);
+  };
+
+  // =========================================================
+  // NAVIGATION
+  // =========================================================
+
+  const handleBack = (e) => {
+    e.preventDefault();
+
+    navigate('/');
+  };
+
+  const handleLoginNavigation = () => {
+    if (typeof onSwitchToLogin === 'function') {
+      onSwitchToLogin();
+    } else {
+      navigate('/partner-login');
+    }
+  };
+
+  // =========================================================
+  // UI
+  // =========================================================
+
+  return (
+    <div className="min-h-screen w-full bg-[#12241C] flex flex-col items-center justify-center py-4 px-4 font-sans relative overflow-hidden">
+
+      {/* TOP NAVIGATION */}
+
+      <div className="w-full max-w-5xl mb-3 flex items-center justify-between z-30 px-1">
+
+        <button
+          type="button"
+          onClick={handleBack}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-md transition-all shadow-lg cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Home</span>
+        </button>
+
+        <span className="text-[11px] font-semibold px-3 py-1 bg-white/10 text-[#ffd700] rounded-full border border-white/10 backdrop-blur-md">
+          Professional Registration
+        </span>
+
+      </div>
+
+      {/* MAIN CARD */}
+
+      <div className="relative w-full max-w-5xl bg-[#ECE7DE] rounded-[28px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-[#2e5b45]/25">
+
+        {/* LEFT SIDE: IMAGE SLIDER */}
+
+        <div className="lg:col-span-5 relative p-6 sm:p-8 flex flex-col justify-between overflow-hidden bg-[#1a382c] text-white">
+
+          {counsellorImages.map((imgSrc, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out ${
+                index === currentImageIndex
+                  ? 'opacity-60 scale-105 filter brightness-105'
+                  : 'opacity-0 scale-100'
+              }`}
+              style={{
+                backgroundImage: `url(${imgSrc})`
+              }}
+            />
+          ))}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[#12241C]/70 via-[#1a382c]/45 to-[#1a382c]/20" />
+
+          <div className="relative z-20 flex items-center justify-between">
+
+            <div className="flex items-center gap-2.5">
+
+              <div className="w-7 h-7 rounded-full bg-[#2c5341] flex items-center justify-center text-white font-bold shadow-md text-xs border border-white/25">
+                🌿
+              </div>
+
+              <div>
+                <h1 className="text-sm font-bold tracking-tight font-serif">
+                  Manovedh
+                </h1>
+
+                <p className="text-[6px] tracking-[0.25em] text-[#ffd700] font-extrabold uppercase">
+                  EXPERT NETWORK
+                </p>
+              </div>
+
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+
+              {counsellorImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setCurrentImageIndex(idx)}
+                  className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
+                    idx === currentImageIndex
+                      ? 'bg-[#ffd700] w-4'
+                      : 'bg-white/50 w-1.5'
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+
+            </div>
+
+          </div>
+
+          <div className="relative z-20 my-auto py-6">
+
+            <h2 className="text-xl sm:text-2xl font-serif font-bold leading-tight mb-3 text-[#F8F6F0]">
+              Join our community of professional counsellors
+            </h2>
+
+            <p className="text-[11px] text-[#d1dcd5] mb-5 leading-relaxed">
+              Help make a difference in people's lives through trusted guidance and secure sessions.
+            </p>
+
+            <div className="space-y-2.5">
+
+              <div className="flex items-center gap-2.5 p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#ffd700] flex-shrink-0" />
+                <span className="text-[11px] font-medium">
+                  Flexible schedule
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2.5 p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#ffd700] flex-shrink-0" />
+                <span className="text-[11px] font-medium">
+                  Global reach
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2.5 p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#ffd700] flex-shrink-0" />
+                <span className="text-[11px] font-medium">
+                  Professional growth
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="relative z-20 flex items-center justify-between text-[9px] text-[#a3b8ac]">
+            <span>Empowering minds, transforming lives.</span>
+
+            <span className="text-[#ffd700] font-semibold tracking-wider">
+              Expert {currentImageIndex + 1}/4
+            </span>
+          </div>
+
+        </div>
+
+        {/* RIGHT SIDE: SIGNUP FORM */}
+
+        <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between bg-[#F8F6F0] relative overflow-y-auto max-h-[620px] [scrollbar-width:thin] [scrollbar-color:#738279_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#738279]/45 [&::-webkit-scrollbar-thumb]:rounded-full">
+
+          <div className="max-w-md mx-auto w-full z-20">
+
+            {/* LOGIN / SIGNUP SWITCH */}
+
+            <div className="bg-[#DED9CC] p-1 rounded-full flex items-center mb-5 shadow-[0_2px_8px_rgba(27,51,40,0.12)]">
+
+              <button
+                type="button"
+                onClick={handleLoginNavigation}
+                className="flex-1 py-1.5 text-center rounded-full text-xs font-bold text-[#5a6b62] hover:text-[#1b3328] transition-all cursor-pointer"
+              >
+                Login
+              </button>
+
+              <div className="flex-1 py-2 text-center rounded-full text-xs font-bold bg-[#2c5341] text-white shadow-[0_3px_8px_rgba(44,83,65,0.28)]">
+                Sign Up
+              </div>
+
+            </div>
+
+            <div className="mb-4">
+
+              <h3 className="text-xl font-serif font-bold text-[#1b3328]">
+                Join as a Counsellor
+              </h3>
+
+              <p className="text-xs text-[#5a6b62] mt-0.5">
+                Create your professional account. Already have an account?{' '}
+
+                <button
+                  type="button"
+                  onClick={handleLoginNavigation}
+                  className="text-[#2c5341] font-bold underline cursor-pointer bg-transparent border-none p-0 inline"
+                >
+                  Sign in
+                </button>
+              </p>
+
+            </div>
+
+            {/* ERROR MESSAGE */}
+
+            {errorMessage && (
+              <div
+                role="alert"
+                className="mb-3 p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-700 text-xs font-medium"
+              >
+                {errorMessage}
+              </div>
+            )}
+
+            {/* SUCCESS MESSAGE */}
+
+            {successMessage && (
+              <div
+                role="status"
+                className="mb-3 p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-700 text-xs font-medium"
+              >
+                {successMessage}
+              </div>
+            )}
+
+            {/* SIGNUP FORM */}
+
+            <form
+              onSubmit={handleSignupSubmit}
+              className="space-y-4"
+            >
+
+              {/* PERSONAL INFORMATION */}
+
+              <div>
+
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#738279] flex items-center gap-1.5 mb-2">
+                  <User className="w-3.5 h-3.5 text-[#2c5341]" />
+                  <span>Personal Information</span>
+                </label>
+
+                <div className="space-y-3">
+
+                  {/* FULL NAME */}
+
+                  <div className="relative">
+
+                    <User className="w-4 h-4 absolute left-3.5 top-0 bottom-0 my-auto text-[#738279]" />
+
+                    <input
+                      type="text"
+                      name="fullName"
+                      required
+                      placeholder="Full Name"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      autoComplete="name"
+                      className="w-full pl-10 pr-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                    />
+
+                  </div>
+
+                  {/* PHONE AND GENDER */}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                    <div className="relative">
+
+                      <Phone className="w-4 h-4 absolute left-3.5 top-0 bottom-0 my-auto text-[#738279]" />
+
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        required
+                        placeholder="Phone Number"
+                        value={formData.phoneNumber}
+                        onChange={handleInputChange}
+                        autoComplete="tel"
+                        className="w-full pl-10 pr-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      />
+
+                    </div>
+
+                    <select
+                      name="gender"
+                      required
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="w-full px-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+
+                  </div>
+
+                  {/* DATE OF BIRTH */}
+
+                  <div>
+
+                    <div className="relative">
+
+                      <Calendar className="w-4 h-4 absolute left-3.5 top-0 bottom-0 my-auto text-[#738279]" />
+
+                      <input
+                        type="date"
+                        name="dob"
+                        required
+                        value={formData.dob}
+                        onChange={handleInputChange}
+                        max={new Date().toISOString().split('T')[0]}
+                        className="w-full pl-10 pr-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                      />
+
+                    </div>
+
+                    <p className="text-[9px] text-[#738279] mt-1">
+                      YOU MUST BE AT LEAST 21 YEARS OLD TO REGISTER
+                    </p>
+
+                  </div>
+
+                  {/* EMAIL */}
+
+                  <div className="relative">
+
+                    <Mail className="w-4 h-4 absolute left-3.5 top-0 bottom-0 my-auto text-[#738279]" />
+
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="Email Address"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      autoComplete="email"
+                      className="w-full pl-10 pr-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                    />
+
+                  </div>
+
+                  {/* ADDRESS */}
+
+                  <div className="relative">
+
+                    <MapPin className="w-4 h-4 absolute left-3.5 top-0 bottom-0 my-auto text-[#738279]" />
+
+                    <input
+                      type="text"
+                      name="address"
+                      required
+                      placeholder="Address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      autoComplete="street-address"
+                      className="w-full pl-10 pr-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                    />
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* PROFESSIONAL INFORMATION */}
+
+              <div className="pt-1">
+
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#738279] flex items-center gap-1.5 mb-2">
+                  <Briefcase className="w-3.5 h-3.5 text-[#2c5341]" />
+                  <span>Professional Information</span>
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                  <select
+                    name="profession"
+                    required
+                    value={formData.profession}
+                    onChange={handleInputChange}
+                    className="w-full px-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                  >
+                    <option value="">Profession</option>
+                    <option value="Psychologist">Clinical Psychologist</option>
+                    <option value="Therapist">Licensed Therapist</option>
+                    <option value="Counsellor">Career/Life Counsellor</option>
+                    <option value="Psychiatrist">Psychiatrist</option>
+                  </select>
+
+                  <input
+                    type="text"
+                    name="specialization"
+                    required
+                    placeholder="Specialization (e.g. Anxiety)"
+                    value={formData.specialization}
+                    onChange={handleInputChange}
+                    className="w-full px-3.5 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* ACCOUNT SECURITY */}
+
+              <div className="pt-1">
+
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#738279] flex items-center gap-1.5 mb-2">
+                  <Lock className="w-3.5 h-3.5 text-[#2c5341]" />
+                  <span>Account Security</span>
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                  {/* PASSWORD */}
+
+                  <div className="relative">
+
+                    <Lock className="w-4 h-4 absolute left-3.5 top-0 bottom-0 my-auto text-[#738279]" />
+
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                      placeholder="Password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-10 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-3.5 top-0 bottom-0 my-auto flex items-center justify-center text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+
+                  </div>
+
+                  {/* CONFIRM PASSWORD */}
+
+                  <div className="relative">
+
+                    <Lock className="w-4 h-4 absolute left-3.5 top-0 bottom-0 my-auto text-[#738279]" />
+
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                      placeholder="Confirm Password"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-10 py-3 bg-white border border-black/10 rounded-xl text-xs text-[#1b3328] placeholder-[#8a9890] focus:outline-none focus:ring-2 focus:ring-[#2c5341]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      aria-label={
+                        showConfirmPassword
+                          ? 'Hide confirm password'
+                          : 'Show confirm password'
+                      }
+                      className="absolute right-3.5 top-0 bottom-0 my-auto flex items-center justify-center text-[#738279] hover:text-[#1b3328] cursor-pointer"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* CERTIFICATE VERIFICATION */}
+
+              <div className="pt-1">
+
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#738279] flex items-center gap-1.5 mb-2">
+                  <Award className="w-3.5 h-3.5 text-[#2c5341]" />
+                  <span>Verification</span>
+                </label>
+
+                <label className="border border-dashed border-black/20 bg-white hover:bg-white/80 rounded-xl p-3.5 flex flex-col items-center justify-center cursor-pointer transition-all">
+
+                  <Upload className="w-5 h-5 text-[#2c5341] mb-1.5" />
+
+                  <span className="text-xs font-bold text-[#1b3328]">
+                    {formData.certificateName
+                      ? formData.certificateName
+                      : 'Click to upload certificate'}
+                  </span>
+
+                  <span className="text-[9px] text-[#738279] mt-0.5">
+                    PDF ONLY (MAX 5MB)
+                  </span>
+
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+
+                </label>
+
+              </div>
+
+              {/* TERMS */}
+
+              <div className="flex items-center gap-2 pt-1 text-[11px] text-[#5a6b62]">
+
+                <input
+                  type="checkbox"
+                  required
+                  id="terms"
+                  className="rounded border-black/20 text-[#2c5341] focus:ring-[#2c5341]"
+                />
+
+                <label htmlFor="terms" className="cursor-pointer">
+                  By registering, I agree to the{' '}
+                  <span className="underline font-semibold">
+                    Terms
+                  </span>
+                  {' '}&{' '}
+                  <span className="underline font-semibold">
+                    Privacy Policy
+                  </span>.
+                </label>
+
+              </div>
+
+              {/* REGISTER BUTTON */}
+
+              <button
+                type="submit"
+                disabled={!!successMessage}
+                className="w-full py-3 mt-2 rounded-xl bg-[#2c5341] hover:bg-[#234536] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs shadow-[0_6px_18px_rgba(44,83,65,0.28)] ring-1 ring-[#2c5341]/40 hover:ring-[#2c5341]/60 flex items-center justify-center gap-2 cursor-pointer transition-all duration-200"
+              >
+
+                <span className="text-white">
+                  {successMessage
+                    ? 'Registration Successful'
+                    : 'Register as Counsellor'}
+                </span>
+
+                <ArrowRight className="w-4 h-4" />
+
+              </button>
+
+            </form>
+
+          </div>
+
+          {/* FOOTER */}
+
+          <div className="mt-5 pt-3 border-t border-black/5 flex items-center justify-center gap-2 text-[10px] text-[#738279]">
+
+            <ShieldCheck className="w-3.5 h-3.5 text-[#2c5341]" />
+
+            <span>
+              Secure Professional Verification & Data Encryption
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
