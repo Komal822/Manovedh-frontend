@@ -1,53 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
+  Calendar,
   Users,
-  UsersRound,
-  CalendarPlus,
-  Clock3,
-  MessageSquare,
-  MessageSquareText,
-  CalendarDays,
-  ArrowRight,
-  MoreVertical,
-  TrendingUp,
-  UserPlus,
+  FileText,
+  Heart,
   BarChart3,
-  Zap,
-  Sun,
-  Leaf,
+  ChevronRight,
+  UserPlus,
+  CalendarPlus,
+  FilePlus,
+  Edit3,
+  Clock,
+  MessageSquare,
 } from "lucide-react";
 
 import Sidebar from "./Sidebar";
-
-// Hero image: ithe tujhya image cha path de
 import heroImage from "../../assets/councellor-images/overview.png";
 
 /* ============================================================
-   DATA  (ithe tujhya API / state cha data tak)
+    DATA & CONSTANTS
 ============================================================ */
 
-const HERO_IMAGE = heroImage;
-
 const STATS = [
-  { icon: Users, value: 12, label: "Total Patients", link: "View all patients" },
-  { icon: CalendarPlus, value: 5, label: "Today's Sessions", link: "View schedule" },
-  { icon: Clock3, value: 2, label: "Upcoming Sessions", link: "View upcoming" },
-  { icon: MessageSquare, value: 8, label: "Unread Messages", link: "Open chats" },
+  { count: 12, label: "Total patients", note: "2 new this month", icon: Users, page: "Patients", tile: "bg-emerald-200 text-emerald-800", chev: "text-slate-400", card: "border-emerald-200 bg-emerald-50" },
+  { count: 5, label: "Today's sessions", note: "1 starting soon", icon: Calendar, page: "Sessions", tile: "bg-violet-200 text-violet-700", chev: "text-slate-400", card: "border-violet-200 bg-violet-50" },
+  { count: 2, label: "Upcoming sessions", note: "Next 7 days", icon: Clock, page: "Sessions", tile: "bg-orange-200 text-orange-700", chev: "text-orange-500", card: "border-orange-200 bg-orange-50" },
+  { count: 8, label: "Unread messages", note: "From 4 patients", icon: MessageSquare, page: "Messages", tile: "bg-teal-200 text-teal-800", chev: "text-slate-400", card: "border-teal-200 bg-teal-50" },
 ];
 
 const SCHEDULE = [
-  { start: "10:00 AM", end: "11:00 AM", name: "John Smith", type: "Individual Therapy", status: "In 30 min", tone: "soon", avatar: "" },
-  { start: "11:30 AM", end: "12:30 PM", name: "Emma Wilson", type: "Follow-up Session", status: "Confirmed", tone: "confirmed", avatar: "" },
-  { start: "01:00 PM", end: "02:00 PM", name: "David Brown", type: "Therapy Session", status: "Confirmed", tone: "confirmed", avatar: "" },
-  { start: "02:30 PM", end: "03:30 PM", name: "Sophia Johnson", type: "Counselling", status: "Upcoming", tone: "upcoming", avatar: "" },
-  { start: "04:00 PM", end: "05:00 PM", name: "Olivia Martinez", type: "Individual Therapy", status: "Upcoming", tone: "upcoming", avatar: "" },
+  { start: "10:00 AM", end: "11:00 AM", name: "John Smith", type: "Individual therapy", status: "In 30 min", tone: "soon", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" },
+  { start: "11:30 AM", end: "12:30 PM", name: "Emma Wilson", type: "Follow-up session", status: "Confirmed", tone: "confirmed", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80" },
+  { start: "01:00 PM", end: "02:00 PM", name: "David Brown", type: "Therapy session", status: "Confirmed", tone: "confirmed", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" },
+  { start: "02:30 PM", end: "03:30 PM", name: "Sophia Johnson", type: "Counselling", status: "Upcoming", tone: "upcoming", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" },
+  { start: "04:00 PM", end: "05:00 PM", name: "Olivia Martinez", type: "Individual therapy", status: "Upcoming", tone: "upcoming", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80" },
 ];
 
 const PATIENT_OVERVIEW = [
-  { label: "Stable", count: 5, color: "#1F6944" },
-  { label: "Moderate", count: 4, color: "#71B994" },
-  { label: "High Risk", count: 2, color: "#E3C458" },
-  { label: "Inactive", count: 1, color: "#BDD6C8" },
+  { label: "Stable", count: 5, color: "#4A7C59" },
+  { label: "Moderate", count: 4, color: "#B7A6D9" },
+  { label: "High risk", count: 2, color: "#E0A458" },
+  { label: "Inactive", count: 1, color: "#A9B0BC" },
 ];
 
 const WEEK = [
@@ -61,523 +54,450 @@ const WEEK = [
 ];
 
 const MESSAGES = [
-  { name: "John Smith", time: "10:25 AM", text: "I've been feeling a bit better...", unread: 2, avatar: "" },
-  { name: "Emma Wilson", time: "09:15 AM", text: "Thank you for the session...", unread: 1, avatar: "" },
-  { name: "David Brown", time: "Yesterday", text: "Can we reschedule our next...", unread: 0, avatar: "" },
-  { name: "Sophia Johnson", time: "Yesterday", text: "Shared a resource", unread: 0, avatar: "" },
+  { name: "John Smith", time: "10:25 AM", text: "I've been feeling a bit better this week…", unread: 2 },
+  { name: "Emma Wilson", time: "9:48 AM", text: "Can we move Thursday's session?", unread: 1 },
+  { name: "David Brown", time: "Yesterday", text: "Thank you, the breathing exercises help.", unread: 0 },
+];
+
+const QUICK_ACTIONS = [
+  { icon: UserPlus, label: "New patient", page: "Patients" },
+  { icon: CalendarPlus, label: "Schedule session", page: "Sessions" },
+  { icon: FilePlus, label: "Assign assessment", page: "Assessments" },
+  { icon: Edit3, label: "Add notes", page: "Notes" },
 ];
 
 const STATUS_STYLE = {
-  soon: "bg-[#E5F5EC] text-[#257B51] border border-[#CDEBDC]",
-  confirmed: "bg-[#EAF5EF] text-[#2F855A] border border-[#D5EFE1]",
-  upcoming: "bg-gray-100 text-gray-600",
+  soon: "bg-[#2D6A4F] text-white",
+  confirmed: "bg-teal-100 text-[#007070]",
+  upcoming: "bg-indigo-100 text-indigo-700",
 };
 
 /* ============================================================
-   MAIN
+    HELPERS
 ============================================================ */
 
-export default function CouncellorDashboard({ onLogout }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const sidebarWidth = sidebarCollapsed ? 78 : 260;
+const greetingFor = (date) => {
+  const h = date.getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+};
 
-  return (
-    <div
-      className="min-h-screen bg-[#F6F9F7] text-gray-800 antialiased"
-      style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-    >
-      {/* Font + animations */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        @keyframes heroZoom { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes sway { 0%,100%{transform:rotate(0)} 50%{transform:rotate(12deg)} }
-        .anim-hero-zoom{animation:heroZoom 10s ease-in-out infinite;transform-origin:center;will-change:transform}
-        .anim-fade-1{animation:fadeUp .8s ease-out both}
-        .anim-fade-2{animation:fadeUp .8s ease-out .2s both}
-        .anim-fade-3{animation:fadeUp .8s ease-out .4s both}
-        .anim-sway{display:inline-block;animation:sway 3s ease-in-out infinite;transform-origin:bottom center}
-        @media (prefers-reduced-motion: reduce){
-          .anim-hero-zoom,.anim-fade-1,.anim-fade-2,.anim-fade-3,.anim-sway{animation:none}
-        }
-      `}</style>
+const initials = (name) =>
+  name.split(" ").map((n) => n[0]).join("").slice(0, 2);
 
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((prev) => !prev)}
-        activePage="Overview"
-        onLogout={onLogout}
-        partnerName="Prem Zumble"
-      />
+const smoothPath = (pts) => {
+  if (pts.length < 2) return "";
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+};
 
-      <main
-        className="min-h-screen transition-[margin] duration-300 ease-in-out"
-        style={{ marginLeft: `${sidebarWidth}px` }}
-      >
-        <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 md:p-6 lg:p-8">
-          <Hero total={STATS[0].value} />
+function useIsDesktop() {
+  const query = "(min-width: 1024px)";
+  const get = () =>
+    typeof window !== "undefined" && window.matchMedia
+      ? window.matchMedia(query).matches
+      : true;
+  const [isDesktop, setIsDesktop] = useState(get);
 
-          {/* STAT CARDS */}
-          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 md:gap-5">
-            {STATS.map((s) => (
-              <StatCard key={s.label} {...s} />
-            ))}
-          </section>
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = (e) => setIsDesktop(e.matches);
+    setIsDesktop(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
-          {/* MAIN 3 COLUMNS */}
-          <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            {/* LEFT */}
-            <div className="flex flex-col gap-5 lg:col-span-5">
-              <ScheduleCard />
-              <BreathCard />
-            </div>
-
-            {/* MIDDLE */}
-            <div className="flex flex-col gap-5 lg:col-span-4">
-              <PatientOverviewCard />
-              <SessionSummaryCard />
-            </div>
-
-            {/* RIGHT */}
-            <div className="flex flex-col gap-5 lg:col-span-3">
-              <MessagesCard />
-              <QuickActionsCard />
-            </div>
-          </section>
-        </div>
-      </main>
-    </div>
-  );
+  return isDesktop;
 }
 
 /* ============================================================
-   HERO
+    COMPONENTS
 ============================================================ */
 
-function Hero({ total }) {
+function CardHeader({ icon: Icon, title, hint, actionLabel, onAction }) {
   return (
-    <header className="relative overflow-hidden rounded-3xl border border-[#9DD4B8] bg-gradient-to-r from-[#B8E2CB] via-[#C9EBD8] to-[#DCF2E4] p-6 shadow-sm md:p-8">
-      <div className="pointer-events-none absolute inset-0 z-0 flex justify-end overflow-hidden">
-        <img
-          src={HERO_IMAGE}
-          alt="Therapist and patient consultation"
-          className="anim-hero-zoom h-full w-full object-cover object-center md:object-right"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/40 to-transparent" />
-      </div>
-
-      <div className="relative z-10">
-        <h1 className="anim-fade-1 text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">
-          Good morning, Dr. Sarah!
-        </h1>
-        <p className="anim-fade-2 mt-1 text-sm font-semibold text-gray-700 md:text-base">
-          Here's what's happening with your patients today.
-        </p>
-
-        <div className="anim-fade-3 mt-5 inline-flex items-center gap-4 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm">
-          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#E3F2EA] text-[#257B51]">
-            <Leaf size={22} />
-          </div>
-          <div>
-            <div className="flex items-baseline gap-2">
-              <span className="anim-sway text-2xl">{total}</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Total Patients
-              </span>
-            </div>
-            <a
-              href="#patient-overview"
-              className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#277D53] transition-colors hover:text-[#1c5f3e]"
-            >
-              View all patients <ArrowRight size={14} strokeWidth={2.5} />
-            </a>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-/* ============================================================
-   SHARED
-============================================================ */
-
-const CARD =
-  "rounded-2xl border border-gray-100 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.03)]";
-
-function CardHeader({ icon: Icon, title, sub, action }) {
-  return (
-    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-      <div className="flex items-center gap-2 text-gray-800">
-        <Icon size={20} className="text-[#257B51]" />
-        <h2 className="text-base font-bold">
-          {title}{" "}
-          {sub && <span className="text-sm font-normal text-gray-400">{sub}</span>}
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-2">
+        <Icon size={18} strokeWidth={2.2} className="text-[#008080] flex-shrink-0" />
+        <h2 className="truncate text-base font-bold text-slate-800">
+          {title}
+          {hint && <span className="ml-2 text-xs font-normal text-slate-400">{hint}</span>}
         </h2>
       </div>
-      {action && (
-        <a
-          href="#"
-          className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-semibold text-[#277D53] hover:text-[#1c5d3d]"
-        >
-          {action} <ArrowRight size={12} />
-        </a>
+      {actionLabel && (
+        <button onClick={onAction} className="inline-flex items-center gap-1 rounded-full bg-[#2D6A4F] px-2.5 py-1 text-xs font-medium text-white hover:bg-[#245a42]">
+          {actionLabel}
+          <ChevronRight size={12} />
+        </button>
       )}
     </div>
   );
 }
 
-function Avatar({ name, src, size = "w-10 h-10" }) {
-  if (src) {
+function Avatar({ src, name, size = 40 }) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
     return (
-      <img
-        src={src}
-        alt={`${name} avatar`}
-        className={`${size} flex-shrink-0 rounded-full border border-gray-100 object-cover`}
-      />
+      <span
+        className="flex flex-shrink-0 items-center justify-center rounded-full bg-teal-100 font-bold text-[#008080]"
+        style={{ width: size, height: size, fontSize: size * 0.35 }}
+      >
+        {initials(name)}
+      </span>
     );
   }
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2);
   return (
-    <div
-      className={`${size} flex flex-shrink-0 items-center justify-center rounded-full border border-gray-100 bg-[#E3F2EA] text-xs font-bold text-[#257B51]`}
-    >
-      {initials}
-    </div>
+    <img
+      src={src}
+      alt=""
+      onError={() => setFailed(true)}
+      className="flex-shrink-0 rounded-full object-cover shadow-xs ring-1 ring-slate-200"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
-/* ============================================================
-   STAT CARD
-============================================================ */
+export default function CouncellorDashboard({
+  onLogout,
+  onNavigate,
+  sidebarCollapsed = false,
+  onToggleSidebar,
+}) {
+  const isDesktop = useIsDesktop();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-function StatCard({ icon: Icon, value, label, link }) {
+  useEffect(() => {
+    if (isDesktop) setMobileNavOpen(false);
+  }, [isDesktop]);
+
+  const sidebarWidth = sidebarCollapsed ? 76 : 268;
+  const now = new Date();
+  const dateLabel = now.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const go = (page) => {
+    if (typeof onNavigate === "function") onNavigate(page);
+  };
+
+  const navigateFromDrawer = (page) => {
+    setMobileNavOpen(false);
+    go(page);
+  };
+
+  const avatarFor = (name) => SCHEDULE.find((s) => s.name === name)?.avatar;
+
+  /* ---- Donut Calculations ---- */
+  const totalPatients = PATIENT_OVERVIEW.reduce((s, p) => s + p.count, 0);
+  const R = 35;
+  const C = 2 * Math.PI * R;
+  const GAP = 2;
+  const donut = useMemo(() => {
+    let offset = 0;
+    return PATIENT_OVERVIEW.map((p) => {
+      const len = (p.count / totalPatients) * C;
+      const seg = { ...p, dash: Math.max(len - GAP, 0), offset: -offset };
+      offset += len;
+      return seg;
+    });
+  }, [totalPatients, C]);
+
+  /* ---- Line Chart Calculations ---- */
+  const chart = useMemo(() => {
+    const L = 34, Rr = 328, T = 18, B = 124, MAX = 15;
+    const step = (Rr - L - 12) / (WEEK.length - 1);
+    const pts = WEEK.map((w, i) => ({
+      x: L + 6 + i * step,
+      y: B - (w.v / MAX) * (B - T),
+      ...w,
+    }));
+    const line = smoothPath(pts);
+    const area = `${line} L ${pts[pts.length - 1].x} ${B} L ${pts[0].x} ${B} Z`;
+    const peak = pts.reduce((a, b) => (b.v > a.v ? b : a));
+    const sum = WEEK.reduce((s, w) => s + w.v, 0);
+    return { L, Rr, T, B, MAX, pts, line, area, peak, sum, step };
+  }, []);
+
   return (
-    <article
-      className={`${CARD} flex items-center gap-4 p-5 transition-shadow hover:shadow-md`}
-    >
-      <div className="flex h-[52px] w-[52px] flex-shrink-0 items-center justify-center rounded-2xl bg-[#EDF7F2] text-[#257B51]">
-        <Icon size={24} />
-      </div>
+    <div className="flex min-h-screen w-full bg-[#EBF2F0] font-sans text-slate-800 antialiased">
+      {/* ================= ORIGINAL SIDEBAR ================= */}
       <div>
-        <div className="text-2xl font-bold leading-tight text-gray-900">{value}</div>
-        <div className="text-xs font-medium text-gray-500">{label}</div>
-        <a
-          href="#"
-          className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#277D53] transition-colors hover:text-[#1b5839]"
-        >
-          {link} <span aria-hidden="true">→</span>
-        </a>
-      </div>
-    </article>
-  );
-}
-
-/* ============================================================
-   TODAY'S SCHEDULE
-============================================================ */
-
-function ScheduleCard() {
-  return (
-    <div className={`${CARD} flex-1 p-5`}>
-      <CardHeader icon={CalendarDays} title="Today's Schedule" action="View full schedule" />
-
-      <div className="divide-y divide-gray-50 pt-2">
-        {SCHEDULE.map((a) => (
-          <div key={a.name} className="flex items-center justify-between gap-3 py-3.5">
-            <div className="w-16 flex-shrink-0 text-[11px] font-semibold leading-tight text-gray-500">
-              <div>{a.start}</div>
-              <div className="font-normal text-gray-300">-</div>
-              <div>{a.end}</div>
-            </div>
-
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <Avatar name={a.name} src={a.avatar} />
-              <div className="min-w-0">
-                <div className="truncate text-sm font-bold text-gray-800">{a.name}</div>
-                <div className="truncate text-xs text-gray-500">{a.type}</div>
-              </div>
-            </div>
-
-            <div className="flex flex-shrink-0 items-center gap-2">
-              <span
-                className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium ${STATUS_STYLE[a.tone]}`}
-              >
-                {a.status}
-              </span>
-              <button
-                type="button"
-                aria-label={`More options for ${a.name}`}
-                className="p-1 text-gray-400 hover:text-gray-600"
-              >
-                <MoreVertical size={16} />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function BreathCard() {
-  return (
-    <aside className="flex items-center justify-between rounded-2xl border border-[#D9ECE1] bg-gradient-to-r from-[#E9F6EF] to-[#F3F9F5] p-4">
-      <div className="flex items-center gap-3.5">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#1F6B45] text-white shadow-sm">
-          <Sun size={20} />
-        </div>
-        <div>
-          <h4 className="text-xs font-bold text-gray-900 md:text-sm">Take a deep breath</h4>
-          <p className="text-[11px] text-gray-500 md:text-xs">
-            Small daily progress leads to big changes.
-          </p>
-        </div>
-      </div>
-      <Leaf size={32} className="pr-1 text-[#358B60] opacity-40" aria-hidden="true" />
-    </aside>
-  );
-}
-
-/* ============================================================
-   PATIENT OVERVIEW (DONUT)
-============================================================ */
-
-function PatientOverviewCard() {
-  const total = PATIENT_OVERVIEW.reduce((s, p) => s + p.count, 0);
-  const r = 38;
-  const C = 2 * Math.PI * r;
-  let offset = 0;
-
-  return (
-    <article id="patient-overview" className={`${CARD} p-5`}>
-      <CardHeader icon={UsersRound} title="Patient Overview" action="View all patients" />
-
-      <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <div className="relative flex h-36 w-36 flex-shrink-0 items-center justify-center">
-          <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r={r} fill="transparent" stroke="#F1F5F2" strokeWidth="14" />
-            {PATIENT_OVERVIEW.map((p) => {
-              const len = (p.count / total) * C;
-              const el = (
-                <circle
-                  key={p.label}
-                  cx="50"
-                  cy="50"
-                  r={r}
-                  fill="transparent"
-                  stroke={p.color}
-                  strokeWidth="14"
-                  strokeDasharray={`${len} ${C}`}
-                  strokeDashoffset={-offset}
+        {isDesktop ? (
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            onToggle={onToggleSidebar}
+            activePage="Dashboard"
+            onNavigate={onNavigate}
+            onLogout={onLogout}
+            partnerName="Dr. Sarah"
+          />
+        ) : (
+          mobileNavOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs"
+                onClick={() => setMobileNavOpen(false)}
+                aria-hidden="true"
+              />
+              <div className="relative z-50">
+                <Sidebar
+                  collapsed={false}
+                  onToggle={() => setMobileNavOpen(false)}
+                  activePage="Dashboard"
+                  onNavigate={navigateFromDrawer}
+                  onLogout={onLogout}
+                  partnerName="Dr. Sarah"
                 />
-              );
-              offset += len;
-              return el;
-            })}
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span className="text-xl font-bold leading-none text-gray-900">{total}</span>
-            <span className="mt-0.5 text-[10px] font-medium text-gray-500">Total Patients</span>
-          </div>
-        </div>
-
-        <div className="w-full flex-1 space-y-2 text-xs sm:w-auto">
-          {PATIENT_OVERVIEW.map((p) => (
-            <div key={p.label} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.color }} />
-                <span className="font-medium text-gray-700">{p.label}</span>
               </div>
-              <span className="font-semibold text-gray-600">
-                {p.count}{" "}
-                <span className="text-[11px] font-normal text-gray-400">
-                  ({Math.round((p.count / total) * 100)}%)
-                </span>
+            </>
+          )
+        )}
+      </div>
+
+      {/* ================= DASHBOARD CONTENT ================= */}
+      <main
+        className="min-h-screen flex-1 p-4 transition-[margin] duration-300 ease-in-out sm:p-6 md:p-8 lg:ml-[var(--sb)]"
+        style={{ "--sb": `${sidebarWidth}px` }}
+      >
+        <div className="mx-auto w-full max-w-7xl space-y-5">
+          {/* Title Section */}
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Dashboard Overview</h2>
+            <p className="text-xs font-medium text-[#009688]">
+              Monitor and manage your clinical status and patient care
+            </p>
+          </div>
+
+          {/* HERO BANNER WITH EXACT IMAGE OVERLAY MATCHING REFERENCE IMAGE */}
+          <div className="relative min-h-[180px] overflow-hidden rounded-xl bg-[#0e271c] px-6 py-8 text-white shadow-md sm:py-10 md:py-12">
+            {/* Background Image using user's imported image */}
+            <div className="absolute inset-0 z-0">
+              <img
+                src={heroImage}
+                alt=""
+                className="h-full w-full object-cover object-center"
+              />
+            </div>
+
+            {/* Dark Left Overlay Gradient */}
+            <div
+              className="absolute inset-0 z-10"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(10, 25, 18, 0.95) 0%, rgba(10, 25, 18, 0.85) 35%, rgba(10, 25, 18, 0.3) 65%, rgba(10, 25, 18, 0) 100%)",
+              }}
+            />
+
+            {/* Banner Content */}
+            <div className="relative z-20 max-w-xl">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-300">
+                {dateLabel}
               </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </article>
-  );
-}
-
-/* ============================================================
-   SESSION SUMMARY (LINE CHART)
-============================================================ */
-
-function SessionSummaryCard() {
-  // chart area: x 40..328, y 115 (0) .. 15 (15)
-  const maxY = 15;
-  const top = 15;
-  const base = 115;
-  const x0 = 40;
-  const step = 48;
-
-  const pts = WEEK.map((d, i) => ({
-    ...d,
-    x: x0 + i * step,
-    y: base - (d.v / maxY) * (base - top),
-  }));
-  const line = pts.map((p) => `${p.x},${p.y}`).join(" ");
-  const area = `${line} ${pts[pts.length - 1].x},${base} ${pts[0].x},${base}`;
-  const grid = [
-    { y: 15, label: "15" },
-    { y: 48, label: "10" },
-    { y: 82, label: "5" },
-    { y: 115, label: "0" },
-  ];
-
-  return (
-    <article className={`${CARD} flex flex-1 flex-col justify-between p-5`}>
-      <div className="flex items-center gap-2 pb-2 text-gray-800">
-        <TrendingUp size={20} className="text-[#257B51]" />
-        <h2 className="text-sm font-bold md:text-base">
-          Session Summary{" "}
-          <span className="text-xs font-normal text-gray-400 md:text-sm">(This Week)</span>
-        </h2>
-      </div>
-
-      <div className="mt-2 w-full">
-        <div className="relative h-44 w-full">
-          <svg
-            className="h-full w-full overflow-visible"
-            preserveAspectRatio="none"
-            viewBox="0 0 340 140"
-          >
-            <defs>
-              <linearGradient id="sessionFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#349A67" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#349A67" stopOpacity="0.02" />
-              </linearGradient>
-            </defs>
-
-            {grid.map((g) => (
-              <g key={g.label}>
-                <line x1="25" x2="335" y1={g.y} y2={g.y} stroke="#F1F5F2" strokeWidth="1" />
-                <text x={g.label.length > 1 ? 5 : 8} y={g.y + 4} fontSize="9" fill="#9CA3AF">
-                  {g.label}
-                </text>
-              </g>
-            ))}
-
-            <polygon points={area} fill="url(#sessionFill)" />
-            <polyline
-              points={line}
-              fill="none"
-              stroke="#2B7F56"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-
-            {pts.map((p) => (
-              <g key={p.day}>
-                <circle cx={p.x} cy={p.y} r="3.5" fill="#1C5E3E" stroke="#fff" strokeWidth="2" />
-                <text
-                  x={p.x}
-                  y={p.y - 8}
-                  fontSize="9"
-                  fontWeight="bold"
-                  textAnchor="middle"
-                  fill="#1C5E3E"
+              <h1 className="mt-2 text-2xl font-bold text-white md:text-3xl lg:text-4xl">
+                {greetingFor(now)}, Dr. Sarah
+              </h1>
+              <p className="mt-2 text-xs leading-relaxed text-emerald-100 sm:text-sm">
+                You have {STATS[1].count} sessions scheduled for today and {STATS[3].count} unread messages.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button
+                  onClick={() => go("Sessions")}
+                  className="rounded-full bg-white px-5 py-2 text-xs font-bold text-[#0A291D] shadow-sm transition-all hover:bg-emerald-50 active:scale-95"
                 >
-                  {p.v}
-                </text>
-              </g>
-            ))}
-          </svg>
-        </div>
-
-        <div className="mt-1 flex justify-between pl-8 pr-1 text-[11px] font-medium text-gray-400">
-          {WEEK.map((d) => (
-            <span key={d.day}>{d.day}</span>
-          ))}
-        </div>
-      </div>
-    </article>
-  );
-}
-
-/* ============================================================
-   RECENT MESSAGES
-============================================================ */
-
-function MessagesCard() {
-  return (
-    <article className={`${CARD} p-5`}>
-      <CardHeader icon={MessageSquareText} title="Recent Messages" action="View all chats" />
-
-      <div className="divide-y divide-gray-50 pt-1">
-        {MESSAGES.map((m) => (
-          <div
-            key={m.name}
-            className="flex cursor-pointer items-start gap-3 rounded-xl p-1.5 py-3 transition-colors hover:bg-gray-50/70"
-          >
-            <Avatar name={m.name} src={m.avatar} size="w-9 h-9" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between">
-                <h3 className="truncate text-xs font-bold text-gray-800">{m.name}</h3>
-                <span className="text-[10px] text-gray-400">{m.time}</span>
-              </div>
-              <div className="mt-0.5 flex items-center justify-between">
-                <p className="truncate pr-1 text-xs text-gray-500">{m.text}</p>
-                {m.unread > 0 && (
-                  <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-[#257B51] text-[10px] font-bold text-white">
-                    {m.unread}
-                  </span>
-                )}
+                  View Schedule
+                </button>
+                <button
+                  onClick={() => go("Patients")}
+                  className="rounded-full border border-white/30 bg-white/10 px-5 py-2 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+                >
+                  All Patients
+                </button>
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    </article>
-  );
-}
 
-/* ============================================================
-   QUICK ACTIONS
-============================================================ */
+          {/* TOP STATS CARDS */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {STATS.map(({ count, label, note, icon: Icon, page, tile, chev, card }) => (
+              <button
+                key={label}
+                onClick={() => go(page)}
+                className={`group flex flex-col rounded-lg border px-5 py-4 text-left shadow-[0_2px_10px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-md ${card}`}
+              >
+                <div className="flex w-full items-center gap-3">
+                  <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${tile}`}>
+                    <Icon size={18} strokeWidth={2} />
+                  </span>
+                  <h3 className="flex-1 text-[11px] font-bold uppercase tracking-wide text-[#1E3A4C]">
+                    {label}
+                  </h3>
+                  <ChevronRight size={14} className={`flex-shrink-0 ${chev}`} />
+                </div>
+                <span className="mt-3 text-3xl font-bold leading-none text-[#0F3D33]">{count}</span>
+                <p className="mt-2 text-[11px] text-slate-400">{note}</p>
+              </button>
+            ))}
+          </div>
 
-function QuickActionsCard() {
-  const actions = [
-    { icon: UserPlus, label: "Add New Patient" },
-    { icon: CalendarPlus, label: "New Session" },
-    { icon: CalendarDays, label: "View Schedule" },
-    { icon: BarChart3, label: "Reports" },
-  ];
+          {/* LOWER CONTENT GRID */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+            {/* SCHEDULE & MOTIVATION */}
+            <div className="space-y-4 lg:col-span-5">
+              <div className="rounded-lg border border-teal-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,128,128,0.10)]">
+                <CardHeader icon={Calendar} title="Today's Schedule" actionLabel="Full Schedule" onAction={() => go("Sessions")} />
+                <div className="space-y-2">
+                  {SCHEDULE.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between rounded-lg border border-emerald-100 bg-emerald-50/60 p-2.5 text-xs">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar src={item.avatar} name={item.name} size={36} />
+                        <div>
+                          <p className="font-bold text-slate-800">{item.name}</p>
+                          <p className="text-[10px] text-slate-400">{item.start} - {item.end} · {item.type}</p>
+                        </div>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${STATUS_STYLE[item.tone]}`}>
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-  return (
-    <article className={`${CARD} p-5`}>
-      <div className="flex items-center gap-2 pb-3 text-gray-800">
-        <Zap size={16} className="text-[#257B51]" strokeWidth={2.5} />
-        <h2 className="text-sm font-bold md:text-base">Quick Actions</h2>
-      </div>
+              <div className="flex items-center gap-3 rounded-lg bg-[#2D6A4F] p-4 text-white shadow-[0_2px_12px_rgba(45,106,79,0.30)]">
+                <Heart size={20} className="text-white flex-shrink-0" />
+                <div>
+                  <h4 className="text-sm font-bold">Take a deep breath</h4>
+                  <p className="text-xs opacity-90">Small daily progress leads to big positive changes.</p>
+                </div>
+              </div>
+            </div>
 
-      <div className="mt-1 grid grid-cols-2 gap-3">
-        {actions.map(({ icon: Icon, label }) => (
-          <button
-            key={label}
-            type="button"
-            className="group flex flex-col items-center justify-center rounded-xl border border-gray-200/80 p-3 transition-all hover:border-[#257B51] hover:bg-[#F3FAF6]"
-          >
-            <Icon
-              size={24}
-              strokeWidth={1.8}
-              className="mb-1.5 text-[#257B51] transition-transform group-hover:scale-110"
-            />
-            <span className="text-center text-xs font-semibold leading-tight text-gray-700">
-              {label}
-            </span>
-          </button>
-        ))}
-      </div>
-    </article>
+            {/* PATIENT OVERVIEW & PERFORMANCE CHART */}
+            <div className="space-y-4 lg:col-span-4">
+              {/* Donut Chart */}
+              <div className="rounded-lg border border-teal-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,128,128,0.10)]">
+                <CardHeader icon={Users} title="Patient Overview" />
+                <div className="flex items-center justify-between gap-4 px-1 pb-1">
+                  <div className="relative flex h-36 w-36 flex-shrink-0 items-center justify-center">
+                    <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r={R} fill="none" stroke="#EDF4EE" strokeWidth="16" />
+                      {donut.map((s) => (
+                        <circle
+                          key={s.label}
+                          cx="50"
+                          cy="50"
+                          r={R}
+                          fill="none"
+                          stroke={s.color}
+                          strokeWidth="16"
+                          strokeDasharray={`${s.dash} ${C}`}
+                          strokeDashoffset={s.offset}
+                        />
+                      ))}
+                    </svg>
+                    <div className="absolute flex flex-col items-center">
+                      <span className="text-3xl font-bold leading-none text-slate-800">{totalPatients}</span>
+                      <span className="mt-1 text-xs text-slate-500">Patients</span>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0 flex-1 space-y-3 text-sm">
+                    {PATIENT_OVERVIEW.map((p) => (
+                      <div key={p.label} className="flex items-center gap-2.5">
+                        <span className="h-3 w-3 flex-shrink-0 rounded-full" style={{ backgroundColor: p.color }}></span>
+                        <span className="flex-1 truncate font-medium text-slate-600">{p.label}</span>
+                        <span className="font-bold text-slate-900">{p.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Line Chart */}
+              <div className="rounded-lg border border-teal-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,128,128,0.10)]">
+                <CardHeader icon={BarChart3} title="Session Summary" hint="This week" />
+                <div className="mb-2 flex items-baseline justify-between text-xs">
+                  <div>
+                    <span className="text-xl font-black text-slate-800">{chart.sum}</span>
+                    <span className="ml-1 text-[10px] text-slate-400">Total sessions</span>
+                  </div>
+                  <span className="rounded bg-teal-100 px-2 py-0.5 font-bold text-[#007070]">
+                    Peak: {chart.peak.day}
+                  </span>
+                </div>
+                <svg viewBox="0 0 340 120" className="w-full">
+                  <defs>
+                    <linearGradient id="gFill" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#00A884" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#00A884" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {chart.area && <path d={chart.area} fill="url(#gFill)" />}
+                  {chart.line && <path d={chart.line} fill="none" stroke="#00A884" strokeWidth="2.5" />}
+                  {chart.pts.map((p) => (
+                    <circle key={p.day} cx={p.x} cy={p.y} r={3.5} fill="#00A884" />
+                  ))}
+                </svg>
+              </div>
+            </div>
+
+            {/* MESSAGES & QUICK ACTIONS */}
+            <div className="space-y-4 lg:col-span-3">
+              <div className="rounded-lg border border-teal-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,128,128,0.10)]">
+                <CardHeader icon={FileText} title="Recent Messages" actionLabel="Chats" onAction={() => go("Messages")} />
+                <div className="space-y-2.5">
+                  {MESSAGES.map((m) => (
+                    <div key={m.name} className="flex items-start gap-2.5 rounded-lg border border-emerald-100 bg-emerald-50/60 p-2.5 text-xs">
+                      <Avatar src={avatarFor(m.name)} name={m.name} size={38} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-[13px] font-bold text-slate-800">{m.name}</span>
+                          <span className="flex-shrink-0 text-[10px] text-slate-400">{m.time}</span>
+                        </div>
+                        <div className="mt-0.5 flex items-start justify-between gap-2">
+                          <p className="line-clamp-2 text-[11px] leading-snug text-slate-500">{m.text}</p>
+                          {m.unread > 0 && (
+                            <span className="flex h-4 min-w-4 flex-shrink-0 items-center justify-center rounded-full bg-[#00A884] px-1 text-[9px] font-bold text-white">
+                              {m.unread}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-teal-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,128,128,0.10)]">
+                <h3 className="mb-2 text-xs font-bold text-slate-800">Quick Actions</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {QUICK_ACTIONS.map(({ icon: Icon, label, page }) => (
+                    <button key={label} onClick={() => go(page)} className="flex items-center gap-2 rounded-md border border-teal-100 bg-teal-50 p-2 text-xs hover:bg-teal-100 hover:text-[#008080]">
+                      <Icon size={16} className="text-[#00A884]" />
+                      <span className="truncate text-[10px] font-bold">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

@@ -1,419 +1,313 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Plus,
-  Search,
-  SlidersHorizontal,
+  Home,
+  Users,
   CalendarDays,
-  MoreVertical,
+  MessageSquare,
+  Bell,
+  UserRoundCog,
+  Clock3,
+  Wallet,
+  LogOut,
+  ChevronsLeft,
+  ChevronsRight,
+  Globe2,
+  ChevronDown,
+  UserRound,
 } from "lucide-react";
 
-import Sidebar from "./Sidebar";
-
-// Banner image: tujhya image cha path de (src/assets/councellor-images/patients.png)
-import bannerImage from "../assets/councellor-images/patients.png";
-
 /* ============================================================
-   DATA  (ithe tujhya API cha data tak)
-   status: "Stable" | "Moderate" | "High Risk"
-   next: null => "Not Scheduled"
-   avatar: "" => naava chi aadyakshare dakhvli jatil
+   CONFIG
+   Page widths: Patients / Overview madhe marginLeft hech vapar
 ============================================================ */
 
-const PATIENTS = [
-  { id: 1, name: "John Smith", age: 24, gender: "Male", problem: "Anxiety", status: "Stable", last: "Yesterday", next: "Tomorrow, 10:00 AM", avatar: "" },
-  { id: 2, name: "Emma Wilson", age: 19, gender: "Female", problem: "Stress", status: "Moderate", last: "5 Days Ago", next: "Fri, 16 May, 11:30 AM", avatar: "" },
-  { id: 3, name: "David Brown", age: 28, gender: "Male", problem: "Depression", status: "High Risk", last: "2 Weeks Ago", next: null, avatar: "" },
-  { id: 4, name: "Sophia Johnson", age: 22, gender: "Female", problem: "Self Esteem", status: "Stable", last: "3 Days Ago", next: "Mon, 19 May, 2:30 PM", avatar: "" },
-  { id: 5, name: "Michael Davis", age: 31, gender: "Male", problem: "Relationship Issues", status: "Moderate", last: "1 Week Ago", next: "Thu, 15 May, 4:00 PM", avatar: "" },
+export const SIDEBAR_WIDTH = 268;
+export const SIDEBAR_WIDTH_COLLAPSED = 76;
+
+const MENU_ITEMS = [
+  { label: "Overview", icon: Home, page: "Overview" },
+  { label: "Patients", icon: Users, page: "Patients" },
+  { label: "Sessions", icon: CalendarDays, page: "Sessions" },
+  { label: "Chats", icon: MessageSquare, page: "Chats" },
+  { label: "Notifications", icon: Bell, page: "Notifications" },
 ];
 
-const PAGE_SIZE = 5;
+const ACCOUNT_ITEMS = [
+  { label: "Profile Settings", icon: UserRoundCog, page: "Profile Settings" },
+  { label: "Availability", icon: Clock3, page: "Availability" },
+  { label: "Withdrawal", icon: Wallet, page: "Withdrawal" },
+];
 
-const STATUS = {
-  Stable: {
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-200/70",
-    dot: "bg-emerald-500",
-    chip: "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border-emerald-200/60",
-  },
-  Moderate: {
-    badge: "bg-amber-50 text-amber-700 border-amber-200/70",
-    dot: "bg-amber-500",
-    chip: "bg-amber-50 text-amber-800 hover:bg-amber-100 border-amber-200/60",
-  },
-  "High Risk": {
-    badge: "bg-rose-50 text-rose-700 border-rose-200/80",
-    dot: "bg-rose-500",
-    chip: "bg-rose-50 text-rose-800 hover:bg-rose-100 border-rose-200/60",
-  },
+const LANGUAGES = ["English", "मराठी", "हिंदी"];
+
+// Jar page chi dusri naav asel tar tya sidebar item la active dakhvel
+const PAGE_ALIASES = {
+  Schedule: "Sessions",
+  Messages: "Chats",
 };
 
 /* ============================================================
-   PAGE
+   NAV ITEM (Menu ani Account donhi sathi ek)
 ============================================================ */
 
-export default function Patients({ onLogout }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const sidebarWidth = sidebarCollapsed ? 78 : 260;
+function NavItem({ item, active, collapsed, onClick }) {
+  const Icon = item.icon;
 
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [page, setPage] = useState(1);
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(item.page)}
+      title={collapsed ? item.label : undefined}
+      aria-current={active ? "page" : undefined}
+      className={`group relative flex h-[42px] w-full cursor-pointer items-center rounded-xl outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#82e0c9]/60 ${
+        collapsed ? "justify-center px-0" : "gap-3 px-3"
+      } ${
+        active
+          ? "bg-[#184d43] font-medium text-[#f2f5dc] shadow-sm"
+          : "text-[#9abdb4] hover:bg-[#0c3733] hover:text-[#e4eee9]"
+      }`}
+    >
+      {active && !collapsed && (
+        <span className="absolute bottom-[10px] left-0 top-[10px] w-[3px] rounded-r-full bg-[#82e0c9]" />
+      )}
 
-  const counts = useMemo(() => {
-    const c = { All: PATIENTS.length, Stable: 0, Moderate: 0, "High Risk": 0 };
-    PATIENTS.forEach((p) => (c[p.status] += 1));
-    return c;
-  }, []);
+      <Icon
+        size={20}
+        strokeWidth={1.8}
+        className={`shrink-0 transition-colors ${
+          active ? "text-[#82e0c9]" : "text-[#8ebcb1] group-hover:text-[#c9e0d9]"
+        }`}
+      />
 
-  const filtered = useMemo(
-    () =>
-      PATIENTS.filter(
-        (p) =>
-          (filter === "All" || p.status === filter) &&
-          p.name.toLowerCase().includes(query.trim().toLowerCase())
-      ),
-    [query, filter]
+      {!collapsed && (
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[14px] tracking-[-0.1px]">
+          {item.label}
+        </span>
+      )}
+    </button>
   );
+}
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const startIdx = (currentPage - 1) * PAGE_SIZE;
-  const visible = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+function SectionLabel({ children, collapsed }) {
+  if (collapsed) return null;
+  return (
+    <div className="mb-2 px-3 text-[11px] font-bold tracking-[1px] text-[#59857c]">
+      {children}
+    </div>
+  );
+}
 
-  const changeFilter = (f) => {
-    setFilter(f);
-    setPage(1);
+/* ============================================================
+   SIDEBAR
+============================================================ */
+
+export default function Sidebar({
+  collapsed = false,
+  onToggle,
+  activePage = "Overview",
+  onNavigate,
+  onLogout,
+  partnerName = "Prem Zumble",
+  partnerRole = "Wellness Partner",
+}) {
+  const [langOpen, setLangOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState("English");
+
+  // Sidebar collapse zala tar language dropdown band kar
+  useEffect(() => {
+    if (collapsed) setLangOpen(false);
+  }, [collapsed]);
+
+  const currentPage = PAGE_ALIASES[activePage] || activePage;
+
+  const handleNavigate = (page) => {
+    if (typeof onNavigate === "function" && page !== currentPage) {
+      onNavigate(page);
+    }
   };
 
   return (
-    <div
-      className="min-h-screen bg-[#F2F6F3] text-slate-800 antialiased selection:bg-[#D1E0D4] selection:text-[#173629]"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-    >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
-        .heading-serif { font-family: 'Playfair Display', Georgia, serif; }
-        .patient-card { transition: all .25s cubic-bezier(.16,1,.3,1); }
-        .patient-card:hover { transform: translateY(-2px); }
-        @media (prefers-reduced-motion: reduce) { .patient-card { transition: none; } .patient-card:hover { transform: none; } }
-      `}</style>
-
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((prev) => !prev)}
-        activePage="Patients"
-        onLogout={onLogout}
-        partnerName="Prem Zumble"
-      />
-
-      <main
-        className="min-h-screen transition-[margin] duration-300 ease-in-out"
-        style={{ marginLeft: `${sidebarWidth}px` }}
-      >
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
-          {/* BANNER */}
-          <section className="relative mb-8 overflow-hidden rounded-3xl bg-slate-900 text-white shadow-[0_4px_20px_-2px_rgba(35,78,61,0.05),0_2px_6px_-1px_rgba(0,0,0,0.02)]">
-            <div className="absolute inset-0">
-              <img
-                src={bannerImage}
-                alt="Counseling illustration"
-                className="h-full w-full object-cover object-right"
-              />
-            </div>
-
-            <div className="relative z-10 flex flex-col items-start justify-between gap-4 px-6 py-6 md:flex-row md:items-center md:px-10 md:py-8">
-              <div>
-                <h2 className="heading-serif text-xl font-bold tracking-wide text-black md:text-2xl">
-                  Better Support, Brighter Tomorrows
-                </h2>
-                <p className="mt-1 max-w-xl text-sm text-slate-800">
-                  5 patient sessions scheduled for today. Review diagnostic
-                  updates and prepare session notes.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <BannerStat value="18" label="Active Patients" valueClass="text-[#234E3D]" />
-                <BannerStat value="4" label="Pending Notes" valueClass="text-emerald-700" />
-              </div>
-            </div>
-          </section>
-
-          {/* TITLE */}
-          <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <h1 className="heading-serif text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-                Patients
-              </h1>
-              <p className="mt-1 text-sm font-normal text-slate-500 md:text-base">
-                Manage and monitor all your patients.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-[#234E3D] px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-[#173629] hover:shadow-lg active:scale-95"
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              Add Patient
-            </button>
-          </div>
-
-          {/* SEARCH + FILTERS */}
-          <div className="mb-6 flex flex-col items-stretch justify-between gap-3 rounded-2xl border border-[#E7EFE8] bg-white p-3 shadow-[0_4px_20px_-2px_rgba(35,78,61,0.05)] md:flex-row md:items-center md:p-4">
-            <div className="flex max-w-md flex-1 items-center gap-2.5">
-              <div className="relative w-full">
-                <Search
-                  size={16}
-                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setPage(1);
-                  }}
-                  placeholder="Search patient by name..."
-                  className="w-full rounded-xl border border-[#D1E0D4]/90 bg-[#F4F7F4]/70 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 transition focus:border-[#5F8C6B] focus:outline-none focus:ring-2 focus:ring-[#487053]/30"
-                />
-              </div>
-
-              <button
-                type="button"
-                title="Filter patients"
-                className="shrink-0 rounded-xl border border-[#D1E0D4] bg-[#E7EFE8]/70 p-2.5 text-[#234E3D] transition hover:bg-[#D1E0D4]/80"
-              >
-                <SlidersHorizontal size={20} />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium text-slate-600 md:pb-0">
-              <button
-                type="button"
-                onClick={() => changeFilter("All")}
-                className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 font-semibold transition ${
-                  filter === "All"
-                    ? "bg-[#234E3D] text-white shadow-sm"
-                    : "bg-[#F4F7F4] text-slate-700 hover:bg-[#E7EFE8]"
-                }`}
-              >
-                All ({counts.All})
-              </button>
-
-              {["Stable", "Moderate", "High Risk"].map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => changeFilter(s)}
-                  className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 transition ${STATUS[s].chip} ${
-                    filter === s ? "ring-2 ring-[#234E3D]/30" : ""
-                  }`}
-                >
-                  <span className={`h-2 w-2 rounded-full ${STATUS[s].dot}`} />
-                  {s} ({counts[s]})
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* LIST */}
-          <div className="space-y-3.5">
-            {visible.length === 0 && (
-              <div className="rounded-2xl border border-[#E7EFE8] bg-white p-10 text-center text-sm text-slate-500">
-                No patients found.
-              </div>
-            )}
-
-            {visible.map((p) => (
-              <PatientCard key={p.id} patient={p} />
-            ))}
-          </div>
-
-          {/* PAGINATION */}
-          <div className="mt-8 flex flex-col items-center justify-between gap-4 text-xs font-medium text-slate-500 sm:flex-row">
-            <p>
-              Showing{" "}
-              <span className="font-semibold text-slate-800">
-                {filtered.length === 0 ? 0 : startIdx + 1}
-              </span>{" "}
-              to{" "}
-              <span className="font-semibold text-slate-800">
-                {startIdx + visible.length}
-              </span>{" "}
-              of{" "}
-              <span className="font-semibold text-slate-800">{filtered.length}</span>{" "}
-              patients
-            </p>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                disabled={currentPage === 1}
-                onClick={() => setPage(currentPage - 1)}
-                className="rounded-lg border border-[#D1E0D4] bg-white px-3 py-1.5 text-slate-700 transition hover:bg-[#F4F7F4] disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-white"
-              >
-                Previous
-              </button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => setPage(n)}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
-                    n === currentPage
-                      ? "bg-[#234E3D] font-semibold text-white"
-                      : "border border-[#D1E0D4] bg-white text-slate-700 hover:bg-[#F4F7F4]"
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-
-              <button
-                type="button"
-                disabled={currentPage === totalPages}
-                onClick={() => setPage(currentPage + 1)}
-                className="rounded-lg border border-[#D1E0D4] bg-white px-3 py-1.5 text-slate-700 transition hover:bg-[#F4F7F4] disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-white"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-/* ============================================================
-   BANNER STAT
-============================================================ */
-
-function BannerStat({ value, label, valueClass }) {
-  return (
-    <div className="rounded-2xl border border-white/40 bg-white/60 px-4 py-2 text-center backdrop-blur-md">
-      <span className={`heading-serif block text-2xl font-bold ${valueClass}`}>
-        {value}
-      </span>
-      <span className="text-[11px] uppercase tracking-wider text-slate-700">
-        {label}
-      </span>
-    </div>
-  );
-}
-
-/* ============================================================
-   PATIENT CARD
-============================================================ */
-
-function PatientCard({ patient: p }) {
-  const risk = p.status === "High Risk";
-  const s = STATUS[p.status];
-  const initials = p.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2);
-
-  return (
-    <article
-      className={`patient-card flex flex-col justify-between gap-4 rounded-2xl border bg-white p-4 shadow-[0_4px_20px_-2px_rgba(35,78,61,0.05),0_2px_6px_-1px_rgba(0,0,0,0.02)] sm:p-5 lg:flex-row lg:items-center ${
-        risk ? "border-rose-100/80 ring-1 ring-rose-500/10" : "border-[#E7EFE8]"
+    <aside
+      className={`fixed left-0 top-0 z-[100] flex h-screen select-none flex-col border-r border-[#123a36] bg-[#032927] text-[#d9ebe5] transition-all duration-300 ease-in-out ${
+        collapsed ? "w-[76px]" : "w-[268px]"
       }`}
     >
-      {/* LEFT */}
-      <div className="flex min-w-[260px] items-center gap-4">
-        {p.avatar ? (
-          <img
-            src={p.avatar}
-            alt={p.name}
-            className="h-14 w-14 rounded-2xl object-cover shadow-sm ring-1 ring-[#D1E0D4]"
-          />
-        ) : (
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E7EFE8] text-sm font-bold text-[#34553E] shadow-sm ring-1 ring-[#D1E0D4]">
-            {initials}
+      {/* ---------- TOP: LOGO + TOGGLE ---------- */}
+      <div
+        className={`relative flex h-[72px] shrink-0 items-center border-b border-[#123a36] ${
+          collapsed ? "justify-center px-0" : "justify-between px-4"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof onNavigate === "function") onNavigate("Overview");
+          }}
+          className={`flex cursor-pointer items-center outline-none ${
+            collapsed ? "justify-center" : "gap-3"
+          }`}
+        >
+          <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-xl border border-[#174d47] bg-[#0a3d39] text-[#78c8b4] shadow-sm">
+            <UserRound size={20} strokeWidth={2} />
           </div>
-        )}
+
+          {!collapsed && (
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-[19px] font-bold tracking-[-0.4px] text-[#f0f5d9]">
+                Manovedh
+              </span>
+              <span className="mt-[4px] text-[10px] font-semibold tracking-[1px] text-[#79b7a9]">
+                PARTNER PORTAL
+              </span>
+            </div>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={onToggle}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className={`flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-lg text-[#8ebcb1] transition hover:bg-[#11403b] hover:text-[#d9eee7] ${
+            collapsed
+              ? "absolute -right-3.5 top-6 z-10 rounded-full border border-[#16403c] bg-[#032927] shadow-md"
+              : ""
+          }`}
+        >
+          {collapsed ? (
+            <ChevronsRight size={18} strokeWidth={2} />
+          ) : (
+            <ChevronsLeft size={18} strokeWidth={2} />
+          )}
+        </button>
+      </div>
+
+      {/* ---------- NAVIGATION ---------- */}
+      <div className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-3 py-4">
+        <div>
+          <SectionLabel collapsed={collapsed}>MENU</SectionLabel>
+          <nav className="space-y-1" aria-label="Main menu">
+            {MENU_ITEMS.map((item) => (
+              <NavItem
+                key={item.page}
+                item={item}
+                active={currentPage === item.page}
+                collapsed={collapsed}
+                onClick={handleNavigate}
+              />
+            ))}
+          </nav>
+        </div>
 
         <div>
-          <h3 className="cursor-pointer text-base font-semibold text-slate-900 transition hover:text-[#234E3D]">
-            {p.name}
-          </h3>
-          <p className="mt-0.5 text-xs text-slate-500">
-            {p.age} Years • {p.gender}
-          </p>
-          <p className="mt-1 text-xs font-medium text-slate-700">
-            Problem: <span className="font-semibold text-[#34553E]">{p.problem}</span>
-          </p>
+          <SectionLabel collapsed={collapsed}>ACCOUNT</SectionLabel>
+          <nav className="space-y-1" aria-label="Account">
+            {ACCOUNT_ITEMS.map((item) => (
+              <NavItem
+                key={item.page}
+                item={item}
+                active={currentPage === item.page}
+                collapsed={collapsed}
+                onClick={handleNavigate}
+              />
+            ))}
+          </nav>
         </div>
       </div>
 
-      {/* STATUS */}
-      <div className="flex min-w-[130px] flex-col sm:items-start">
-        <span
-          className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${s.badge}`}
-        >
-          <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-          {p.status}
-        </span>
-        <span
-          className={`mt-1.5 text-[11px] ${
-            risk ? "font-medium text-rose-500" : "text-slate-400"
-          }`}
-        >
-          Last: {p.last}
-        </span>
-      </div>
-
-      {/* NEXT SESSION */}
-      <div className="flex min-w-[210px] items-center gap-3">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-            p.next
-              ? "border-[#D1E0D4]/80 bg-[#F4F7F4] text-[#34553E]"
-              : "border-rose-200 bg-rose-50 text-rose-600"
-          }`}
-        >
-          <CalendarDays size={20} />
-        </div>
-        <div>
-          <span className="block text-[11px] font-medium uppercase tracking-wider text-slate-400">
-            Next Session
-          </span>
-          <span
-            className={`text-xs font-semibold ${
-              p.next ? "text-slate-800" : "text-rose-600"
+      {/* ---------- BOTTOM: LANGUAGE + PROFILE ---------- */}
+      <div className="shrink-0 space-y-2.5 border-t border-[#123a36] bg-[#02211f]/50 p-3">
+        {/* Language */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => !collapsed && setLangOpen((o) => !o)}
+            title={collapsed ? selectedLang : undefined}
+            aria-haspopup="listbox"
+            aria-expanded={langOpen}
+            className={`flex h-[40px] w-full cursor-pointer items-center rounded-xl border border-[#12423e] bg-[#073330] text-[#d6e8e2] outline-none transition hover:bg-[#0c3d3a] ${
+              collapsed ? "justify-center" : "gap-2.5 px-3"
             }`}
           >
-            {p.next || "Not Scheduled"}
-          </span>
+            <Globe2 size={18} strokeWidth={1.8} className="shrink-0 text-[#8fc1b4]" />
+            {!collapsed && (
+              <>
+                <span className="flex-1 truncate text-left text-[13px] font-medium">
+                  {selectedLang}
+                </span>
+                <ChevronDown
+                  size={15}
+                  strokeWidth={2}
+                  className={`text-[#80a89f] transition-transform duration-200 ${
+                    langOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </>
+            )}
+          </button>
+
+          {langOpen && !collapsed && (
+            <div
+              role="listbox"
+              className="absolute bottom-full left-0 right-0 z-50 mb-1.5 overflow-hidden rounded-xl border border-[#144742] bg-[#06322f] py-1 shadow-xl"
+            >
+              {LANGUAGES.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedLang === lang}
+                  onClick={() => {
+                    setSelectedLang(lang);
+                    setLangOpen(false);
+                  }}
+                  className={`w-full cursor-pointer px-3 py-2 text-left text-[13px] transition ${
+                    selectedLang === lang
+                      ? "bg-[#184d43] font-medium text-[#edf5e0]"
+                      : "text-[#b2d2c8] hover:bg-[#0a3b37]"
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Profile */}
+        <div
+          className={`flex items-center rounded-xl border border-[#103b37] bg-[#052b28] p-2 ${
+            collapsed ? "justify-center" : "justify-between gap-2.5"
+          }`}
+        >
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#c4e0cb] bg-[#e2edd3]">
+              <UserRound size={20} strokeWidth={1.8} className="text-[#2c6659]" />
+            </div>
+
+            {!collapsed && (
+              <div className="min-w-0">
+                <div className="truncate text-[13px] font-semibold text-[#edf3df]">
+                  {partnerName}
+                </div>
+                <div className="truncate text-[10px] text-[#79b7a9]">{partnerRole}</div>
+              </div>
+            )}
+          </div>
+
+          {!collapsed && (
+            <button
+              type="button"
+              onClick={onLogout}
+              title="Logout"
+              aria-label="Logout"
+              className="flex h-[30px] w-[30px] shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#83afa5] transition hover:bg-[#3d1414]/50 hover:text-[#ffcccc]"
+            >
+              <LogOut size={16} strokeWidth={1.8} />
+            </button>
+          )}
         </div>
       </div>
-
-      {/* ACTIONS */}
-      <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 pt-2 sm:border-t-0 sm:pt-0">
-        <button
-          type="button"
-          className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition duration-150 hover:border-[#ADC6B3] hover:bg-[#F4F7F4]"
-        >
-          View Profile
-        </button>
-        <button
-          type="button"
-          className="whitespace-nowrap rounded-xl bg-[#234E3D] px-4 py-2 text-xs font-semibold text-white shadow-sm transition duration-150 hover:bg-[#173629] hover:shadow"
-        >
-          Start Session
-        </button>
-        <button
-          type="button"
-          title="More Options"
-          className="rounded-lg p-2 text-slate-400 transition hover:bg-[#F4F7F4] hover:text-slate-600"
-        >
-          <MoreVertical size={16} />
-        </button>
-      </div>
-    </article>
+    </aside>
   );
 }
