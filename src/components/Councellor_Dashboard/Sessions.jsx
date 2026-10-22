@@ -3,25 +3,18 @@ import {
   ChevronLeft, ChevronRight, Plus, CalendarDays, CalendarCheck, MoreVertical, Clock, X, Menu,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
+import {
+  sessionStore, useSessions, useNow, formatSlot, formatDay, sessionEnd, SESSION_MINUTES,
+} from "./sessionStore";
 
 /* ================= CONFIG ================= */
-const TODAY = new Date(2026, 4, 19); // 19 May 2026
-const START_HOUR = 8;
-const END_HOUR = 18;
+// Grid kamit kami 8 AM - 7 PM dakhavto. Tya baher chi session asel tar grid apoap vadhto.
+const DEFAULT_START_HOUR = 8;
+const DEFAULT_END_HOUR = 18;
 const ROW_H = 76;
 
-const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
 const SESSION_TYPES = ["Individual Therapy", "Follow-up Session", "Therapy Session", "Counselling", "Couple Therapy"];
 const DURATIONS = [30, 45, 60, 90, 120];
-
-const INITIAL_SESSIONS = [
-  { id: 1, name: "Emma Wilson", type: "Follow-up Session", date: "2026-05-19", start: "11:30", duration: 60, tone: "blue", avatar: "" },
-  { id: 2, name: "John Smith", type: "Individual Therapy", date: "2026-05-20", start: "10:00", duration: 60, tone: "blue", avatar: "" },
-  { id: 3, name: "Olivia Martinez", type: "Individual Therapy", date: "2026-05-20", start: "16:00", duration: 60, tone: "green", avatar: "" },
-  { id: 4, name: "David Brown", type: "Therapy Session", date: "2026-05-22", start: "09:00", duration: 60, tone: "amber", avatar: "" },
-  { id: 5, name: "Sophia Johnson", type: "Counselling", date: "2026-05-22", start: "13:00", duration: 60, tone: "purple", avatar: "" },
-  { id: 6, name: "Michael Davis", type: "Therapy Session", date: "2026-05-23", start: "14:30", duration: 60, tone: "blue", avatar: "" },
-];
 
 const TONES = {
   green: { bg: "bg-[#D3E7DA]", border: "border-[#1F7A5A]", text: "text-[#0F3D2C]", subtext: "text-[#2F6B52]", dot: "bg-[#1F7A5A]" },
@@ -29,6 +22,7 @@ const TONES = {
   amber: { bg: "bg-[#F4E4C6]", border: "border-[#D08A1E]", text: "text-[#4F3205]", subtext: "text-[#8A5A0B]", dot: "bg-[#D08A1E]" },
   purple: { bg: "bg-[#E4DCF0]", border: "border-[#7F62B0]", text: "text-[#2F2050]", subtext: "text-[#5E468A]", dot: "bg-[#7F62B0]" },
 };
+const TONE_KEYS = Object.keys(TONES);
 
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A5A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#DDE7E1]";
@@ -44,7 +38,6 @@ const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 
 const sameDay = (a, b) => toKey(a) === toKey(b);
 const mondayOf = (d) => addDays(d, -((d.getDay() + 6) % 7));
 const dayName = (d) => d.toLocaleDateString("en-US", { weekday: "short" });
-const dayMonth = (d) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 const monthTitle = (d) => d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
 const toMin = (t) => {
@@ -58,6 +51,22 @@ const fmtTime = (min) => {
 };
 const fmtRange = (startMin, duration) => `${fmtTime(startMin)} – ${fmtTime(startMin + duration)}`;
 const hourLabel = (h) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h >= 12 ? "PM" : "AM"}`;
+
+// Store session -> calendar shape
+function toCalendar(s) {
+  const d = new Date(s.start);
+  const hash = [...s.patientName].reduce((a, c) => a + c.charCodeAt(0), 0);
+  return {
+    id: s.id,
+    name: s.patientName,
+    type: s.type || s.problem || "Therapy Session",
+    date: toKey(d),
+    start: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+    duration: s.duration || SESSION_MINUTES,
+    tone: s.tone || TONE_KEYS[hash % TONE_KEYS.length],
+    status: s.status,
+  };
+}
 
 const sessionsOn = (sessions, d) =>
   sessions.filter((s) => s.date === toKey(d)).sort((a, b) => toMin(a.start) - toMin(b.start));
@@ -114,10 +123,19 @@ export default function Sessions({ onLogout, onNavigate, sidebarCollapsed, onTog
 
   const sidebarWidth = sidebarCollapsed ? 76 : 268;
 
-  const [sessions, setSessions] = useState(INITIAL_SESSIONS);
+  const storeSessions = useSessions();
+  const now = useNow();
+  const today = new Date(now);
+
   const [view, setView] = useState("week");
-  const [cursor, setCursor] = useState(addDays(TODAY, 1));
+  const [cursor, setCursor] = useState(() => new Date());
   const [modal, setModal] = useState(null);
+
+  // Calendar madhe: scheduled + completed (completed halke disatat)
+  const sessions = useMemo(
+    () => storeSessions.filter((s) => s.status === "scheduled" || s.status === "completed").map(toCalendar),
+    [storeSessions]
+  );
 
   const shift = (dir) => {
     if (view === "day") setCursor(addDays(cursor, dir));
@@ -131,21 +149,51 @@ export default function Sessions({ onLogout, onNavigate, sidebarCollapsed, onTog
     return Array.from({ length: 7 }, (_, i) => addDays(mon, i));
   }, [view, cursor]);
 
+  // Disat astil tya divsanche tasanchi range (kamit kami 8 AM - 7 PM)
+  const range = useMemo(() => {
+    let start = DEFAULT_START_HOUR;
+    let end = DEFAULT_END_HOUR;
+    for (const d of days) {
+      for (const s of sessionsOn(sessions, d)) {
+        start = Math.min(start, Math.floor(toMin(s.start) / 60));
+        end = Math.max(end, Math.ceil((toMin(s.start) + s.duration) / 60) - 1);
+      }
+    }
+    return { start, end: Math.min(end, 23) };
+  }, [days, sessions]);
+
   const upcoming = useMemo(
     () =>
-      sessions
-        .filter((s) => s.date >= toKey(TODAY))
-        .sort((a, b) => a.date.localeCompare(b.date) || toMin(a.start) - toMin(b.start)),
-    [sessions]
+      storeSessions
+        .filter((s) => s.status === "scheduled" && sessionEnd(s) > now)
+        .sort((a, b) => a.start - b.start)
+        .slice(0, 6)
+        .map((s) => ({ ...toCalendar(s), ts: s.start })),
+    [storeSessions, now]
   );
 
-  const openNew = () => setModal({ date: toKey(cursor), start: "10:00" });
+  const openNew = () => {
+    const d = new Date();
+    const h = sameDay(cursor, d) ? Math.min(d.getHours() + 1, 23) : 10;
+    setModal({ date: toKey(cursor), start: `${pad(h)}:00` });
+  };
   const openSlot = (date, hour) => setModal({ date: toKey(date), start: `${pad(hour)}:00` });
 
+  // Store madhe save hote -> Patients, Notifications madhe pan disate
   const addSession = (data) => {
-    setSessions((prev) => [...prev, { id: Date.now(), avatar: "", ...data }]);
-    setCursor(fromKey(data.date));
-    setModal(null);
+    const r = sessionStore.schedule({
+      name: data.name,
+      problem: data.type,
+      type: data.type,
+      tone: data.tone,
+      duration: data.duration,
+      start: data.start,
+    });
+    if (r.ok) {
+      setCursor(new Date(data.start));
+      setModal(null);
+    }
+    return r;
   };
 
   const navigateFromDrawer = (page) => {
@@ -200,20 +248,21 @@ export default function Sessions({ onLogout, onNavigate, sidebarCollapsed, onTog
         style={{ "--sb": `${sidebarWidth}px` }}>
         <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-8 sm:py-9">
           <Toolbar view={view} onView={setView} title={monthTitle(cursor)}
-            onPrev={() => shift(-1)} onNext={() => shift(1)} onToday={() => setCursor(TODAY)} onNew={openNew} />
+            onPrev={() => shift(-1)} onNext={() => shift(1)} onToday={() => setCursor(new Date())} onNew={openNew} />
 
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
             <div className="ss-rise lg:col-span-8 xl:col-span-9" style={{ animationDelay: "60ms" }}>
               {view === "month" ? (
-                <MonthView sessions={sessions} cursor={cursor}
+                <MonthView sessions={sessions} cursor={cursor} today={today}
                   onPick={(d) => { setCursor(d); setView("day"); }} />
               ) : (
-                <TimeGrid sessions={sessions} days={days} cursor={cursor} onPick={setCursor} onSlot={openSlot} />
+                <TimeGrid sessions={sessions} days={days} cursor={cursor} today={today} range={range}
+                  onPick={setCursor} onSlot={openSlot} />
               )}
             </div>
 
             <aside className="ss-rise space-y-5 lg:col-span-4 xl:col-span-3" style={{ animationDelay: "120ms" }}>
-              <UpcomingCard list={upcoming} />
+              <UpcomingCard list={upcoming} now={now} />
               <TipCard />
             </aside>
           </div>
@@ -275,9 +324,10 @@ function Toolbar({ view, onView, title, onPrev, onNext, onToday, onNew }) {
 }
 
 /* ================= TIME GRID ================= */
-function TimeGrid({ sessions, days, cursor, onPick, onSlot }) {
+function TimeGrid({ sessions, days, cursor, today, range, onPick, onSlot }) {
   const cols = `72px repeat(${days.length}, minmax(0, 1fr))`;
   const minWidth = days.length === 1 ? 0 : 860;
+  const hours = Array.from({ length: range.end - range.start + 1 }, (_, i) => range.start + i);
 
   return (
     <div className="overflow-hidden rounded-3xl border border-[#C6D6CD] bg-white">
@@ -289,7 +339,7 @@ function TimeGrid({ sessions, days, cursor, onPick, onSlot }) {
             </div>
             {days.map((d, i) => {
               const active = sameDay(d, cursor);
-              const isToday = sameDay(d, TODAY);
+              const isToday = sameDay(d, today);
               const count = sessionsOn(sessions, d).length;
               return (
                 <button key={toKey(d)} type="button" onClick={() => onPick(d)}
@@ -314,18 +364,18 @@ function TimeGrid({ sessions, days, cursor, onPick, onSlot }) {
 
           <div className="grid" style={{ gridTemplateColumns: cols }}>
             <div className="select-none border-r border-[#E3ECE6]">
-              {HOURS.map((h, i) => (
+              {hours.map((h, i) => (
                 <div key={h} style={{ height: ROW_H }}
                   className={`flex items-start justify-end pr-3 pt-2.5 text-xs font-bold text-[#62766C] ${
-                    i < HOURS.length - 1 ? "border-b border-[#EEF3F0]" : ""
+                    i < hours.length - 1 ? "border-b border-[#EEF3F0]" : ""
                   }`}>
                   {hourLabel(h)}
                 </div>
               ))}
             </div>
             {days.map((d, i) => (
-              <DayColumn key={toKey(d)} sessions={sessions} date={d} active={sameDay(d, cursor)}
-                last={i === days.length - 1} onSlot={onSlot} />
+              <DayColumn key={toKey(d)} sessions={sessions} date={d} hours={hours} range={range}
+                active={sameDay(d, cursor)} last={i === days.length - 1} onSlot={onSlot} />
             ))}
           </div>
         </div>
@@ -334,15 +384,16 @@ function TimeGrid({ sessions, days, cursor, onPick, onSlot }) {
   );
 }
 
-function DayColumn({ sessions, date, active, last, onSlot }) {
+function DayColumn({ sessions, date, hours, range, active, last, onSlot }) {
   const list = layoutSessions(sessionsOn(sessions, date));
+  const gridEnd = (range.end + 1) * 60;
 
   return (
     <div className={`relative ${last ? "" : "border-r border-[#E3ECE6]"} ${active ? "bg-[#F6FAF7]" : ""}`}>
-      {HOURS.map((h, i) => (
+      {hours.map((h, i) => (
         <div key={h} style={{ height: ROW_H }} onClick={() => onSlot(date, h)} title={`Add session at ${hourLabel(h)}`}
           className={`group/slot cursor-pointer transition-colors hover:bg-[#EEF5F0] ${
-            i < HOURS.length - 1 ? "border-b border-[#EEF3F0]" : ""
+            i < hours.length - 1 ? "border-b border-[#EEF3F0]" : ""
           }`}>
           <div className="flex h-full items-center justify-center opacity-0 transition-opacity group-hover/slot:opacity-100">
             <Plus size={16} className="text-[#1F7A5A]" />
@@ -350,21 +401,22 @@ function DayColumn({ sessions, date, active, last, onSlot }) {
         </div>
       ))}
 
-      {list.map(({ s, start, col, cols }) => {
-        const top = ((start - START_HOUR * 60) / 60) * ROW_H + 2;
-        const height = (s.duration / 60) * ROW_H - 4;
+      {list.map(({ s, start, end, col, cols }) => {
+        const top = ((start - range.start * 60) / 60) * ROW_H + 2;
+        const height = ((Math.min(end, gridEnd) - start) / 60) * ROW_H - 4;
         const style = TONES[s.tone] || TONES.green;
+        const done = s.status === "completed";
         return (
-          <div key={s.id} title={`${s.name} • ${s.type} • ${fmtRange(start, s.duration)}`}
+          <div key={s.id} title={`${s.name} • ${s.type} • ${fmtRange(start, s.duration)}${done ? " • Completed" : ""}`}
             onClick={(e) => e.stopPropagation()}
             style={{ top, height, left: `calc(${(col / cols) * 100}% + 4px)`, width: `calc(${100 / cols}% - 8px)` }}
-            className={`absolute z-10 flex cursor-pointer flex-col justify-center gap-0.5 overflow-hidden rounded-xl border-l-4 px-2.5 py-1.5 transition hover:z-20 hover:brightness-95 ${style.bg} ${style.border}`}>
+            className={`absolute z-10 flex cursor-pointer flex-col justify-center gap-0.5 overflow-hidden rounded-xl border-l-4 px-2.5 py-1.5 transition hover:z-20 hover:brightness-95 ${style.bg} ${style.border} ${done ? "opacity-60" : ""}`}>
             <div className={`truncate text-[13px] font-extrabold leading-tight ${style.text}`}>{s.name}</div>
             <div className={`flex items-center gap-1 text-[11px] font-bold ${style.subtext}`}>
               <Clock size={11} className="shrink-0" />
               <span className="truncate">{fmtRange(start, s.duration)}</span>
             </div>
-            <div className={`truncate text-[11px] font-semibold ${style.subtext}`}>{s.type}</div>
+            <div className={`truncate text-[11px] font-semibold ${style.subtext}`}>{done ? "Completed" : s.type}</div>
           </div>
         );
       })}
@@ -373,7 +425,7 @@ function DayColumn({ sessions, date, active, last, onSlot }) {
 }
 
 /* ================= MONTH VIEW ================= */
-function MonthView({ sessions, cursor, onPick }) {
+function MonthView({ sessions, cursor, today, onPick }) {
   const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
   const gridStart = mondayOf(first);
   const cells = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
@@ -389,7 +441,7 @@ function MonthView({ sessions, cursor, onPick }) {
         {cells.map((d, i) => {
           const list = sessionsOn(sessions, d);
           const inMonth = d.getMonth() === cursor.getMonth();
-          const isToday = sameDay(d, TODAY);
+          const isToday = sameDay(d, today);
           return (
             <button key={toKey(d)} type="button" onClick={() => onPick(d)}
               className={`min-h-[110px] p-2 text-left align-top transition-colors hover:bg-[#F6FAF7] ${FOCUS} ${
@@ -405,7 +457,9 @@ function MonthView({ sessions, cursor, onPick }) {
                   const style = TONES[s.tone] || TONES.green;
                   return (
                     <div key={s.id} title={`${s.name} • ${s.type}`}
-                      className={`flex items-center gap-1 truncate rounded-md border-l-4 px-1.5 py-1 text-[11px] font-bold ${style.bg} ${style.border} ${style.text}`}>
+                      className={`flex items-center gap-1 truncate rounded-md border-l-4 px-1.5 py-1 text-[11px] font-bold ${style.bg} ${style.border} ${style.text} ${
+                        s.status === "completed" ? "opacity-60" : ""
+                      }`}>
                       <span className={`shrink-0 ${style.subtext}`}>{fmtTime(toMin(s.start)).replace(":00", "")}</span>
                       <span className="truncate">{s.name}</span>
                     </div>
@@ -431,7 +485,10 @@ function NewSessionModal({ initial, onClose, onSave }) {
     name: "", type: SESSION_TYPES[0], date: initial.date, start: initial.start, duration: 60, tone: "green",
   });
   const [error, setError] = useState("");
-  const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const set = (key, value) => {
+    setForm((f) => ({ ...f, [key]: value }));
+    setError("");
+  };
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -445,12 +502,20 @@ function NewSessionModal({ initial, onClose, onSave }) {
     if (!form.date) return setError("Choose a date.");
     if (!form.start) return setError("Choose a start time.");
 
-    const startMin = toMin(form.start);
-    const endMin = startMin + Number(form.duration);
-    if (startMin < START_HOUR * 60 || endMin > (END_HOUR + 1) * 60) {
-      return setError(`Sessions must fall between ${hourLabel(START_HOUR)} and ${hourLabel(END_HOUR + 1)}.`);
+    const duration = Number(form.duration);
+    if (toMin(form.start) + duration > 24 * 60) return setError("The session must end by midnight.");
+
+    const start = new Date(`${form.date}T${form.start}`).getTime();
+    if (Number.isNaN(start) || start <= Date.now()) return setError("Pick a time in the future.");
+
+    const r = onSave({ name, type: form.type, start, duration, tone: form.tone, date: form.date });
+    if (!r.ok) {
+      setError(
+        r.reason === "conflict"
+          ? `This clashes with ${r.conflict.patientName} at ${formatSlot(r.conflict.start)}.`
+          : "Could not save this session. Please try another time."
+      );
     }
-    onSave({ name, type: form.type, date: form.date, start: form.start, duration: Number(form.duration), tone: form.tone });
   };
 
   const endPreview =
@@ -546,14 +611,7 @@ function Avatar({ name }) {
   );
 }
 
-function whenLabel(dateKey) {
-  const date = fromKey(dateKey);
-  if (sameDay(date, TODAY)) return { text: "Today", hot: true };
-  if (sameDay(date, addDays(TODAY, 1))) return { text: "Tomorrow", hot: true };
-  return { text: dayMonth(date), hot: false };
-}
-
-function UpcomingCard({ list }) {
+function UpcomingCard({ list, now }) {
   return (
     <div className="rounded-3xl border border-[#C6D6CD] bg-white p-5">
       <div className="flex items-center justify-between pb-3">
@@ -569,7 +627,8 @@ function UpcomingCard({ list }) {
           <p className="py-6 text-center text-sm font-medium text-[#455A50]">No upcoming sessions. Add one with “New session”.</p>
         )}
         {list.map((s) => {
-          const w = whenLabel(s.date);
+          const day = formatDay(s.ts, now);
+          const hot = day === "Today" || day === "Tomorrow";
           return (
             <div key={s.id} className="flex items-center justify-between gap-2 py-3">
               <div className="flex min-w-0 items-center gap-3">
@@ -582,7 +641,7 @@ function UpcomingCard({ list }) {
               <div className="flex shrink-0 items-center gap-1">
                 <div className="text-right">
                   <div className="text-xs font-extrabold">{fmtTime(toMin(s.start))}</div>
-                  <div className={`text-[11px] font-bold ${w.hot ? "text-[#176247]" : "text-[#62766C]"}`}>{w.text}</div>
+                  <div className={`text-[11px] font-bold ${hot ? "text-[#176247]" : "text-[#62766C]"}`}>{day}</div>
                 </div>
                 <button type="button" aria-label={`Options for ${s.name}`}
                   className={`rounded-full p-1.5 text-[#455A50] hover:bg-[#E9F1EC] ${FOCUS}`}>

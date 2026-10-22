@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Calendar,
+  CalendarClock,
   Users,
   FileText,
   Heart,
@@ -12,6 +13,7 @@ import {
   Edit3,
   Clock,
   MessageSquare,
+  Menu,
 } from "lucide-react";
 
 import Sidebar from "./Sidebar";
@@ -26,6 +28,13 @@ const STATS = [
   { count: 5, label: "Today's sessions", note: "1 starting soon", icon: Calendar, page: "Sessions", tile: "bg-violet-200 text-violet-700", chev: "text-slate-400", card: "border-violet-200 bg-violet-50" },
   { count: 2, label: "Upcoming sessions", note: "Next 7 days", icon: Clock, page: "Sessions", tile: "bg-orange-200 text-orange-700", chev: "text-orange-500", card: "border-orange-200 bg-orange-50" },
   { count: 8, label: "Unread messages", note: "From 4 patients", icon: MessageSquare, page: "Messages", tile: "bg-teal-200 text-teal-800", chev: "text-slate-400", card: "border-teal-200 bg-teal-50" },
+];
+
+/* Today's availability (static for now, like the rest of this dashboard).
+   Later this can come from the same store the Availability page uses. */
+const AVAILABILITY_TODAY = [
+  { start: "10:00 AM", end: "12:00 PM" },
+  { start: "04:00 PM", end: "06:00 PM" },
 ];
 
 const SCHEDULE = [
@@ -72,6 +81,44 @@ const STATUS_STYLE = {
   upcoming: "bg-indigo-100 text-indigo-700",
 };
 
+/* Thin, themed scrollbar (page + every scrollable area in the dashboard).
+   Change the 3 colours below to customise. */
+const SCROLLBAR_CSS = `
+  html,
+  .dash-scroll,
+  .dash-scroll * {
+    scrollbar-width: thin;
+    scrollbar-color: #2D6A4F #EBF2F0;
+  }
+  html::-webkit-scrollbar,
+  .dash-scroll::-webkit-scrollbar,
+  .dash-scroll *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  html::-webkit-scrollbar-track,
+  .dash-scroll::-webkit-scrollbar-track,
+  .dash-scroll *::-webkit-scrollbar-track {
+    background: #EBF2F0;
+  }
+  html::-webkit-scrollbar-thumb,
+  .dash-scroll::-webkit-scrollbar-thumb,
+  .dash-scroll *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #2D6A4F 0%, #00A884 100%);
+    border-radius: 999px;
+  }
+  html::-webkit-scrollbar-thumb:hover,
+  .dash-scroll::-webkit-scrollbar-thumb:hover,
+  .dash-scroll *::-webkit-scrollbar-thumb:hover {
+    background: #008080;
+  }
+  html::-webkit-scrollbar-corner,
+  .dash-scroll::-webkit-scrollbar-corner,
+  .dash-scroll *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+`;
+
 /* ============================================================
     HELPERS
 ============================================================ */
@@ -85,6 +132,18 @@ const greetingFor = (date) => {
 
 const initials = (name) =>
   name.split(" ").map((n) => n[0]).join("").slice(0, 2);
+
+/* "04:00 PM" -> minutes since midnight */
+const toMin = (t) => {
+  const [time, ap] = t.split(" ");
+  let [h, m] = time.split(":").map(Number);
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+  return h * 60 + m;
+};
+
+/* "10:00 AM" -> "10 AM" (keeps "10:30 AM" as is) */
+const shortTime = (t) => t.replace(":00", "");
 
 const smoothPath = (pts) => {
   if (pts.length < 2) return "";
@@ -130,14 +189,17 @@ function CardHeader({ icon: Icon, title, hint, actionLabel, onAction }) {
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-2">
-        <Icon size={18} strokeWidth={2.2} className="text-[#008080] flex-shrink-0" />
+        <Icon size={18} strokeWidth={2.2} className="flex-shrink-0 text-[#008080]" />
         <h2 className="truncate text-base font-bold text-slate-800">
           {title}
           {hint && <span className="ml-2 text-xs font-normal text-slate-400">{hint}</span>}
         </h2>
       </div>
       {actionLabel && (
-        <button onClick={onAction} className="inline-flex items-center gap-1 rounded-full bg-[#2D6A4F] px-2.5 py-1 text-xs font-medium text-white hover:bg-[#245a42]">
+        <button
+          onClick={onAction}
+          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-[#2D6A4F] px-2.5 py-1 text-xs font-medium text-white hover:bg-[#245a42]"
+        >
           {actionLabel}
           <ChevronRight size={12} />
         </button>
@@ -202,6 +264,20 @@ export default function CouncellorDashboard({
 
   const avatarFor = (name) => SCHEDULE.find((s) => s.name === name)?.avatar;
 
+  /* ---- Availability card: current slot, else next slot, else last one ---- */
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const liveSlot = AVAILABILITY_TODAY.find((s) => nowMin >= toMin(s.start) && nowMin < toMin(s.end));
+  const nextSlot = AVAILABILITY_TODAY.find((s) => toMin(s.start) > nowMin);
+  const shownSlot = liveSlot || nextSlot || AVAILABILITY_TODAY[AVAILABILITY_TODAY.length - 1];
+  const availValue = shownSlot
+    ? `${shortTime(shownSlot.start)} – ${shortTime(shownSlot.end)}`
+    : "Not set";
+  const availNote = !AVAILABILITY_TODAY.length
+    ? "Add your hours"
+    : liveSlot
+    ? "Available now"
+    : `Today · ${AVAILABILITY_TODAY.length} slot${AVAILABILITY_TODAY.length > 1 ? "s" : ""}`;
+
   /* ---- Donut Calculations ---- */
   const totalPatients = PATIENT_OVERVIEW.reduce((s, p) => s + p.count, 0);
   const R = 35;
@@ -234,8 +310,10 @@ export default function CouncellorDashboard({
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full bg-[#EBF2F0] font-sans text-slate-800 antialiased">
-      {/* ================= ORIGINAL SIDEBAR ================= */}
+    <div className="dash-scroll flex min-h-screen w-full bg-[#EBF2F0] font-sans text-slate-800 antialiased">
+      <style>{SCROLLBAR_CSS}</style>
+
+      {/* ================= SIDEBAR ================= */}
       <div>
         {isDesktop ? (
           <Sidebar
@@ -271,59 +349,78 @@ export default function CouncellorDashboard({
 
       {/* ================= DASHBOARD CONTENT ================= */}
       <main
-        className="min-h-screen flex-1 p-4 transition-[margin] duration-300 ease-in-out sm:p-6 md:p-8 lg:ml-[var(--sb)]"
+        className="min-h-screen min-w-0 flex-1 p-4 transition-[margin] duration-300 ease-in-out sm:p-6 md:p-8 lg:ml-[var(--sb)]"
         style={{ "--sb": `${sidebarWidth}px` }}
       >
         <div className="mx-auto w-full max-w-7xl space-y-5">
-          {/* Title Section */}
-          <div>
+          {/* Mobile top bar with hamburger */}
+          <div className="flex items-center gap-3 lg:hidden">
+            <button
+              onClick={() => setMobileNavOpen(true)}
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white text-[#2D6A4F] shadow-sm ring-1 ring-teal-100"
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold leading-tight text-slate-900">Dashboard</h2>
+              <p className="truncate text-[11px] font-medium text-[#009688]">
+                Clinical status & patient care
+              </p>
+            </div>
+          </div>
+
+          {/* Title Section (desktop only) */}
+          <div className="hidden lg:block">
             <h2 className="text-xl font-bold text-slate-900">Dashboard Overview</h2>
             <p className="text-xs font-medium text-[#009688]">
               Monitor and manage your clinical status and patient care
             </p>
           </div>
 
-          {/* HERO BANNER WITH EXACT IMAGE OVERLAY MATCHING REFERENCE IMAGE */}
-          <div className="relative min-h-[180px] overflow-hidden rounded-xl bg-[#0e271c] px-6 py-8 text-white shadow-md sm:py-10 md:py-12">
-            {/* Background Image using user's imported image */}
-            <div className="absolute inset-0 z-0">
+          {/* HERO BANNER */}
+          <div className="relative overflow-hidden rounded-xl bg-[#0e271c] text-white shadow-md sm:min-h-[200px]">
+            {/* Image: mobile = top strip, desktop = full background */}
+            <div className="relative h-40 w-full sm:absolute sm:inset-0 sm:h-full">
               <img
                 src={heroImage}
                 alt=""
-                className="h-full w-full object-cover object-center"
+                className="h-full w-full object-cover object-right sm:object-center"
               />
+              {/* Mobile: image fades into dark at the bottom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0e271c] via-[#0e271c]/30 to-transparent sm:hidden" />
             </div>
 
-            {/* Dark Left Overlay Gradient */}
+            {/* Desktop: left-to-right dark gradient */}
             <div
-              className="absolute inset-0 z-10"
+              className="absolute inset-0 z-10 hidden sm:block"
               style={{
                 background:
-                  "linear-gradient(90deg, rgba(10, 25, 18, 0.95) 0%, rgba(10, 25, 18, 0.85) 35%, rgba(10, 25, 18, 0.3) 65%, rgba(10, 25, 18, 0) 100%)",
+                  "linear-gradient(90deg, rgba(10,25,18,0.95) 0%, rgba(10,25,18,0.85) 35%, rgba(10,25,18,0.3) 65%, rgba(10,25,18,0) 100%)",
               }}
             />
 
-            {/* Banner Content */}
-            <div className="relative z-20 max-w-xl">
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-300">
+            {/* Content */}
+            <div className="relative z-20 max-w-xl px-5 pb-5 pt-1 sm:px-8 sm:py-10 md:py-12">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300 sm:text-[11px]">
                 {dateLabel}
               </span>
-              <h1 className="mt-2 text-2xl font-bold text-white md:text-3xl lg:text-4xl">
+              <h1 className="mt-1.5 text-2xl font-bold leading-tight text-white sm:mt-2 md:text-3xl lg:text-4xl">
                 {greetingFor(now)}, Dr. Sarah
               </h1>
               <p className="mt-2 text-xs leading-relaxed text-emerald-100 sm:text-sm">
                 You have {STATS[1].count} sessions scheduled for today and {STATS[3].count} unread messages.
               </p>
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="mt-4 flex gap-3 sm:mt-5">
                 <button
                   onClick={() => go("Sessions")}
-                  className="rounded-full bg-white px-5 py-2 text-xs font-bold text-[#0A291D] shadow-sm transition-all hover:bg-emerald-50 active:scale-95"
+                  className="flex-1 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-[#0A291D] shadow-sm transition-all hover:bg-emerald-50 active:scale-95 sm:flex-none sm:px-5 sm:py-2"
                 >
                   View Schedule
                 </button>
                 <button
                   onClick={() => go("Patients")}
-                  className="rounded-full border border-white/30 bg-white/10 px-5 py-2 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+                  className="flex-1 rounded-full border border-white/30 bg-white/10 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 sm:flex-none sm:px-5 sm:py-2"
                 >
                   All Patients
                 </button>
@@ -331,27 +428,51 @@ export default function CouncellorDashboard({
             </div>
           </div>
 
-          {/* TOP STATS CARDS */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* TOP STATS CARDS (2 per row on mobile, 5 across on desktop) */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
             {STATS.map(({ count, label, note, icon: Icon, page, tile, chev, card }) => (
               <button
                 key={label}
                 onClick={() => go(page)}
-                className={`group flex flex-col rounded-lg border px-5 py-4 text-left shadow-[0_2px_10px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-md ${card}`}
+                className={`group flex flex-col rounded-lg border px-3 py-3 text-left shadow-[0_2px_10px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-md sm:px-5 sm:py-4 ${card}`}
               >
-                <div className="flex w-full items-center gap-3">
-                  <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${tile}`}>
+                <div className="flex w-full items-center gap-2 sm:gap-3">
+                  <span className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${tile}`}>
                     <Icon size={18} strokeWidth={2} />
                   </span>
-                  <h3 className="flex-1 text-[11px] font-bold uppercase tracking-wide text-[#1E3A4C]">
+                  <h3 className="flex-1 text-[10px] font-bold uppercase leading-tight tracking-wide text-[#1E3A4C] sm:text-[11px]">
                     {label}
                   </h3>
-                  <ChevronRight size={14} className={`flex-shrink-0 ${chev}`} />
+                  <ChevronRight size={14} className={`hidden flex-shrink-0 sm:block ${chev}`} />
                 </div>
-                <span className="mt-3 text-3xl font-bold leading-none text-[#0F3D33]">{count}</span>
+                <span className="mt-3 text-2xl font-bold leading-none text-[#0F3D33] sm:text-3xl">{count}</span>
                 <p className="mt-2 text-[11px] text-slate-400">{note}</p>
               </button>
             ))}
+
+            {/* Availability card -> opens the Availability page */}
+            <button
+              onClick={() => go("Availability")}
+              aria-label={`Availability today: ${availValue}. Open availability page`}
+              className="group col-span-2 flex flex-col rounded-lg border border-sky-200 bg-sky-50 px-3 py-3 text-left shadow-[0_2px_10px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-md sm:px-5 sm:py-4 lg:col-span-1"
+            >
+              <div className="flex w-full items-center gap-2 sm:gap-3">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-sky-200 text-sky-800 sm:h-10 sm:w-10">
+                  <CalendarClock size={18} strokeWidth={2} />
+                </span>
+                <h3 className="flex-1 text-[10px] font-bold uppercase leading-tight tracking-wide text-[#1E3A4C] sm:text-[11px]">
+                  Availability
+                </h3>
+                <ChevronRight size={14} className="hidden flex-shrink-0 text-slate-400 sm:block" />
+              </div>
+              <span className="mt-3 text-xl font-bold leading-tight text-[#0F3D33] sm:text-2xl lg:text-xl xl:text-2xl">
+                {availValue}
+              </span>
+              <p className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400">
+                {liveSlot && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                {availNote}
+              </p>
+            </button>
           </div>
 
           {/* LOWER CONTENT GRID */}
@@ -362,15 +483,22 @@ export default function CouncellorDashboard({
                 <CardHeader icon={Calendar} title="Today's Schedule" actionLabel="Full Schedule" onAction={() => go("Sessions")} />
                 <div className="space-y-2">
                   {SCHEDULE.map((item) => (
-                    <div key={item.name} className="flex items-center justify-between rounded-lg border border-emerald-100 bg-emerald-50/60 p-2.5 text-xs">
-                      <div className="flex items-center gap-2.5">
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-emerald-100 bg-emerald-50/60 p-2.5 text-xs"
+                    >
+                      <div className="flex min-w-0 items-center gap-2.5">
                         <Avatar src={item.avatar} name={item.name} size={36} />
-                        <div>
-                          <p className="font-bold text-slate-800">{item.name}</p>
-                          <p className="text-[10px] text-slate-400">{item.start} - {item.end} · {item.type}</p>
+                        <div className="min-w-0">
+                          <p className="truncate font-bold text-slate-800">{item.name}</p>
+                          <p className="truncate text-[10px] text-slate-400">
+                            {item.start} - {item.end} · {item.type}
+                          </p>
                         </div>
                       </div>
-                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${STATUS_STYLE[item.tone]}`}>
+                      <span
+                        className={`flex-shrink-0 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-bold ${STATUS_STYLE[item.tone]}`}
+                      >
                         {item.status}
                       </span>
                     </div>
@@ -379,7 +507,7 @@ export default function CouncellorDashboard({
               </div>
 
               <div className="flex items-center gap-3 rounded-lg bg-[#2D6A4F] p-4 text-white shadow-[0_2px_12px_rgba(45,106,79,0.30)]">
-                <Heart size={20} className="text-white flex-shrink-0" />
+                <Heart size={20} className="flex-shrink-0 text-white" />
                 <div>
                   <h4 className="text-sm font-bold">Take a deep breath</h4>
                   <p className="text-xs opacity-90">Small daily progress leads to big positive changes.</p>
@@ -393,7 +521,7 @@ export default function CouncellorDashboard({
               <div className="rounded-lg border border-teal-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,128,128,0.10)]">
                 <CardHeader icon={Users} title="Patient Overview" />
                 <div className="flex items-center justify-between gap-4 px-1 pb-1">
-                  <div className="relative flex h-36 w-36 flex-shrink-0 items-center justify-center">
+                  <div className="relative flex h-32 w-32 flex-shrink-0 items-center justify-center sm:h-36 sm:w-36">
                     <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r={R} fill="none" stroke="#EDF4EE" strokeWidth="16" />
                       {donut.map((s) => (
@@ -487,8 +615,12 @@ export default function CouncellorDashboard({
                 <h3 className="mb-2 text-xs font-bold text-slate-800">Quick Actions</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {QUICK_ACTIONS.map(({ icon: Icon, label, page }) => (
-                    <button key={label} onClick={() => go(page)} className="flex items-center gap-2 rounded-md border border-teal-100 bg-teal-50 p-2 text-xs hover:bg-teal-100 hover:text-[#008080]">
-                      <Icon size={16} className="text-[#00A884]" />
+                    <button
+                      key={label}
+                      onClick={() => go(page)}
+                      className="flex items-center gap-2 rounded-md border border-teal-100 bg-teal-50 p-2 text-xs hover:bg-teal-100 hover:text-[#008080]"
+                    >
+                      <Icon size={16} className="flex-shrink-0 text-[#00A884]" />
                       <span className="truncate text-[10px] font-bold">{label}</span>
                     </button>
                   ))}

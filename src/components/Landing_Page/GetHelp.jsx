@@ -1,41 +1,60 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Zap, Eye, Brain, BatteryLow, Moon, 
-  Utensils, ClipboardList, Clock, Frown, Heart, 
-  ChevronRight, X
+import {
+  Zap,
+  Eye,
+  Brain,
+  BatteryLow,
+  Moon,
+  Utensils,
+  ClipboardList,
+  Clock,
+  Frown,
+  Heart,
+  ChevronRight,
+  X
 } from 'lucide-react';
+
 import chakraImg from '../../assets/chakra.png';
 
+import { useLanguage } from '../../LanguageContext';
+import { marathi } from '../../translations/marathi';
+import { hindi } from '../../translations/hindi';
+
 export default function GetHelp() {
+  const { language } = useLanguage();
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-
   const [activeLeftIndex, setActiveLeftIndex] = useState(0);
   const [activeRightIndex, setActiveRightIndex] = useState(0);
 
   const sectionRef = useRef(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.15 }
-    );
+  const isEnglish = language === 'en';
+  const isDevanagari = language === 'mr' || language === 'hi';
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+  const sectionFont = isEnglish
+    ? 'inherit'
+    : "'Noto Sans Devanagari', sans-serif";
 
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
+  const headingSize = isEnglish
+    ? 'text-3xl sm:text-5xl leading-[1.2] tracking-tight'
+    : 'text-[27px] sm:text-[38px] lg:text-[46px] leading-[1.4] sm:leading-[1.35] tracking-normal';
 
-  const leftItems = [
+  const descriptionSize = isEnglish
+    ? 'text-sm sm:text-base leading-relaxed'
+    : 'text-[13px] sm:text-[15px] leading-[1.85] sm:leading-[1.75]';
+
+  const helpContent =
+    language === 'mr'
+      ? marathi.home.getHelp
+      : language === 'hi'
+        ? hindi.home.getHelp
+        : null;
+
+  const englishLeftItems = [
     {
       id: 0,
       label: 'Feeling less motivated lately',
@@ -68,7 +87,7 @@ export default function GetHelp() {
     }
   ];
 
-  const rightItems = [
+  const englishRightItems = [
     {
       id: 5,
       label: 'Changes in your eating habits',
@@ -101,6 +120,31 @@ export default function GetHelp() {
     }
   ];
 
+  const leftItems = englishLeftItems.map((item, index) => ({
+    ...item,
+    label: helpContent?.signs?.[index] ?? item.label
+  }));
+
+  const rightItems = englishRightItems.map((item, index) => ({
+    ...item,
+    label: helpContent?.signs?.[index + 5] ?? item.label
+  }));
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.15 }
+    );
+
+    const section = sectionRef.current;
+
+    if (section) observer.observe(section);
+
+    return () => {
+      if (section) observer.unobserve(section);
+    };
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveLeftIndex((prev) => (prev + 1) % leftItems.length);
@@ -110,12 +154,21 @@ export default function GetHelp() {
     return () => clearInterval(interval);
   }, [leftItems.length, rightItems.length]);
 
+  useEffect(() => {
+    if (!selectedItem) return;
+
+    const translatedItem = [...leftItems, ...rightItems].find(
+      (item) => item.id === selectedItem.id
+    );
+
+    if (translatedItem) setSelectedItem(translatedItem);
+  }, [language]);
+
   const handleItemClick = (item) => {
     setSelectedItem(item);
     setIsModalOpen(true);
   };
 
-  // Simple and smooth floating animation (no rotation)
   const floatAnimation = `
     @keyframes simpleFloat {
       0%, 100% { transform: translateY(0px); }
@@ -123,16 +176,71 @@ export default function GetHelp() {
     }
   `;
 
+  const renderCarouselItem = (item, index, activeIndex, items) => {
+    const IconComponent = item.icon;
+    const isActive = index === activeIndex;
+
+    const isPrev =
+      index === (activeIndex - 1 + items.length) % items.length;
+
+    const isNext =
+      index === (activeIndex + 1) % items.length;
+
+    if (!isActive && !isPrev && !isNext) return null;
+
+    return (
+      <div
+        key={item.id}
+        onClick={() => handleItemClick(item)}
+        style={{
+          transform: isActive
+            ? 'scale(1.03) translateY(0px)'
+            : isPrev
+              ? 'scale(0.9) translateY(-85px)'
+              : 'scale(0.9) translateY(85px)',
+          zIndex: isActive ? 30 : 10,
+          fontFamily: sectionFont
+        }}
+        className={`absolute w-full group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl cursor-pointer transition-all duration-700 backdrop-blur-md ${
+          isActive
+            ? 'bg-white text-black shadow-[0_12px_30px_rgba(15,23,42,0.12)] border-2 border-emerald-400 opacity-100'
+            : 'bg-white text-black border border-slate-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] opacity-40 hover:opacity-75 blur-[0.2px]'
+        }`}
+      >
+        <div className="flex items-center gap-3 relative z-10 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-xs shrink-0">
+            <IconComponent className="w-4 h-4" />
+          </div>
+
+          <span
+            className={`font-bold text-black ${
+              isEnglish
+                ? 'text-xs sm:text-sm tracking-wide'
+                : 'text-[11px] sm:text-[13px] leading-[1.65] tracking-normal'
+            }`}
+          >
+            {item.label}
+          </span>
+        </div>
+
+        <div className="w-7 h-7 rounded-full bg-emerald-50/50 flex items-center justify-center text-emerald-700 shrink-0 ml-2">
+          <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <section 
+    <section
       ref={sectionRef}
       className="relative w-full min-h-screen bg-white flex flex-col justify-between py-16 px-4 sm:px-12 font-sans overflow-hidden scroll-mt-24"
+      style={{ fontFamily: sectionFont }}
     >
       <style>{floatAnimation}</style>
 
-      <div className="absolute top-1/4 left-5 w-[420px] h-[420px] bg-slate-100/45 rounded-full filter blur-[140px] pointer-events-none"></div>
+      <div className="absolute top-1/4 left-5 w-[420px] h-[420px] bg-slate-100/45 rounded-full filter blur-[140px] pointer-events-none" />
 
-      <div className="absolute bottom-10 right-5 w-[420px] h-[420px] bg-slate-100/55 rounded-full filter blur-[140px] pointer-events-none"></div>
+      <div className="absolute bottom-10 right-5 w-[420px] h-[420px] bg-slate-100/55 rounded-full filter blur-[140px] pointer-events-none" />
 
       <div
         className={`relative z-10 text-center max-w-2xl mx-auto space-y-4 mb-8 transition-all duration-1000 transform ${
@@ -142,26 +250,39 @@ export default function GetHelp() {
         }`}
       >
         <div className="inline-flex items-center px-4 py-2 rounded-full bg-white mx-auto shadow-[0_4px_14px_rgba(15,23,42,0.08)] border border-slate-100">
-          <span className="text-xs font-bold text-emerald-800 tracking-wider">
-            GET HELP & SUPPORT
+          <span
+            className={`font-bold text-emerald-800 ${
+              isEnglish
+                ? 'text-xs tracking-wider'
+                : 'text-[10px] sm:text-[12px] tracking-normal leading-relaxed'
+            }`}
+          >
+            {language === 'mr'
+              ? 'स्वतःला अधिक चांगलं समजून घ्या'
+              : language === 'hi'
+                ? 'खुद को बेहतर समझें'
+                : 'GET HELP & SUPPORT'}
           </span>
         </div>
 
-        <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.2]">
-          Notice the small changes <br />
-          that can say{' '}
-          <span className="text-emerald-700 underline decoration-emerald-300 decoration-wavy decoration-1">
-            so much
-          </span>
+        <h2
+          className={`font-extrabold text-slate-900 whitespace-pre-line ${headingSize}`}
+          style={{ fontFamily: sectionFont }}
+        >
+          {helpContent?.title ||
+            'Notice the small changes that can say so much'}
         </h2>
 
-        <p className="text-slate-600 text-sm sm:text-base max-w-lg mx-auto font-medium">
-          Your mind often speaks in small ways. These changes matter, and it's completely okay to notice and honor them.
+        <p
+          className={`text-slate-600 max-w-lg mx-auto font-medium ${descriptionSize}`}
+          style={{ fontFamily: sectionFont }}
+        >
+          {helpContent?.description ||
+            "Your mind often speaks in small ways. These changes matter, and it's completely okay to notice and honor them."}
         </p>
       </div>
 
       <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10 my-auto">
-
         {/* Left Carousel */}
         <div
           className={`lg:col-span-4 flex flex-col relative h-[420px] overflow-hidden justify-center items-center transition-opacity duration-1000 delay-200 ${
@@ -169,61 +290,16 @@ export default function GetHelp() {
           }`}
         >
           <div className="w-full max-w-sm flex flex-col items-center relative h-full justify-center">
-
-            {leftItems.map((item, index) => {
-              const IconComponent = item.icon;
-              const isActive = index === activeLeftIndex;
-              const isPrev =
-                index ===
-                (activeLeftIndex - 1 + leftItems.length) % leftItems.length;
-              const isNext =
-                index === (activeLeftIndex + 1) % leftItems.length;
-
-              if (!isActive && !isPrev && !isNext) return null;
-
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => handleItemClick(item)}
-                  style={{
-                    transform: isActive
-                      ? 'scale(1.03) translateY(0px)'
-                      : isPrev
-                      ? 'scale(0.9) translateY(-85px)'
-                      : 'scale(0.9) translateY(85px)',
-                    zIndex: isActive ? 30 : 10,
-                  }}
-                  className={`absolute w-full group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl cursor-pointer transition-all duration-700 backdrop-blur-md ${
-                    isActive
-                      ? 'bg-white text-black shadow-[0_12px_30px_rgba(15,23,42,0.12)] border-2 border-emerald-400 opacity-100'
-                      : 'bg-white text-black border border-slate-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] opacity-40 hover:opacity-75 blur-[0.2px]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-xs">
-                      <IconComponent className="w-4 h-4" />
-                    </div>
-
-                    <span className="text-xs sm:text-sm font-bold text-black tracking-wide">
-                      {item.label}
-                    </span>
-                  </div>
-
-                  <div className="w-7 h-7 rounded-full bg-emerald-50/50 flex items-center justify-center text-emerald-700">
-                    <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </div>
-                </div>
-              );
-            })}
-
+            {leftItems.map((item, index) =>
+              renderCarouselItem(item, index, activeLeftIndex, leftItems)
+            )}
           </div>
         </div>
 
-        {/* Center Character/Chakra Image with Simple Floating Animation */}
+        {/* Center Character / Chakra Image */}
         <div className="lg:col-span-4 flex flex-col items-center justify-center relative py-6">
           <div className="relative group w-full flex justify-center items-center">
-
-            <div className="absolute w-72 h-72 bg-slate-200/50 rounded-full filter blur-3xl -z-10"></div>
+            <div className="absolute w-72 h-72 bg-slate-200/50 rounded-full filter blur-3xl -z-10" />
 
             <img
               src={chakraImg}
@@ -235,7 +311,6 @@ export default function GetHelp() {
                   : 'opacity-0 scale-50'
               }`}
             />
-
           </div>
         </div>
 
@@ -246,64 +321,20 @@ export default function GetHelp() {
           }`}
         >
           <div className="w-full max-w-sm flex flex-col items-center relative h-full justify-center">
-
-            {rightItems.map((item, index) => {
-              const IconComponent = item.icon;
-              const isActive = index === activeRightIndex;
-              const isPrev =
-                index ===
-                (activeRightIndex - 1 + rightItems.length) % rightItems.length;
-              const isNext =
-                index === (activeRightIndex + 1) % rightItems.length;
-
-              if (!isActive && !isPrev && !isNext) return null;
-
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => handleItemClick(item)}
-                  style={{
-                    transform: isActive
-                      ? 'scale(1.03) translateY(0px)'
-                      : isPrev
-                      ? 'scale(0.9) translateY(-85px)'
-                      : 'scale(0.9) translateY(85px)',
-                    zIndex: isActive ? 30 : 10,
-                  }}
-                  className={`absolute w-full group flex items-center justify-between p-3.5 sm:p-4 rounded-2xl cursor-pointer transition-all duration-700 backdrop-blur-md ${
-                    isActive
-                      ? 'bg-white text-black shadow-[0_12px_30px_rgba(15,23,42,0.12)] border-2 border-emerald-400 opacity-100'
-                      : 'bg-white text-black border border-slate-200 shadow-[0_6px_18px_rgba(15,23,42,0.07)] opacity-40 hover:opacity-75 blur-[0.2px]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-xs">
-                      <IconComponent className="w-4 h-4" />
-                    </div>
-
-                    <span className="text-xs sm:text-sm font-bold text-black tracking-wide">
-                      {item.label}
-                    </span>
-                  </div>
-
-                  <div className="w-7 h-7 rounded-full bg-emerald-50/50 flex items-center justify-center text-emerald-700">
-                    <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </div>
-                </div>
-              );
-            })}
-
+            {rightItems.map((item, index) =>
+              renderCarouselItem(item, index, activeRightIndex, rightItems)
+            )}
           </div>
         </div>
-
       </div>
 
       {/* Modal */}
       {isModalOpen && selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fadeIn">
-
-          <div className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative animate-scaleUp">
-
+          <div
+            className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative animate-scaleUp"
+            style={{ fontFamily: sectionFont }}
+          >
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-emerald-700 hover:text-white transition-colors"
@@ -312,42 +343,54 @@ export default function GetHelp() {
             </button>
 
             <div className="flex items-center gap-3.5 mb-4">
-
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shrink-0">
                 {React.createElement(selectedItem.icon, {
-                  className: "w-6 h-6"
+                  className: 'w-6 h-6'
                 })}
               </div>
 
-              <div>
-                <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
+              <div className="min-w-0">
+                <span
+                  className={`font-bold text-emerald-600 uppercase ${
+                    isEnglish
+                      ? 'text-xs tracking-wider'
+                      : 'text-[10px] sm:text-[11px] tracking-normal'
+                  }`}
+                >
                   Mindful Reflection
                 </span>
 
-                <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                <h3
+                  className={`font-bold text-slate-900 leading-[1.5] ${
+                    isEnglish
+                      ? 'text-lg'
+                      : 'text-[15px] sm:text-[16px]'
+                  }`}
+                >
                   {selectedItem.label}
                 </h3>
               </div>
-
             </div>
 
-            <p className="text-slate-700 text-sm sm:text-base leading-relaxed bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100/60 mb-6 font-medium">
+            <p
+              className={`text-slate-700 leading-relaxed bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100/60 mb-6 font-medium ${
+                isEnglish
+                  ? 'text-sm sm:text-base'
+                  : 'text-[13px] sm:text-[14px]'
+              }`}
+            >
               {selectedItem.desc}
             </p>
 
             <div className="flex items-center justify-end">
-
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold shadow-md hover:bg-emerald-700 transition-colors w-full tracking-wide"
               >
                 I understand, thank you 💚
               </button>
-
             </div>
-
           </div>
-
         </div>
       )}
 
@@ -356,7 +399,6 @@ export default function GetHelp() {
           you're never alone on this journey
         </span>
       </div>
-
     </section>
   );
 }

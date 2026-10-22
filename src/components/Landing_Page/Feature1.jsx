@@ -1,17 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Leaf,
-  TrendingUp,
-  Sun
-} from 'lucide-react';
+import { Leaf, TrendingUp, Sun } from 'lucide-react';
 
 import { useLanguage } from '../../LanguageContext';
 import { marathi } from '../../translations/marathi';
 import { hindi } from '../../translations/hindi';
-
-/* ------------------------------------------------------------------ */
-/*  Section blending & background styles                              */
-/* ------------------------------------------------------------------ */
 
 const BLEND_TOP = '#fbfefc';
 const BLEND_BOTTOM = '#fbfefc';
@@ -41,15 +33,26 @@ export default function Feature1() {
   const [isPaused, setIsPaused] = useState(false);
   const sectionRef = useRef(null);
 
-  /* ------------------------------------------------------------------ */
-  /*  GLOBAL LANGUAGE                                                    */
-  /* ------------------------------------------------------------------ */
-
   const { language } = useLanguage();
 
-  /* ------------------------------------------------------------------ */
-  /*  VISIBILITY OBSERVER                                                */
-  /* ------------------------------------------------------------------ */
+  const isEnglish = language === 'en';
+  const isDevanagari = language === 'mr' || language === 'hi';
+
+  const sectionFont = isEnglish
+    ? 'inherit'
+    : "'Noto Sans Devanagari', sans-serif";
+
+  const headingSize = isEnglish
+    ? 'text-3xl sm:text-5xl lg:text-6xl leading-[1.12] tracking-tight'
+    : 'text-[27px] sm:text-[38px] lg:text-[46px] leading-[1.4] sm:leading-[1.35] tracking-normal';
+
+  const descriptionSize = isEnglish
+    ? 'text-sm sm:text-base leading-relaxed'
+    : 'text-[13px] sm:text-[15px] leading-[1.85] sm:leading-[1.75]';
+
+  const featureTextSize = isEnglish
+    ? 'text-xs sm:text-sm'
+    : 'text-[10px] sm:text-[12px] leading-relaxed';
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -69,30 +72,22 @@ export default function Feature1() {
     return () => observer.disconnect();
   }, []);
 
-  /* ------------------------------------------------------------------ */
-  /*  TRANSLATED CONTENT                                                 */
-  /* ------------------------------------------------------------------ */
-
   const focusContent =
     language === 'mr'
       ? marathi.home.focus
       : language === 'hi'
-      ? hindi.home.focus
-      : {
-          title: 'Improve Focus with Effectiveness.',
-          description:
-            'Manovedh helps you identify daily patterns and take meaningful action through small, practical steps. No pressure. No judgment. Just clarity.',
-          metrics: {
-            energy: 'Energy',
-            effectiveness: 'Effectiveness',
-            focus: 'Focus',
-            dailyFlow: 'Daily Flow'
-          }
-        };
-
-  /* ------------------------------------------------------------------ */
-  /*  STATS                                                              */
-  /* ------------------------------------------------------------------ */
+        ? hindi.home.focus
+        : {
+            title: 'Improve Focus with Effectiveness.',
+            description:
+              'Manovedh helps you identify daily patterns and take meaningful action through small, practical steps. No pressure. No judgment. Just clarity.',
+            metrics: {
+              energy: 'Energy',
+              effectiveness: 'Effectiveness',
+              focus: 'Focus',
+              dailyFlow: 'Daily Flow'
+            }
+          };
 
   const stats = [
     {
@@ -125,10 +120,6 @@ export default function Feature1() {
     }
   ];
 
-  /* ------------------------------------------------------------------ */
-  /*  SMOOTH AUTOMATIC CYCLING                                           */
-  /* ------------------------------------------------------------------ */
-
   useEffect(() => {
     if (!isVisible || isPaused) return;
 
@@ -139,18 +130,14 @@ export default function Feature1() {
     return () => clearInterval(interval);
   }, [isVisible, isPaused, stats.length]);
 
-  /* ------------------------------------------------------------------ */
-  /*  DEFAULT SUMMARY                                                    */
-  /* ------------------------------------------------------------------ */
-
   const defaultSummary = {
     id: 'total',
     label:
       language === 'mr'
         ? 'एकूण संतुलन'
         : language === 'hi'
-        ? 'समग्र संतुलन'
-        : 'Overall Balance',
+          ? 'समग्र संतुलन'
+          : 'Overall Balance',
     percentage: '82%',
     desc: 'Harmonic rhythm'
   };
@@ -160,10 +147,6 @@ export default function Feature1() {
       ? defaultSummary
       : stats[activeIndex - 1];
 
-  /* ------------------------------------------------------------------ */
-  /*  DONUT GEOMETRY                                                     */
-  /* ------------------------------------------------------------------ */
-
   const RADIUS = 64;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
   const CENTER = 100;
@@ -171,45 +154,28 @@ export default function Feature1() {
   let accumulatedLength = 0;
 
   const segments = stats.map((stat, idx) => {
-    const length =
-      (CIRCUMFERENCE * stat.value) / 100;
-
-    const dashoffset =
-      CIRCUMFERENCE - accumulatedLength;
-
-    const midLength =
-      accumulatedLength + length / 2;
+    const length = (CIRCUMFERENCE * stat.value) / 100;
+    const dashoffset = CIRCUMFERENCE - accumulatedLength;
+    const midLength = accumulatedLength + length / 2;
 
     const angleRad =
       (midLength / CIRCUMFERENCE) * 2 * Math.PI -
       Math.PI / 2;
 
     const labelRadius = RADIUS;
-
-    const x =
-      CENTER + labelRadius * Math.cos(angleRad);
-
-    const y =
-      CENTER + labelRadius * Math.sin(angleRad);
+    const x = CENTER + labelRadius * Math.cos(angleRad);
+    const y = CENTER + labelRadius * Math.sin(angleRad);
 
     accumulatedLength += length;
 
     return {
       ...stat,
       index: idx + 1,
-      strokeDasharray: `${length} ${
-        CIRCUMFERENCE - length
-      }`,
-      strokeDashoffset: isVisible
-        ? -dashoffset
-        : CIRCUMFERENCE,
+      strokeDasharray: `${length} ${CIRCUMFERENCE - length}`,
+      strokeDashoffset: isVisible ? -dashoffset : CIRCUMFERENCE,
       labelCoords: { x, y }
     };
   });
-
-  /* ------------------------------------------------------------------ */
-  /*  FEATURE PILLS                                                      */
-  /* ------------------------------------------------------------------ */
 
   const features = [
     {
@@ -217,8 +183,8 @@ export default function Feature1() {
         language === 'mr'
           ? 'तुमचे पॅटर्न्स समजून घ्या'
           : language === 'hi'
-          ? 'अपने पैटर्न्स को समझें'
-          : 'Understand Your Patterns',
+            ? 'अपने पैटर्न्स को समझें'
+            : 'Understand Your Patterns',
       icon: Leaf
     },
     {
@@ -226,8 +192,8 @@ export default function Feature1() {
         language === 'mr'
           ? 'चांगल्या सवयी तयार करा'
           : language === 'hi'
-          ? 'बेहतर आदतें बनाएं'
-          : 'Build Better Habits',
+            ? 'बेहतर आदतें बनाएं'
+            : 'Build Better Habits',
       icon: TrendingUp
     },
     {
@@ -235,15 +201,11 @@ export default function Feature1() {
         language === 'mr'
           ? 'अधिक नियंत्रणात असल्यासारखं वाटू द्या'
           : language === 'hi'
-          ? 'खुद को अधिक नियंत्रण में महसूस करें'
-          : 'Feel More In Control',
+            ? 'खुद को अधिक नियंत्रण में महसूस करें'
+            : 'Feel More In Control',
       icon: Sun
     }
   ];
-
-  /* ------------------------------------------------------------------ */
-  /*  BACKGROUND                                                         */
-  /* ------------------------------------------------------------------ */
 
   const blendedBackground = {
     background: [
@@ -255,19 +217,12 @@ export default function Feature1() {
     ].join(', ')
   };
 
-  /* ------------------------------------------------------------------ */
-  /*  UI                                                                  */
-  /* ------------------------------------------------------------------ */
-
   return (
     <section
       ref={sectionRef}
       style={blendedBackground}
       className="relative w-full min-h-screen flex items-center justify-center py-16 sm:py-20 px-4 sm:px-8 font-sans overflow-hidden"
     >
-
-      {/* Top Wavy Divider */}
-
       <div
         className="absolute top-0 left-0 w-full overflow-hidden leading-none pointer-events-none z-0"
         style={{
@@ -287,8 +242,6 @@ export default function Feature1() {
         </svg>
       </div>
 
-      {/* Main Content Container */}
-
       <div
         className={`w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10 transition-all duration-1000 ease-out transform ${
           isVisible
@@ -296,15 +249,15 @@ export default function Feature1() {
             : 'opacity-0 scale-95 translate-y-8'
         }`}
       >
-
-        {/* Left Section */}
-
         <div className="lg:col-span-6 flex flex-col space-y-5">
-
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-[#1b3a2b] leading-[1.12] tracking-tight">
+          <h1
+            className={`font-bold text-[#1b3a2b] ${headingSize}`}
+            style={{ fontFamily: sectionFont }}
+          >
             {language === 'en' ? (
               <>
-                Improve Focus <br /> with{' '}
+                Improve Focus <br />
+                with{' '}
                 <span className="text-[#2d6a4f]">
                   Effectiveness.
                 </span>
@@ -314,7 +267,10 @@ export default function Feature1() {
             )}
           </h1>
 
-          <p className="text-[#2f5142] text-sm sm:text-base leading-relaxed max-w-lg">
+          <p
+            className={`text-[#2f5142] max-w-lg ${descriptionSize}`}
+            style={{ fontFamily: sectionFont }}
+          >
             {focusContent.description}
           </p>
 
@@ -325,9 +281,10 @@ export default function Feature1() {
               return (
                 <div
                   key={idx}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/70 border border-[#d2eada] shadow-xs text-xs sm:text-sm font-medium text-[#2d6a4f]"
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/70 border border-[#d2eada] shadow-xs font-medium text-[#2d6a4f] ${featureTextSize}`}
+                  style={{ fontFamily: sectionFont }}
                 >
-                  <div className="w-7 h-7 rounded-lg bg-[#dcf2e3] flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-[#dcf2e3] flex items-center justify-center shrink-0">
                     <Icon className="w-4 h-4 text-[#2d6a4f]" />
                   </div>
 
@@ -346,13 +303,9 @@ export default function Feature1() {
 
             <div className="h-px bg-[#8bc49f] flex-1 max-w-[70px]" />
           </div>
-
         </div>
 
-        {/* Right Section */}
-
         <div className="lg:col-span-6 flex flex-col items-center justify-center perspective-[1200px]">
-
           <div
             className={`relative w-72 h-72 sm:w-84 sm:h-84 flex items-center justify-center bg-white/70 backdrop-blur-xl rounded-full p-3 border border-white shadow-[0_30px_70px_rgba(0,0,0,0.15),inset_0_2px_8px_rgba(255,255,255,0.9)] cursor-pointer select-none transition-all duration-1200 ease-out transform ${
               isVisible
@@ -361,18 +314,13 @@ export default function Feature1() {
             }`}
             style={{
               transformStyle: 'preserve-3d',
-              transform:
-                'rotateX(8deg) rotateY(-8deg)'
+              transform: 'rotateX(8deg) rotateY(-8deg)'
             }}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
-
-            {/* SVG Gradient Definitions */}
-
             <svg className="absolute w-0 h-0 overflow-hidden">
               <defs>
-
                 <linearGradient
                   id="grad-energy"
                   x1="0%"
@@ -380,14 +328,8 @@ export default function Feature1() {
                   x2="100%"
                   y2="100%"
                 >
-                  <stop
-                    offset="0%"
-                    stopColor="#22c55e"
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor="#0f766e"
-                  />
+                  <stop offset="0%" stopColor="#22c55e" />
+                  <stop offset="100%" stopColor="#0f766e" />
                 </linearGradient>
 
                 <linearGradient
@@ -397,14 +339,8 @@ export default function Feature1() {
                   x2="100%"
                   y2="100%"
                 >
-                  <stop
-                    offset="0%"
-                    stopColor="#facc15"
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor="#ea580c"
-                  />
+                  <stop offset="0%" stopColor="#facc15" />
+                  <stop offset="100%" stopColor="#ea580c" />
                 </linearGradient>
 
                 <linearGradient
@@ -414,14 +350,8 @@ export default function Feature1() {
                   x2="100%"
                   y2="100%"
                 >
-                  <stop
-                    offset="0%"
-                    stopColor="#c084fc"
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor="#6b21a8"
-                  />
+                  <stop offset="0%" stopColor="#c084fc" />
+                  <stop offset="100%" stopColor="#6b21a8" />
                 </linearGradient>
 
                 <linearGradient
@@ -431,30 +361,18 @@ export default function Feature1() {
                   x2="100%"
                   y2="100%"
                 >
-                  <stop
-                    offset="0%"
-                    stopColor="#38bdf8"
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor="#0369a1"
-                  />
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="100%" stopColor="#0369a1" />
                 </linearGradient>
-
               </defs>
             </svg>
 
-            {/* Main Donut Wheel */}
-
             <svg
               className={`w-full h-full transform -rotate-90 overflow-visible drop-shadow-[0_10px_15px_rgba(0,0,0,0.1)] transition-transform duration-[2400ms] cubic-bezier(0.25, 1, 0.5, 1) ${
-                isVisible
-                  ? 'rotate-[360deg]'
-                  : 'rotate-0'
+                isVisible ? 'rotate-[360deg]' : 'rotate-0'
               }`}
               viewBox="0 0 200 200"
             >
-
               <circle
                 cx={CENTER}
                 cy={CENTER}
@@ -465,11 +383,8 @@ export default function Feature1() {
               />
 
               {segments.map((seg) => {
-                const isCurrentActive =
-                  activeIndex === seg.index;
-
-                const gradientId =
-                  `grad-${seg.id}`;
+                const isCurrentActive = activeIndex === seg.index;
+                const gradientId = `grad-${seg.id}`;
 
                 return (
                   <circle
@@ -478,19 +393,11 @@ export default function Feature1() {
                     cy={CENTER}
                     r={RADIUS}
                     stroke={`url(#${gradientId})`}
-                    strokeWidth={
-                      isCurrentActive ? '42' : '38'
-                    }
+                    strokeWidth={isCurrentActive ? '42' : '38'}
                     fill="none"
-                    strokeDasharray={
-                      seg.strokeDasharray
-                    }
-                    strokeDashoffset={
-                      seg.strokeDashoffset
-                    }
-                    onClick={() =>
-                      setActiveIndex(seg.index)
-                    }
+                    strokeDasharray={seg.strokeDasharray}
+                    strokeDashoffset={seg.strokeDashoffset}
+                    onClick={() => setActiveIndex(seg.index)}
                     style={{
                       transition:
                         'stroke-dashoffset 1.4s cubic-bezier(0.34, 1.56, 0.64, 1), stroke-width 0.35s ease, filter 0.35s ease',
@@ -502,34 +409,23 @@ export default function Feature1() {
                   />
                 );
               })}
-
             </svg>
 
-            {/* Text and Percentages */}
-
             <div className="absolute inset-0 pointer-events-none">
-
               {segments.map((seg) => {
-                const isCurrentActive =
-                  activeIndex === seg.index;
-
-                const leftPercent =
-                  (seg.labelCoords.x / 200) * 100;
-
-                const topPercent =
-                  (seg.labelCoords.y / 200) * 100;
+                const isCurrentActive = activeIndex === seg.index;
+                const leftPercent = (seg.labelCoords.x / 200) * 100;
+                const topPercent = (seg.labelCoords.y / 200) * 100;
 
                 return (
                   <div
                     key={seg.id}
-                    onClick={() =>
-                      setActiveIndex(seg.index)
-                    }
+                    onClick={() => setActiveIndex(seg.index)}
                     style={{
                       left: `${leftPercent}%`,
                       top: `${topPercent}%`,
-                      transform:
-                        'translate(-50%, -50%)'
+                      transform: 'translate(-50%, -50%)',
+                      fontFamily: sectionFont
                     }}
                     className={`absolute flex flex-col items-center justify-center cursor-pointer pointer-events-auto transition-all duration-400 ${
                       isCurrentActive
@@ -537,42 +433,43 @@ export default function Feature1() {
                         : 'opacity-90 hover:opacity-100'
                     }`}
                   >
-
                     <span className="text-white text-[12px] font-black tracking-tight drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
                       {seg.percentage}
                     </span>
 
-                    <span className="text-white/95 text-[9px] font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap">
+                    <span
+                      className={`text-white/95 font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap ${
+                        isDevanagari
+                          ? 'text-[8px] sm:text-[9px] leading-relaxed'
+                          : 'text-[9px]'
+                      }`}
+                    >
                       {seg.label}
                     </span>
-
                   </div>
                 );
               })}
-
             </div>
 
-            {/* Center Summary */}
-
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
-
-              <span className="text-xs font-bold text-[#2d6a4f] transition-all duration-300">
+              <span
+                className={`font-bold text-[#2d6a4f] transition-all duration-300 ${
+                  isDevanagari
+                    ? 'text-[9px] sm:text-[10px]'
+                    : 'text-xs'
+                }`}
+                style={{ fontFamily: sectionFont }}
+              >
                 {currentStat.label}
               </span>
 
               <span className="text-3xl sm:text-4xl font-black text-[#1b3a2b] tracking-tight leading-tight mt-0.5 transition-all duration-300">
                 {currentStat.percentage}
               </span>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
-      {/* Bottom Wavy Divider */}
 
       <div
         className="absolute bottom-0 left-0 w-full overflow-hidden leading-none pointer-events-none z-0"
@@ -592,7 +489,6 @@ export default function Feature1() {
           />
         </svg>
       </div>
-
     </section>
   );
 }

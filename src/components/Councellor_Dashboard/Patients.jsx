@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Search,
   SlidersHorizontal,
@@ -6,44 +6,55 @@ import {
   CalendarDays,
   MoreVertical,
   X,
-  Video,
-  VideoOff,
-  Mic,
-  MicOff,
-  PhoneOff,
-  NotebookPen,
-  Trash2,
-  Check,
+  Clock,
 } from "lucide-react";
 
 import Sidebar from "./Sidebar";
+import {
+  sessionStore,
+  useSessions,
+  useNow,
+  findConflict,
+  joinState,
+  sessionEnd,
+  formatSlot,
+  formatDay,
+  toLocalInput,
+} from "./sessionStore";
+import {
+  Avatar,
+  FIELD,
+  JoinButton,
+  RescheduleModal,
+  VideoCallModal,
+} from "./SessionUi";
 
 // Hero image
 import heroImage from "../../assets/councellor-images/patients.png";
 
-
 const HERO_IMAGE = heroImage;
 const PAGE_SIZE = 5;
 
+// Next session aata store madhun yeto (sessionStore.js), mhanun `next` field nahi.
 const INITIAL_PATIENTS = [
-  { id: 1, name: "John Smith", age: 24, gender: "Male", problem: "Anxiety", status: "stable", last: "Yesterday", next: "Tomorrow, 10:00 AM", avatar: "" },
-  { id: 2, name: "Emma Wilson", age: 19, gender: "Female", problem: "Stress", status: "moderate", last: "5 Days Ago", next: "Fri, 16 May, 11:30 AM", avatar: "" },
-  { id: 3, name: "David Brown", age: 28, gender: "Male", problem: "Depression", status: "high", last: "2 Weeks Ago", next: "", avatar: "" },
-  { id: 4, name: "Sophia Johnson", age: 22, gender: "Female", problem: "Self Esteem", status: "stable", last: "3 Days Ago", next: "Mon, 19 May, 2:30 PM", avatar: "" },
-  { id: 5, name: "Michael Davis", age: 31, gender: "Male", problem: "Relationship Issues", status: "moderate", last: "1 Week Ago", next: "Thu, 15 May, 4:00 PM", avatar: "" },
-  { id: 6, name: "Olivia Martinez", age: 26, gender: "Female", problem: "Anxiety", status: "stable", last: "2 Days Ago", next: "Tue, 20 May, 10:30 AM", avatar: "" },
-  { id: 7, name: "Liam Anderson", age: 33, gender: "Male", problem: "Work Stress", status: "stable", last: "4 Days Ago", next: "Wed, 21 May, 1:00 PM", avatar: "" },
-  { id: 8, name: "Charlotte Clark", age: 29, gender: "Female", problem: "Sleep Issues", status: "moderate", last: "6 Days Ago", next: "Thu, 22 May, 3:00 PM", avatar: "" },
-  { id: 9, name: "Noah Taylor", age: 21, gender: "Male", problem: "Social Anxiety", status: "stable", last: "Yesterday", next: "Fri, 23 May, 9:30 AM", avatar: "" },
-  { id: 10, name: "Ava Thomas", age: 35, gender: "Female", problem: "Grief", status: "moderate", last: "1 Week Ago", next: "Mon, 26 May, 11:00 AM", avatar: "" },
-  { id: 11, name: "Henry Allen", age: 40, gender: "Male", problem: "Panic Attacks", status: "high", last: "10 Days Ago", next: "Tomorrow, 4:30 PM", avatar: "" },
-  { id: 12, name: "Isabella Moore", age: 23, gender: "Female", problem: "Self Esteem", status: "stable", last: "3 Days Ago", next: "Tue, 27 May, 2:00 PM", avatar: "" },
-  { id: 13, name: "James Lewis", age: 37, gender: "Male", problem: "Anger Management", status: "moderate", last: "5 Days Ago", next: "Wed, 28 May, 5:00 PM", avatar: "" },
-  { id: 14, name: "Ethan Jackson", age: 27, gender: "Male", problem: "Stress", status: "stable", last: "2 Days Ago", next: "Thu, 29 May, 10:00 AM", avatar: "" },
-  { id: 15, name: "Amelia Walker", age: 30, gender: "Female", problem: "Burnout", status: "moderate", last: "1 Week Ago", next: "Fri, 30 May, 12:00 PM", avatar: "" },
-  { id: 16, name: "Mia White", age: 20, gender: "Female", problem: "Exam Anxiety", status: "stable", last: "Yesterday", next: "Mon, 2 Jun, 3:30 PM", avatar: "" },
-  { id: 17, name: "Benjamin Hall", age: 45, gender: "Male", problem: "Life Transition", status: "moderate", last: "8 Days Ago", next: "Tue, 3 Jun, 1:30 PM", avatar: "" },
-  { id: 18, name: "Lucas Harris", age: 25, gender: "Male", problem: "Loneliness", status: "stable", last: "4 Days Ago", next: "Wed, 4 Jun, 11:30 AM", avatar: "" },
+  { id: 1, name: "John Smith", age: 24, gender: "Male", problem: "Anxiety", status: "stable", last: "Yesterday", avatar: "" },
+  { id: 2, name: "Emma Wilson", age: 19, gender: "Female", problem: "Stress", status: "moderate", last: "5 Days Ago", avatar: "" },
+  { id: 3, name: "David Brown", age: 28, gender: "Male", problem: "Depression", status: "high", last: "2 Weeks Ago", avatar: "" },
+  { id: 4, name: "Sophia Johnson", age: 22, gender: "Female", problem: "Self Esteem", status: "stable", last: "3 Days Ago", avatar: "" },
+  { id: 5, name: "Michael Davis", age: 31, gender: "Male", problem: "Relationship Issues", status: "moderate", last: "1 Week Ago", avatar: "" },
+  { id: 6, name: "Olivia Martinez", age: 26, gender: "Female", problem: "Anxiety", status: "stable", last: "2 Days Ago", avatar: "" },
+  { id: 7, name: "Liam Anderson", age: 33, gender: "Male", problem: "Work Stress", status: "stable", last: "4 Days Ago", avatar: "" },
+  { id: 8, name: "Charlotte Clark", age: 29, gender: "Female", problem: "Sleep Issues", status: "moderate", last: "6 Days Ago", avatar: "" },
+  { id: 9, name: "Noah Taylor", age: 21, gender: "Male", problem: "Social Anxiety", status: "stable", last: "Yesterday", avatar: "" },
+  { id: 10, name: "Ava Thomas", age: 35, gender: "Female", problem: "Grief", status: "moderate", last: "1 Week Ago", avatar: "" },
+  { id: 11, name: "Henry Allen", age: 40, gender: "Male", problem: "Panic Attacks", status: "high", last: "10 Days Ago", avatar: "" },
+  { id: 12, name: "Isabella Moore", age: 23, gender: "Female", problem: "Self Esteem", status: "stable", last: "3 Days Ago", avatar: "" },
+  { id: 13, name: "James Lewis", age: 37, gender: "Male", problem: "Anger Management", status: "moderate", last: "5 Days Ago", avatar: "" },
+  { id: 14, name: "Ethan Jackson", age: 27, gender: "Male", problem: "Stress", status: "stable", last: "2 Days Ago", avatar: "" },
+  { id: 15, name: "Amelia Walker", age: 30, gender: "Female", problem: "Burnout", status: "moderate", last: "1 Week Ago", avatar: "" },
+  { id: 16, name: "Mia White", age: 20, gender: "Female", problem: "Exam Anxiety", status: "stable", last: "Yesterday", avatar: "" },
+  { id: 17, name: "Benjamin Hall", age: 45, gender: "Male", problem: "Life Transition", status: "moderate", last: "8 Days Ago", avatar: "" },
+  { id: 18, name: "Lucas Harris", age: 25, gender: "Male", problem: "Loneliness", status: "stable", last: "4 Days Ago", avatar: "" },
 ];
 
 const STATUS = {
@@ -67,10 +78,6 @@ const STATUS = {
   },
 };
 
-/* ============================================================
-   SHARED
-============================================================ */
-
 const CARD =
   "rounded-[22px] border border-[#E3EDE6] bg-white shadow-[0_10px_30px_-12px_rgba(35,78,61,0.12)]";
 
@@ -86,12 +93,16 @@ export default function Patients({
 }) {
   const sidebarWidth = sidebarCollapsed ? 76 : 268;
 
+  const sessions = useSessions();
+  const now = useNow();
+
   const [patients, setPatients] = useState(INITIAL_PATIENTS);
   const [showAdd, setShowAdd] = useState(false);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
-  const [activeCall, setActiveCall] = useState(null); // patient currently in a call
+  const [reschedule, setReschedule] = useState(null); // session being rescheduled
+  const [activeCall, setActiveCall] = useState(null); // session currently in a call
 
   const counts = useMemo(
     () => ({
@@ -102,6 +113,29 @@ export default function Patients({
     }),
     [patients]
   );
+
+  // Prati patient: upcoming session, pending request, last completed
+  const sessionInfo = useMemo(() => {
+    const map = new Map();
+    for (const p of patients) {
+      const mine = sessions.filter((s) => s.patientId === p.id);
+      map.set(p.id, {
+        upcoming:
+          mine
+            .filter((s) => s.status === "scheduled" && sessionEnd(s) > now)
+            .sort((a, b) => a.start - b.start)[0] || null,
+        pending: mine.find((s) => s.status === "pending") || null,
+        lastDone:
+          mine.filter((s) => s.status === "completed").sort((a, b) => b.start - a.start)[0] || null,
+      });
+    }
+    return map;
+  }, [patients, sessions, now]);
+
+  const todayCount = sessions.filter(
+    (s) => s.status === "scheduled" && sessionEnd(s) > now && formatDay(s.start, now) === "Today"
+  ).length;
+  const pendingCount = sessions.filter((s) => s.status === "pending").length;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -126,30 +160,32 @@ export default function Patients({
     setPage(1);
   };
 
-  const handleAddPatient = (data) => {
-    setPatients((prev) => [{ ...data, id: Date.now() }, ...prev]);
+  const handleAddPatient = ({ nextTs, ...data }) => {
+    const id = Date.now();
+    setPatients((prev) => [{ ...data, id }, ...prev]);
+    if (nextTs) {
+      sessionStore.schedule({
+        patientId: id,
+        name: data.name,
+        age: data.age,
+        gender: data.gender,
+        problem: data.problem,
+        start: nextTs,
+      });
+    }
     setQuery("");
     setFilter("all");
     setPage(1);
     setShowAdd(false);
   };
 
-  /* ---------- Session flow: pending -> accepted -> (call) -> completed ---------- */
-  const updateSession = (id, session) =>
-    setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, session } : p)));
-
-  const handleAccept = (p) => updateSession(p.id, "accepted");
-  const handleDecline = (p) => updateSession(p.id, "declined");
-  const handleJoin = (p) => setActiveCall(p);
+  // Join fakt session chya 15 min aadhi pasun enable asto
+  const handleJoin = (s) => {
+    if (joinState(s, Date.now()) === "open") setActiveCall(s);
+  };
 
   const handleEndCall = (notes) => {
-    setPatients((prev) =>
-      prev.map((p) =>
-        p.id === activeCall.id
-          ? { ...p, session: "completed", notes: [...(p.notes || []), ...notes] }
-          : p
-      )
-    );
+    sessionStore.complete(activeCall.id, notes);
     setActiveCall(null);
   };
 
@@ -158,11 +194,9 @@ export default function Patients({
       className="min-h-screen bg-[#F2F6F3] text-gray-800 antialiased"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
-      {/* Font + animations */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-        /* Fraunces is used ONLY on the main banner heading (same as dashboard hero) */
         .cd-display { font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.01em; }
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
@@ -189,7 +223,11 @@ export default function Patients({
         style={{ marginLeft: `${sidebarWidth}px` }}
       >
         <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 md:p-6 lg:p-8">
-          <Banner />
+          <Banner
+            todayCount={todayCount}
+            pendingCount={pendingCount}
+            onReview={() => onNavigate?.("Notifications")}
+          />
 
           <TitleBar onAdd={() => setShowAdd(true)} />
 
@@ -211,15 +249,22 @@ export default function Patients({
                 </p>
               </div>
             ) : (
-              visible.map((p) => (
-                <PatientCard
-                  key={p.id}
-                  patient={p}
-                  onAccept={handleAccept}
-                  onDecline={handleDecline}
-                  onJoin={handleJoin}
-                />
-              ))
+              visible.map((p) => {
+                const info = sessionInfo.get(p.id) || {};
+                return (
+                  <PatientCard
+                    key={p.id}
+                    patient={p}
+                    upcoming={info.upcoming}
+                    pending={info.pending}
+                    lastDone={info.lastDone}
+                    now={now}
+                    onJoin={handleJoin}
+                    onReschedule={setReschedule}
+                    onReview={() => onNavigate?.("Notifications")}
+                  />
+                );
+              })
             )}
           </section>
 
@@ -236,38 +281,17 @@ export default function Patients({
 
       {showAdd && (
         <AddPatientModal
+          sessions={sessions}
           onClose={() => setShowAdd(false)}
           onAdd={handleAddPatient}
         />
       )}
 
-      {activeCall && (
-        <VideoCallModal patient={activeCall} onEnd={handleEndCall} />
+      {reschedule && (
+        <RescheduleModal session={reschedule} onClose={() => setReschedule(null)} />
       )}
-    </div>
-  );
-}
 
-function Avatar({ name, src, size = "h-14 w-14", textSize = "text-sm" }) {
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt={name}
-        className={`${size} flex-shrink-0 rounded-2xl object-cover shadow-sm ring-1 ring-[#E3EDE6]`}
-      />
-    );
-  }
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2);
-  return (
-    <div
-      className={`${size} ${textSize} flex flex-shrink-0 items-center justify-center rounded-2xl bg-[#E3F2EA] font-bold text-[#257B51] shadow-sm ring-1 ring-[#E3EDE6]`}
-    >
-      {initials}
+      {activeCall && <VideoCallModal session={activeCall} onEnd={handleEndCall} />}
     </div>
   );
 }
@@ -276,7 +300,12 @@ function Avatar({ name, src, size = "h-14 w-14", textSize = "text-sm" }) {
    BANNER
 ============================================================ */
 
-function Banner() {
+function Banner({ todayCount, pendingCount, onReview }) {
+  const todayText =
+    todayCount === 0
+      ? "No patient sessions scheduled for today."
+      : `${todayCount} patient ${todayCount > 1 ? "sessions" : "session"} scheduled for today.`;
+
   return (
     <section className="relative flex min-h-[170px] items-center overflow-hidden rounded-[30px] border border-[#9DD4B8] bg-gradient-to-r from-[#B8E2CB] via-[#C9EBD8] to-[#DCF2E4] shadow-sm md:min-h-[220px] lg:min-h-[260px]">
       <div className="pointer-events-none absolute inset-0 z-0">
@@ -285,11 +314,7 @@ function Banner() {
           alt="Counselling illustration"
           className="h-full w-full object-cover object-right"
         />
-
-        {/* Mobile overlay */}
         <div className="absolute inset-0 bg-black/55 md:hidden" />
-
-        {/* Desktop overlay */}
         <div
           className="absolute inset-0 hidden md:block"
           style={{
@@ -307,9 +332,18 @@ function Banner() {
             Brighter Tomorrows
           </h2>
           <p className="anim-fade-2 mt-3 max-w-xl text-sm font-medium text-white/90 drop-shadow md:text-base">
-            5 patient sessions scheduled for today. Review diagnostic updates and
-            prepare session notes.
+            {todayText} Review diagnostic updates and prepare session notes.
           </p>
+          {pendingCount > 0 && (
+            <button
+              type="button"
+              onClick={onReview}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-[#234E3D] shadow-sm transition hover:bg-[#F4F7F4]"
+            >
+              <Clock size={14} />
+              {pendingCount} new session {pendingCount > 1 ? "requests" : "request"} waiting
+            </button>
+          )}
         </div>
       </div>
     </section>
@@ -357,25 +391,7 @@ const EMPTY_FORM = {
   next: "",
 };
 
-const FIELD =
-  "w-full rounded-xl border border-[#B7CDBD] bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition focus:border-[#234E3D] focus:outline-none focus:ring-2 focus:ring-[#487053]/30";
-
-function formatNext(value) {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
-  const day = d.toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-  const time = d
-    .toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
-    .toUpperCase();
-  return `${day}, ${time}`;
-}
-
-function AddPatientModal({ onClose, onAdd }) {
+function AddPatientModal({ sessions, onClose, onAdd }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
 
@@ -405,6 +421,15 @@ function AddPatientModal({ onClose, onAdd }) {
     else if (!Number.isInteger(ageNum) || ageNum < 1 || ageNum > 120)
       er.age = "Enter an age between 1 and 120";
     if (!form.problem.trim()) er.problem = "Please enter the problem";
+
+    if (form.next) {
+      const ts = new Date(form.next).getTime();
+      if (Number.isNaN(ts) || ts <= Date.now()) er.next = "Pick a time in the future";
+      else {
+        const c = findConflict(sessions, ts);
+        if (c) er.next = `Clashes with ${c.patientName} at ${formatSlot(c.start)}`;
+      }
+    }
     return er;
   };
 
@@ -421,8 +446,8 @@ function AddPatientModal({ onClose, onAdd }) {
       problem: form.problem.trim(),
       status: form.status,
       last: "New patient",
-      next: formatNext(form.next),
       avatar: "",
+      nextTs: form.next ? new Date(form.next).getTime() : null,
     });
   };
 
@@ -461,7 +486,6 @@ function AddPatientModal({ onClose, onAdd }) {
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* Name */}
           <div className="sm:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
               Full Name
@@ -477,7 +501,6 @@ function AddPatientModal({ onClose, onAdd }) {
             {errors.name && <p className="mt-1 text-[11px] text-rose-600">{errors.name}</p>}
           </div>
 
-          {/* Age */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">Age</label>
             <input
@@ -492,7 +515,6 @@ function AddPatientModal({ onClose, onAdd }) {
             {errors.age && <p className="mt-1 text-[11px] text-rose-600">{errors.age}</p>}
           </div>
 
-          {/* Gender */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">Gender</label>
             <select value={form.gender} onChange={set("gender")} className={FIELD}>
@@ -502,7 +524,6 @@ function AddPatientModal({ onClose, onAdd }) {
             </select>
           </div>
 
-          {/* Problem */}
           <div className="sm:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">Problem</label>
             <input
@@ -517,7 +538,6 @@ function AddPatientModal({ onClose, onAdd }) {
             )}
           </div>
 
-          {/* Status */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">Status</label>
             <select value={form.status} onChange={set("status")} className={FIELD}>
@@ -527,7 +547,6 @@ function AddPatientModal({ onClose, onAdd }) {
             </select>
           </div>
 
-          {/* Next session */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
               Next Session <span className="font-normal text-slate-400">(optional)</span>
@@ -535,9 +554,11 @@ function AddPatientModal({ onClose, onAdd }) {
             <input
               type="datetime-local"
               value={form.next}
+              min={toLocalInput(Date.now())}
               onChange={set("next")}
               className={FIELD}
             />
+            {errors.next && <p className="mt-1 text-[11px] text-rose-600">{errors.next}</p>}
           </div>
         </div>
 
@@ -576,7 +597,6 @@ function FiltersBar({ query, onQuery, filter, onFilter, counts }) {
     <div
       className={`${CARD} flex flex-col items-stretch justify-between gap-3 p-3 md:flex-row md:items-center md:p-4`}
     >
-      {/* Search Bar Wrapper */}
       <div className="flex max-w-md flex-1 items-center gap-2.5">
         <div className="relative flex h-11 w-full items-center rounded-2xl border-2 border-[#9FBFA9] bg-white px-3.5 shadow-sm transition focus-within:border-[#234E3D] focus-within:ring-4 focus-within:ring-[#487053]/20">
           <Search size={18} className="flex-shrink-0 text-[#234E3D]" />
@@ -597,7 +617,6 @@ function FiltersBar({ query, onQuery, filter, onFilter, counts }) {
         </button>
       </div>
 
-      {/* Filter Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium md:pb-0">
         <button
           type="button"
@@ -631,13 +650,35 @@ function FiltersBar({ query, onQuery, filter, onFilter, counts }) {
 
 /* ============================================================
    PATIENT CARD
+   - Request aali asel: "Requested Session" + "Review request"
+   - Session schedule asel: vel + Reschedule + Join
+     (Join session chya 15 min aadhi paryant disabled)
 ============================================================ */
 
-function PatientCard({ patient: p, onAccept, onDecline, onJoin }) {
+function PatientCard({ patient: p, upcoming, pending, lastDone, now, onJoin, onReschedule, onReview }) {
   const s = STATUS[p.status];
   const isHigh = p.status === "high";
-  const notScheduled = !p.next;
-  const session = p.session || "pending"; // pending | accepted | declined | completed
+
+  const nextLabel = upcoming ? "Next Session" : pending ? "Requested Session" : "Next Session";
+  const nextValue = upcoming
+    ? `${formatSlot(upcoming.start, now)}${upcoming.rescheduled ? " (rescheduled)" : ""}`
+    : pending
+    ? formatSlot(pending.start, now)
+    : "Not Scheduled";
+
+  const iconStyle = upcoming
+    ? "border-[#E3EDE6] bg-[#F4F8F5] text-[#34553E]"
+    : pending
+    ? "border-amber-100 bg-amber-50 text-amber-600"
+    : "border-rose-100 bg-rose-50 text-rose-600";
+
+  const valueStyle = upcoming
+    ? "text-slate-800"
+    : pending
+    ? "text-amber-700"
+    : "text-rose-600";
+
+  const lastLabel = lastDone ? formatDay(lastDone.start, now) : p.last;
 
   return (
     <article
@@ -674,37 +715,30 @@ function PatientCard({ patient: p, onAccept, onDecline, onJoin }) {
             isHigh ? "font-medium text-rose-500" : "text-slate-400"
           }`}
         >
-          Last: {p.last}
+          Last: {lastLabel}
         </span>
       </div>
 
       {/* Next session */}
-      <div className="flex items-center gap-3 lg:min-w-[210px]">
+      <div className="flex items-center gap-3 lg:min-w-[220px]">
         <div
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border ${
-            notScheduled
-              ? "border-rose-100 bg-rose-50 text-rose-600"
-              : "border-[#E3EDE6] bg-[#F4F8F5] text-[#34553E]"
-          }`}
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border ${iconStyle}`}
         >
           <CalendarDays size={20} />
         </div>
         <div>
           <span className="block text-[11px] font-medium uppercase tracking-wider text-slate-400">
-            Next Session
+            {nextLabel}
           </span>
-          <span
-            className={`text-xs font-semibold ${
-              notScheduled ? "text-rose-600" : "text-slate-800"
-            }`}
-          >
-            {notScheduled ? "Not Scheduled" : p.next}
-          </span>
+          <span className={`text-xs font-semibold ${valueStyle}`}>{nextValue}</span>
+          {pending && !upcoming && (
+            <span className="mt-0.5 block text-[11px] text-amber-600">Awaiting your reply</span>
+          )}
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-2.5 border-t border-slate-100 pt-2 sm:border-t-0 sm:pt-0">
+      <div className="flex flex-wrap items-start justify-end gap-2.5 border-t border-slate-100 pt-2 sm:border-t-0 sm:pt-0">
         <button
           type="button"
           className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition duration-150 hover:border-[#ADC6B3] hover:bg-[#F4F7F4]"
@@ -712,47 +746,27 @@ function PatientCard({ patient: p, onAccept, onDecline, onJoin }) {
           View Profile
         </button>
 
-        {session === "pending" && (
-          <>
-            <button
-              type="button"
-              onClick={() => onDecline(p)}
-              className="whitespace-nowrap rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-600 transition duration-150 hover:bg-rose-50"
-            >
-              Decline
-            </button>
-            <button
-              type="button"
-              onClick={() => onAccept(p)}
-              className="whitespace-nowrap rounded-xl bg-[#234E3D] px-4 py-2 text-xs font-semibold text-white shadow-sm transition duration-150 hover:bg-[#173629] hover:shadow"
-            >
-              Accept
-            </button>
-          </>
-        )}
-
-        {session === "accepted" && (
+        {pending && !upcoming && (
           <button
             type="button"
-            onClick={() => onJoin(p)}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-[#234E3D] px-4 py-2 text-xs font-semibold text-white shadow-sm transition duration-150 hover:bg-[#173629] hover:shadow"
+            onClick={onReview}
+            className="whitespace-nowrap rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700 transition duration-150 hover:bg-amber-100"
           >
-            <Video size={14} />
-            Join
+            Review request
           </button>
         )}
 
-        {session === "declined" && (
-          <span className="whitespace-nowrap rounded-xl border border-rose-100 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-600">
-            Declined
-          </span>
-        )}
-
-        {session === "completed" && (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-xl border border-[#A7F3D0]/70 bg-[#ECFDF5] px-4 py-2 text-xs font-semibold text-[#047857]">
-            <Check size={14} />
-            Completed
-          </span>
+        {upcoming && (
+          <>
+            <button
+              type="button"
+              onClick={() => onReschedule(upcoming)}
+              className="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition duration-150 hover:border-[#ADC6B3] hover:bg-[#F4F7F4]"
+            >
+              Reschedule
+            </button>
+            <JoinButton session={upcoming} now={now} onJoin={onJoin} />
+          </>
         )}
 
         <button
@@ -828,285 +842,5 @@ function Pagination({ from, to, total, page, totalPages, onPage }) {
         </button>
       </div>
     </footer>
-  );
-}
-
-/* ============================================================
-   VIDEO CALL MODAL
-   - Patient: motha screen
-   - Counsellor: lahan screen (khali ujvi kade)
-   - Session notes panel (right side)
-============================================================ */
-
-function formatTimer(sec) {
-  const m = String(Math.floor(sec / 60)).padStart(2, "0");
-  const s = String(sec % 60).padStart(2, "0");
-  return `${m}:${s}`;
-}
-
-function VideoCallModal({ patient, onEnd }) {
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null); // attach WebRTC remote stream here
-  const streamRef = useRef(null);
-
-  const [seconds, setSeconds] = useState(0);
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
-  const [camError, setCamError] = useState(false);
-  const [showNotes, setShowNotes] = useState(true);
-  const [draft, setDraft] = useState("");
-  const [notes, setNotes] = useState([]);
-
-  // Call timer
-  useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  // Counsellor's local camera + mic
-  useEffect(() => {
-    let cancelled = false;
-    navigator.mediaDevices
-      ?.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        streamRef.current = stream;
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-      })
-      .catch(() => setCamError(true));
-
-    return () => {
-      cancelled = true;
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-    };
-  }, []);
-
-  // Body scroll lock
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
-
-  const toggleMic = () => {
-    streamRef.current?.getAudioTracks().forEach((t) => (t.enabled = !micOn));
-    setMicOn((v) => !v);
-  };
-  const toggleCam = () => {
-    streamRef.current?.getVideoTracks().forEach((t) => (t.enabled = !camOn));
-    setCamOn((v) => !v);
-  };
-
-  const addNote = () => {
-    const text = draft.trim();
-    if (!text) return;
-    setNotes((prev) => [
-      ...prev,
-      { id: Date.now(), text, at: formatTimer(seconds) },
-    ]);
-    setDraft("");
-  };
-
-  const handleKey = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      addNote();
-    }
-  };
-
-  const endCall = () => {
-    // Save any unsaved text in the draft as well
-    const pending = draft.trim()
-      ? [{ id: Date.now(), text: draft.trim(), at: formatTimer(seconds) }]
-      : [];
-    onEnd([...notes, ...pending]);
-  };
-
-  return (
-    <div className="fixed inset-0 z-[60] bg-[#0B1511]" role="dialog" aria-modal="true">
-      {/* VIDEO AREA */}
-      <div className="relative h-full w-full overflow-hidden">
-        {/* Patient - motha screen */}
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#12241C] to-[#0B1511]">
-          {/* Placeholder until remote stream arrives */}
-          <div className="relative z-0 flex flex-col items-center gap-4">
-            <Avatar
-              name={patient.name}
-              src={patient.avatar}
-              size="h-32 w-32"
-              textSize="text-3xl"
-            />
-            <p className="text-sm font-medium text-white/70">Waiting for patient video…</p>
-          </div>
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className="absolute inset-0 z-[1] h-full w-full object-cover"
-          />
-        </div>
-
-        {/* Top bar */}
-        <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-5 py-4">
-          <div>
-            <h3 className="text-base font-semibold text-white">{patient.name}</h3>
-            <p className="text-xs text-white/70">
-              {patient.age} Years • {patient.problem}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 text-xs font-semibold text-white">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-rose-500" />
-              {formatTimer(seconds)}
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowNotes((v) => !v)}
-              className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
-                showNotes
-                  ? "bg-white text-[#234E3D]"
-                  : "bg-white/15 text-white hover:bg-white/25"
-              }`}
-            >
-              <NotebookPen size={14} />
-              Notes
-            </button>
-          </div>
-        </div>
-
-        {/* Counsellor - lahan screen (khali ujvi kade) */}
-        <div className="absolute bottom-24 right-4 z-10 h-32 w-24 overflow-hidden rounded-2xl border-2 border-white/30 bg-[#1B3329] shadow-xl sm:h-40 sm:w-56">
-          {/* Video stays mounted so the stream is not lost when camera is toggled */}
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            className="h-full w-full -scale-x-100 object-cover"
-          />
-          {(camError || !camOn) && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#1B3329] text-white/70">
-              <VideoOff size={20} />
-              <span className="text-[11px]">
-                {camError ? "Camera unavailable" : "Camera off"}
-              </span>
-            </div>
-          )}
-          <span className="absolute bottom-1.5 left-2 rounded-md bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white">
-            You
-          </span>
-        </div>
-
-        {/* Controls */}
-        <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3">
-          <button
-            type="button"
-            onClick={toggleMic}
-            aria-label="Toggle microphone"
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
-              micOn ? "bg-white/15 text-white hover:bg-white/25" : "bg-white text-slate-800"
-            }`}
-          >
-            {micOn ? <Mic size={20} /> : <MicOff size={20} />}
-          </button>
-          <button
-            type="button"
-            onClick={toggleCam}
-            aria-label="Toggle camera"
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
-              camOn ? "bg-white/15 text-white hover:bg-white/25" : "bg-white text-slate-800"
-            }`}
-          >
-            {camOn ? <Video size={20} /> : <VideoOff size={20} />}
-          </button>
-          <button
-            type="button"
-            onClick={endCall}
-            aria-label="End call"
-            className="flex h-12 items-center gap-2 rounded-full bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700"
-          >
-            <PhoneOff size={18} />
-            End
-          </button>
-        </div>
-      </div>
-
-      {/* NOTES PANEL */}
-      {showNotes && (
-        <aside className="absolute right-4 top-20 z-20 flex max-h-[calc(100vh-20rem)] w-[calc(100%-2rem)] flex-col overflow-hidden rounded-2xl border border-[#C8DACD] bg-white shadow-2xl sm:max-h-[calc(100vh-24rem)] sm:w-[440px]">
-          <div className="flex items-center justify-between border-b border-[#E3EDE6] px-4 py-3">
-            <div>
-              <h4 className="text-sm font-bold text-slate-900">Session Notes</h4>
-              <p className="text-[11px] text-slate-500">
-                Write down what the patient says
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowNotes(false)}
-              aria-label="Close notes"
-              className="rounded-xl p-1.5 text-slate-400 transition hover:bg-[#F4F7F4] hover:text-slate-600"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          {/* Saved notes */}
-          <div className="min-h-[140px] flex-1 space-y-2.5 overflow-y-auto px-4 py-3 sm:min-h-[220px]">
-            {notes.length === 0 ? (
-              <p className="py-3 text-center text-xs text-slate-400">
-                No notes yet. Type below and press Enter to save.
-              </p>
-            ) : (
-              notes.map((n) => (
-                <div
-                  key={n.id}
-                  className="group rounded-xl border border-[#E3EDE6] bg-[#F4F8F5] p-3"
-                >
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-[#257B51]">{n.at}</span>
-                    <button
-                      type="button"
-                      onClick={() => setNotes((prev) => prev.filter((x) => x.id !== n.id))}
-                      aria-label="Delete note"
-                      className="text-slate-400 opacity-0 transition hover:text-rose-500 focus:opacity-100 group-hover:opacity-100"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                    {n.text}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Input */}
-          <div className="border-t border-[#E3EDE6] p-3">
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={handleKey}
-              rows={3}
-              placeholder="Type what the patient says… (Enter to save)"
-              className={`${FIELD} resize-none`}
-            />
-            <button
-              type="button"
-              onClick={addNote}
-              className="mt-2 w-full rounded-xl bg-[#234E3D] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#173629] active:scale-95"
-            >
-              Add Note
-            </button>
-          </div>
-        </aside>
-      )}
-    </div>
   );
 }
