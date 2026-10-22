@@ -361,7 +361,7 @@ export default function CounsellorProfileStep1({
                   />
                   <span
                     aria-hidden="true"
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm opacity-60"
+                    className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm leading-none opacity-60"
                   >
                     🔒
                   </span>

@@ -35,6 +35,10 @@ const statesAndDistricts = {
   ],
 };
 
+const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+const UPI_REGEX = /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z]{2,64}$/;
+const PINCODE_REGEX = /^[1-9][0-9]{5}$/;
+
 function getCurrentPartner() {
   try {
     const storedPartner = localStorage.getItem(
@@ -46,6 +50,19 @@ function getCurrentPartner() {
     console.error("Unable to read partner session:", error);
     return {};
   }
+}
+
+// Reads the structured address. If only an old single-line address exists,
+// it is placed in "Address line 1" so nothing is lost.
+function readAddress(data = {}) {
+  const details = data.addressDetails || {};
+  return {
+    addressLine1: details.addressLine1 || (data.addressDetails ? "" : data.address || ""),
+    addressLine2: details.addressLine2 || "",
+    landmark: details.landmark || "",
+    city: details.city || "",
+    pincode: details.pincode || "",
+  };
 }
 
 function Field({ label, hint, invalid, children }) {
@@ -76,11 +93,33 @@ export default function CounsellorProfileStep2({
     ...initialData,
   }));
 
+  // Personal & location
+  const initialAddress = readAddress(initialData);
   const [gender, setGender] = useState(initialData.gender || "");
   const [dob, setDob] = useState(initialData.dob || "");
   const [state, setState] = useState(initialData.state || "");
   const [district, setDistrict] = useState(initialData.district || "");
-  const [address, setAddress] = useState(initialData.address || "");
+  const [addressLine1, setAddressLine1] = useState(initialAddress.addressLine1);
+  const [addressLine2, setAddressLine2] = useState(initialAddress.addressLine2);
+  const [landmark, setLandmark] = useState(initialAddress.landmark);
+  const [city, setCity] = useState(initialAddress.city);
+  const [pincode, setPincode] = useState(initialAddress.pincode);
+
+  // Bank details
+  const initialBank = initialData.bankDetails || {};
+  const [accountHolderName, setAccountHolderName] = useState(
+    initialBank.accountHolderName || ""
+  );
+  const [bankName, setBankName] = useState(initialBank.bankName || "");
+  const [accountNumber, setAccountNumber] = useState(
+    initialBank.accountNumber || ""
+  );
+  const [confirmAccountNumber, setConfirmAccountNumber] = useState(
+    initialBank.accountNumber || ""
+  );
+  const [ifsc, setIfsc] = useState(initialBank.ifsc || "");
+  const [accountType, setAccountType] = useState(initialBank.accountType || "");
+  const [upiId, setUpiId] = useState(initialBank.upiId || "");
 
   const [error, setError] = useState("");
   const [touched, setTouched] = useState({});
@@ -92,13 +131,27 @@ export default function CounsellorProfileStep2({
       ...getCurrentPartner(),
       ...initialData,
     };
+    const bank = currentPartner.bankDetails || {};
+    const savedAddress = readAddress(currentPartner);
 
     setPartner(currentPartner);
     setGender(currentPartner.gender || "");
     setDob(currentPartner.dob || "");
     setState(currentPartner.state || "");
     setDistrict(currentPartner.district || "");
-    setAddress(currentPartner.address || "");
+    setAddressLine1(savedAddress.addressLine1);
+    setAddressLine2(savedAddress.addressLine2);
+    setLandmark(savedAddress.landmark);
+    setCity(savedAddress.city);
+    setPincode(savedAddress.pincode);
+
+    setAccountHolderName(bank.accountHolderName || "");
+    setBankName(bank.bankName || "");
+    setAccountNumber(bank.accountNumber || "");
+    setConfirmAccountNumber(bank.accountNumber || "");
+    setIfsc(bank.ifsc || "");
+    setAccountType(bank.accountType || "");
+    setUpiId(bank.upiId || "");
   }, [initialData]);
 
   const markTouched = (field) =>
@@ -106,12 +159,57 @@ export default function CounsellorProfileStep2({
 
   const todayString = new Date().toISOString().split("T")[0];
 
+  const getDobError = () => {
+    if (!dob) return "Select your date of birth";
+    const selectedDate = new Date(`${dob}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (Number.isNaN(selectedDate.getTime()) || selectedDate > today) {
+      return "Select a valid date of birth";
+    }
+    return "";
+  };
+
+  // Order matters: the first invalid field is the one reported on save.
   const fieldErrors = {
     gender: gender ? "" : "Select your gender",
-    dob: dob ? "" : "Select your date of birth",
+    dob: getDobError(),
     state: state ? "" : "Select your state",
     district: district ? "" : "Select your district",
-    address: address.trim() ? "" : "Enter your address",
+    addressLine1: addressLine1.trim()
+      ? ""
+      : "Enter your house / flat number and building name",
+    addressLine2: addressLine2.trim() ? "" : "Enter your street or area",
+    city: city.trim() ? "" : "Enter your city, town or village",
+    pincode: !pincode
+      ? "Enter your pincode"
+      : !PINCODE_REGEX.test(pincode)
+      ? "Enter a valid 6-digit pincode"
+      : "",
+    accountHolderName: accountHolderName.trim()
+      ? ""
+      : "Enter the account holder name",
+    bankName: bankName.trim() ? "" : "Enter your bank name",
+    accountNumber: !accountNumber
+      ? "Enter your account number"
+      : accountNumber.length < 9 || accountNumber.length > 18
+      ? "Account number must be 9 to 18 digits"
+      : "",
+    confirmAccountNumber: !confirmAccountNumber
+      ? "Re-enter your account number"
+      : confirmAccountNumber !== accountNumber
+      ? "Account numbers do not match"
+      : "",
+    ifsc: !ifsc
+      ? "Enter your IFSC code"
+      : !IFSC_REGEX.test(ifsc)
+      ? "Enter a valid IFSC code (e.g. SBIN0001234)"
+      : "",
+    accountType: accountType ? "" : "Select the account type",
+    upiId:
+      upiId.trim() && !UPI_REGEX.test(upiId.trim())
+        ? "Enter a valid UPI ID (e.g. name@bank)"
+        : "",
   };
   const showError = (field) => (touched[field] ? fieldErrors[field] : "");
 
@@ -120,45 +218,41 @@ export default function CounsellorProfileStep2({
 
     if (isSaving) return;
 
-    if (!gender) {
-      markTouched("gender");
-      setError("Please select your gender.");
+    const firstInvalid = Object.keys(fieldErrors).find(
+      (key) => fieldErrors[key]
+    );
+
+    if (firstInvalid) {
+      setTouched(
+        Object.keys(fieldErrors).reduce(
+          (all, key) => ({ ...all, [key]: true }),
+          {}
+        )
+      );
+      setError(`${fieldErrors[firstInvalid]}.`);
       return;
     }
 
-    if (!dob) {
-      markTouched("dob");
-      setError("Please select your date of birth.");
-      return;
-    }
+    const addressDetails = {
+      addressLine1: addressLine1.trim(),
+      addressLine2: addressLine2.trim(),
+      landmark: landmark.trim(),
+      city: city.trim(),
+      pincode,
+    };
 
-    const selectedDate = new Date(`${dob}T00:00:00`);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (Number.isNaN(selectedDate.getTime()) || selectedDate > today) {
-      markTouched("dob");
-      setError("Please select a valid date of birth.");
-      return;
-    }
-
-    if (!state) {
-      markTouched("state");
-      setError("Please select your state.");
-      return;
-    }
-
-    if (!district) {
-      markTouched("district");
-      setError("Please select your district.");
-      return;
-    }
-
-    if (!address.trim()) {
-      markTouched("address");
-      setError("Please enter your address.");
-      return;
-    }
+    // Single-line version of the address, kept for the rest of the app.
+    const fullAddress = [
+      addressDetails.addressLine1,
+      addressDetails.addressLine2,
+      addressDetails.landmark ? `Near ${addressDetails.landmark}` : "",
+      addressDetails.city,
+      district,
+      state,
+      addressDetails.pincode,
+    ]
+      .filter(Boolean)
+      .join(", ");
 
     const profileData = {
       ...partner,
@@ -167,7 +261,16 @@ export default function CounsellorProfileStep2({
       dob,
       state,
       district,
-      address: address.trim(),
+      address: fullAddress,
+      addressDetails,
+      bankDetails: {
+        accountHolderName: accountHolderName.trim(),
+        bankName: bankName.trim(),
+        accountNumber,
+        ifsc,
+        accountType,
+        upiId: upiId.trim(),
+      },
       profileCompleted: true,
     };
 
@@ -231,24 +334,37 @@ export default function CounsellorProfileStep2({
       {/* Mobile Header */}
       <header className="relative z-30 border-b border-[#a6dbc0] bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3.5 sm:px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0c3831] text-lg text-white shadow-[0_6px_16px_rgba(12,56,49,0.25)]">
-            🌿
-          </div>
-          <div>
-            <div className="text-base font-bold leading-none text-[#0c3831]">
-              Manovedh
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0c3831] text-white shadow-[0_6px_16px_rgba(12,56,49,0.25)]">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15" />
+                <path d="M5 19c3-5 6-8 10-10" />
+              </svg>
             </div>
-            <div className="mt-1 text-[10px] font-bold tracking-[2.5px] text-[#1b5e53]">
-              PARTNER PORTAL
+            <div>
+              <div className="text-base font-bold leading-none text-[#0c3831]">
+                Manovedh
+              </div>
+              <div className="mt-1 text-[10px] font-bold tracking-[2.5px] text-[#1b5e53]">
+                PARTNER PORTAL
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 rounded-full border border-[#a6dbc0] bg-[#e6f7ee] px-3 py-1.5 text-xs font-bold text-[#114b42]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#114b42]"></span>
-          Step 2 of 2
-        </div>
+          <div className="flex items-center gap-2 rounded-full border border-[#a6dbc0] bg-[#e6f7ee] px-3 py-1.5 text-xs font-bold text-[#114b42]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#114b42]"></span>
+            Step 2 of 2
+          </div>
         </div>
       </header>
 
@@ -261,7 +377,7 @@ export default function CounsellorProfileStep2({
               {partner?.firstName ? `, ${partner.firstName}` : ""}
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[#245248]">
-              Add your personal and location details to complete your
+              Add your personal, location and bank details to complete your
               Manovedh account.
             </p>
           </div>
@@ -275,7 +391,7 @@ export default function CounsellorProfileStep2({
                     2
                   </span>
                   <span className="text-sm font-bold text-[#114b42]">
-                    Personal &amp; location details
+                    Personal, location &amp; bank details
                   </span>
                 </div>
                 <span className="text-xs font-semibold text-[#547e74]">
@@ -287,7 +403,10 @@ export default function CounsellorProfileStep2({
               </div>
             </div>
 
-            {/* Form Fields */}
+            {/* Personal & location */}
+            <h2 className="mb-4 text-sm font-bold text-[#0c3831]">
+              Personal &amp; location
+            </h2>
             <div className="grid gap-5 md:grid-cols-2">
               <Field label="Gender" invalid={showError("gender")}>
                 <select
@@ -363,29 +482,253 @@ export default function CounsellorProfileStep2({
                 </select>
               </Field>
 
+              {/* Address (structured) */}
               <div className="md:col-span-2">
-                <Field label="Address" invalid={showError("address")}>
-                  <textarea
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    onBlur={() => markTouched("address")}
-                    rows={4}
-                    placeholder="Enter your address"
-                    maxLength={500}
-                    className={`mv-input resize-none ${
-                      showError("address") ? "mv-invalid" : ""
+                <Field
+                  label="Address line 1"
+                  hint="House / flat number and building name. Keep it simple, avoid unnecessary sensitive details."
+                  invalid={showError("addressLine1")}
+                >
+                  <input
+                    type="text"
+                    value={addressLine1}
+                    onChange={(e) => setAddressLine1(e.target.value)}
+                    onBlur={() => markTouched("addressLine1")}
+                    placeholder="e.g. Flat 302, Shree Apartments"
+                    maxLength={120}
+                    autoComplete="address-line1"
+                    className={`mv-input ${
+                      showError("addressLine1") ? "mv-invalid" : ""
                     }`}
                   />
-                  <div className="mt-1.5 flex items-start justify-between gap-3 text-xs text-[#547e74]">
-                    <span>
-                      Keep your address simple. Avoid unnecessary sensitive
-                      details.
-                    </span>
-                    <span className="shrink-0 tabular-nums">
-                      {address.length}/500
-                    </span>
-                  </div>
                 </Field>
+              </div>
+
+              <div className="md:col-span-2">
+                <Field
+                  label="Address line 2"
+                  hint="Street, area or locality"
+                  invalid={showError("addressLine2")}
+                >
+                  <input
+                    type="text"
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
+                    onBlur={() => markTouched("addressLine2")}
+                    placeholder="e.g. Rajapeth Road, Camp Area"
+                    maxLength={120}
+                    autoComplete="address-line2"
+                    className={`mv-input ${
+                      showError("addressLine2") ? "mv-invalid" : ""
+                    }`}
+                  />
+                </Field>
+              </div>
+
+              <Field
+                label="City / Town / Village"
+                invalid={showError("city")}
+              >
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  onBlur={() => markTouched("city")}
+                  placeholder="e.g. Amravati"
+                  maxLength={60}
+                  autoComplete="address-level2"
+                  className={`mv-input ${showError("city") ? "mv-invalid" : ""}`}
+                />
+              </Field>
+
+              <Field
+                label="Pincode"
+                hint="6-digit postal code"
+                invalid={showError("pincode")}
+              >
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={pincode}
+                  onChange={(e) =>
+                    setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
+                  onBlur={() => markTouched("pincode")}
+                  placeholder="e.g. 444601"
+                  maxLength={6}
+                  autoComplete="postal-code"
+                  className={`mv-input ${
+                    showError("pincode") ? "mv-invalid" : ""
+                  }`}
+                />
+              </Field>
+
+              <div className="md:col-span-2">
+                <Field
+                  label="Landmark (optional)"
+                  hint="A nearby place that helps people find you"
+                >
+                  <input
+                    type="text"
+                    value={landmark}
+                    onChange={(e) => setLandmark(e.target.value)}
+                    placeholder="e.g. Near Railway Station"
+                    maxLength={100}
+                    autoComplete="off"
+                    className="mv-input"
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* Bank details */}
+            <div className="mt-8 border-t border-[#e1f2e8] pt-6">
+              <h2 className="text-sm font-bold text-[#0c3831]">Bank details</h2>
+              <p className="mb-4 mt-1 text-xs text-[#547e74]">
+                Your session earnings will be paid to this account.
+              </p>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field
+                  label="Account holder name"
+                  hint="Exactly as it appears on your bank account"
+                  invalid={showError("accountHolderName")}
+                >
+                  <input
+                    type="text"
+                    value={accountHolderName}
+                    onChange={(e) => setAccountHolderName(e.target.value)}
+                    onBlur={() => markTouched("accountHolderName")}
+                    placeholder="Full name"
+                    maxLength={100}
+                    autoComplete="off"
+                    className={`mv-input ${
+                      showError("accountHolderName") ? "mv-invalid" : ""
+                    }`}
+                  />
+                </Field>
+
+                <Field label="Bank name" invalid={showError("bankName")}>
+                  <input
+                    type="text"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    onBlur={() => markTouched("bankName")}
+                    placeholder="e.g. State Bank of India"
+                    maxLength={100}
+                    autoComplete="off"
+                    className={`mv-input ${
+                      showError("bankName") ? "mv-invalid" : ""
+                    }`}
+                  />
+                </Field>
+
+                <Field
+                  label="Account number"
+                  invalid={showError("accountNumber")}
+                >
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    value={accountNumber}
+                    onChange={(e) =>
+                      setAccountNumber(
+                        e.target.value.replace(/\D/g, "").slice(0, 18)
+                      )
+                    }
+                    onBlur={() => markTouched("accountNumber")}
+                    placeholder="Enter account number"
+                    autoComplete="off"
+                    className={`mv-input ${
+                      showError("accountNumber") ? "mv-invalid" : ""
+                    }`}
+                  />
+                </Field>
+
+                <Field
+                  label="Confirm account number"
+                  invalid={showError("confirmAccountNumber")}
+                >
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={confirmAccountNumber}
+                    onChange={(e) =>
+                      setConfirmAccountNumber(
+                        e.target.value.replace(/\D/g, "").slice(0, 18)
+                      )
+                    }
+                    onPaste={(e) => e.preventDefault()}
+                    onBlur={() => markTouched("confirmAccountNumber")}
+                    placeholder="Re-enter account number"
+                    autoComplete="off"
+                    className={`mv-input ${
+                      showError("confirmAccountNumber") ? "mv-invalid" : ""
+                    }`}
+                  />
+                </Field>
+
+                <Field
+                  label="IFSC code"
+                  hint="11 characters, e.g. SBIN0001234"
+                  invalid={showError("ifsc")}
+                >
+                  <input
+                    type="text"
+                    value={ifsc}
+                    onChange={(e) =>
+                      setIfsc(
+                        e.target.value
+                          .toUpperCase()
+                          .replace(/[^A-Z0-9]/g, "")
+                          .slice(0, 11)
+                      )
+                    }
+                    onBlur={() => markTouched("ifsc")}
+                    placeholder="IFSC code"
+                    maxLength={11}
+                    autoComplete="off"
+                    className={`mv-input ${
+                      showError("ifsc") ? "mv-invalid" : ""
+                    }`}
+                  />
+                </Field>
+
+                <Field label="Account type" invalid={showError("accountType")}>
+                  <select
+                    value={accountType}
+                    onChange={(e) => setAccountType(e.target.value)}
+                    onBlur={() => markTouched("accountType")}
+                    className={`mv-input ${
+                      showError("accountType") ? "mv-invalid" : ""
+                    }`}
+                  >
+                    <option value="">Select account type</option>
+                    <option value="Savings">Savings</option>
+                    <option value="Current">Current</option>
+                  </select>
+                </Field>
+
+                <div className="md:col-span-2">
+                  <Field
+                    label="UPI ID (optional)"
+                    hint="Add a UPI ID if you'd also like to receive payments that way"
+                    invalid={showError("upiId")}
+                  >
+                    <input
+                      type="text"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      onBlur={() => markTouched("upiId")}
+                      placeholder="name@bank"
+                      maxLength={100}
+                      autoComplete="off"
+                      className={`mv-input ${
+                        showError("upiId") ? "mv-invalid" : ""
+                      }`}
+                    />
+                  </Field>
+                </div>
               </div>
             </div>
 
@@ -395,7 +738,7 @@ export default function CounsellorProfileStep2({
                 role="alert"
                 className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700"
               >
-                ⚠️ {error}
+                {error}
               </div>
             )}
 
@@ -429,7 +772,7 @@ export default function CounsellorProfileStep2({
 
           <p className="mt-5 text-center text-xs text-[#3d6b60]">
             Your details are kept private and used only for your partner
-            profile.
+            profile and payouts.
           </p>
         </div>
       </main>

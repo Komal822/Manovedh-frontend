@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   SlidersHorizontal,
@@ -6,6 +6,14 @@ import {
   CalendarDays,
   MoreVertical,
   X,
+  Video,
+  VideoOff,
+  Mic,
+  MicOff,
+  PhoneOff,
+  NotebookPen,
+  Trash2,
+  Check,
 } from "lucide-react";
 
 import Sidebar from "./Sidebar";
@@ -64,7 +72,7 @@ const STATUS = {
 ============================================================ */
 
 const CARD =
-  "rounded-[22px] border border-[#C8DACD] bg-white shadow-[0_6px_24px_-4px_rgba(35,78,61,0.12),0_2px_6px_-1px_rgba(0,0,0,0.06)]";
+  "rounded-[22px] border border-[#E3EDE6] bg-white shadow-[0_10px_30px_-12px_rgba(35,78,61,0.12)]";
 
 /* ============================================================
    MAIN
@@ -83,6 +91,7 @@ export default function Patients({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [activeCall, setActiveCall] = useState(null); // patient currently in a call
 
   const counts = useMemo(
     () => ({
@@ -125,6 +134,25 @@ export default function Patients({
     setShowAdd(false);
   };
 
+  /* ---------- Session flow: pending -> accepted -> (call) -> completed ---------- */
+  const updateSession = (id, session) =>
+    setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, session } : p)));
+
+  const handleAccept = (p) => updateSession(p.id, "accepted");
+  const handleDecline = (p) => updateSession(p.id, "declined");
+  const handleJoin = (p) => setActiveCall(p);
+
+  const handleEndCall = (notes) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === activeCall.id
+          ? { ...p, session: "completed", notes: [...(p.notes || []), ...notes] }
+          : p
+      )
+    );
+    setActiveCall(null);
+  };
+
   return (
     <div
       className="min-h-screen bg-[#F2F6F3] text-gray-800 antialiased"
@@ -145,14 +173,16 @@ export default function Patients({
         }
       `}</style>
 
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={onToggleSidebar}
-        activePage="Patients"
-        onNavigate={onNavigate}
-        onLogout={onLogout}
-        partnerName="Prem Zumble"
-      />
+      <div className="font-sans">
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={onToggleSidebar}
+          activePage="Patients"
+          onNavigate={onNavigate}
+          onLogout={onLogout}
+          partnerName="Prem Zumble"
+        />
+      </div>
 
       <main
         className="min-h-screen transition-[margin] duration-300 ease-in-out"
@@ -181,7 +211,15 @@ export default function Patients({
                 </p>
               </div>
             ) : (
-              visible.map((p) => <PatientCard key={p.id} patient={p} />)
+              visible.map((p) => (
+                <PatientCard
+                  key={p.id}
+                  patient={p}
+                  onAccept={handleAccept}
+                  onDecline={handleDecline}
+                  onJoin={handleJoin}
+                />
+              ))
             )}
           </section>
 
@@ -202,17 +240,21 @@ export default function Patients({
           onAdd={handleAddPatient}
         />
       )}
+
+      {activeCall && (
+        <VideoCallModal patient={activeCall} onEnd={handleEndCall} />
+      )}
     </div>
   );
 }
 
-function Avatar({ name, src, size = "h-14 w-14" }) {
+function Avatar({ name, src, size = "h-14 w-14", textSize = "text-sm" }) {
   if (src) {
     return (
       <img
         src={src}
         alt={name}
-        className={`${size} flex-shrink-0 rounded-2xl object-cover shadow-sm ring-1 ring-[#C8DACD]`}
+        className={`${size} flex-shrink-0 rounded-2xl object-cover shadow-sm ring-1 ring-[#E3EDE6]`}
       />
     );
   }
@@ -223,7 +265,7 @@ function Avatar({ name, src, size = "h-14 w-14" }) {
     .slice(0, 2);
   return (
     <div
-      className={`${size} flex flex-shrink-0 items-center justify-center rounded-2xl bg-[#E3F2EA] text-sm font-bold text-[#257B51] shadow-sm ring-1 ring-[#C8DACD]`}
+      className={`${size} ${textSize} flex flex-shrink-0 items-center justify-center rounded-2xl bg-[#E3F2EA] font-bold text-[#257B51] shadow-sm ring-1 ring-[#E3EDE6]`}
     >
       {initials}
     </div>
@@ -591,15 +633,16 @@ function FiltersBar({ query, onQuery, filter, onFilter, counts }) {
    PATIENT CARD
 ============================================================ */
 
-function PatientCard({ patient: p }) {
+function PatientCard({ patient: p, onAccept, onDecline, onJoin }) {
   const s = STATUS[p.status];
   const isHigh = p.status === "high";
   const notScheduled = !p.next;
+  const session = p.session || "pending"; // pending | accepted | declined | completed
 
   return (
     <article
-      className={`flex flex-col justify-between gap-4 rounded-[22px] border bg-white p-4 shadow-[0_6px_24px_-4px_rgba(35,78,61,0.12),0_2px_6px_-1px_rgba(0,0,0,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-4px_rgba(35,78,61,0.18)] sm:p-5 lg:flex-row lg:items-center ${
-        isHigh ? "border-rose-200 ring-1 ring-rose-500/15" : "border-[#C8DACD]"
+      className={`flex flex-col justify-between gap-4 rounded-[22px] border bg-white p-4 shadow-[0_10px_30px_-12px_rgba(35,78,61,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-12px_rgba(35,78,61,0.18)] sm:p-5 lg:flex-row lg:items-center ${
+        isHigh ? "border-rose-100 ring-1 ring-rose-500/10" : "border-[#E3EDE6]"
       }`}
     >
       {/* Demographics */}
@@ -640,8 +683,8 @@ function PatientCard({ patient: p }) {
         <div
           className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border ${
             notScheduled
-              ? "border-rose-200 bg-rose-50 text-rose-600"
-              : "border-[#C8DACD] bg-[#F4F7F4] text-[#34553E]"
+              ? "border-rose-100 bg-rose-50 text-rose-600"
+              : "border-[#E3EDE6] bg-[#F4F8F5] text-[#34553E]"
           }`}
         >
           <CalendarDays size={20} />
@@ -668,12 +711,50 @@ function PatientCard({ patient: p }) {
         >
           View Profile
         </button>
-        <button
-          type="button"
-          className="whitespace-nowrap rounded-xl bg-[#234E3D] px-4 py-2 text-xs font-semibold text-white shadow-sm transition duration-150 hover:bg-[#173629] hover:shadow"
-        >
-          Start Session
-        </button>
+
+        {session === "pending" && (
+          <>
+            <button
+              type="button"
+              onClick={() => onDecline(p)}
+              className="whitespace-nowrap rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-600 transition duration-150 hover:bg-rose-50"
+            >
+              Decline
+            </button>
+            <button
+              type="button"
+              onClick={() => onAccept(p)}
+              className="whitespace-nowrap rounded-xl bg-[#234E3D] px-4 py-2 text-xs font-semibold text-white shadow-sm transition duration-150 hover:bg-[#173629] hover:shadow"
+            >
+              Accept
+            </button>
+          </>
+        )}
+
+        {session === "accepted" && (
+          <button
+            type="button"
+            onClick={() => onJoin(p)}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-[#234E3D] px-4 py-2 text-xs font-semibold text-white shadow-sm transition duration-150 hover:bg-[#173629] hover:shadow"
+          >
+            <Video size={14} />
+            Join
+          </button>
+        )}
+
+        {session === "declined" && (
+          <span className="whitespace-nowrap rounded-xl border border-rose-100 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-600">
+            Declined
+          </span>
+        )}
+
+        {session === "completed" && (
+          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-xl border border-[#A7F3D0]/70 bg-[#ECFDF5] px-4 py-2 text-xs font-semibold text-[#047857]">
+            <Check size={14} />
+            Completed
+          </span>
+        )}
+
         <button
           type="button"
           aria-label={`More options for ${p.name}`}
@@ -747,5 +828,285 @@ function Pagination({ from, to, total, page, totalPages, onPage }) {
         </button>
       </div>
     </footer>
+  );
+}
+
+/* ============================================================
+   VIDEO CALL MODAL
+   - Patient: motha screen
+   - Counsellor: lahan screen (khali ujvi kade)
+   - Session notes panel (right side)
+============================================================ */
+
+function formatTimer(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function VideoCallModal({ patient, onEnd }) {
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null); // attach WebRTC remote stream here
+  const streamRef = useRef(null);
+
+  const [seconds, setSeconds] = useState(0);
+  const [micOn, setMicOn] = useState(true);
+  const [camOn, setCamOn] = useState(true);
+  const [camError, setCamError] = useState(false);
+  const [showNotes, setShowNotes] = useState(true);
+  const [draft, setDraft] = useState("");
+  const [notes, setNotes] = useState([]);
+
+  // Call timer
+  useEffect(() => {
+    const t = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Counsellor's local camera + mic
+  useEffect(() => {
+    let cancelled = false;
+    navigator.mediaDevices
+      ?.getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+      })
+      .catch(() => setCamError(true));
+
+    return () => {
+      cancelled = true;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  // Body scroll lock
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  const toggleMic = () => {
+    streamRef.current?.getAudioTracks().forEach((t) => (t.enabled = !micOn));
+    setMicOn((v) => !v);
+  };
+  const toggleCam = () => {
+    streamRef.current?.getVideoTracks().forEach((t) => (t.enabled = !camOn));
+    setCamOn((v) => !v);
+  };
+
+  const addNote = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setNotes((prev) => [
+      ...prev,
+      { id: Date.now(), text, at: formatTimer(seconds) },
+    ]);
+    setDraft("");
+  };
+
+  const handleKey = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      addNote();
+    }
+  };
+
+  const endCall = () => {
+    // Save any unsaved text in the draft as well
+    const pending = draft.trim()
+      ? [{ id: Date.now(), text: draft.trim(), at: formatTimer(seconds) }]
+      : [];
+    onEnd([...notes, ...pending]);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-[#0B1511]" role="dialog" aria-modal="true">
+      {/* VIDEO AREA */}
+      <div className="relative h-full w-full overflow-hidden">
+        {/* Patient - motha screen */}
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#12241C] to-[#0B1511]">
+          {/* Placeholder until remote stream arrives */}
+          <div className="relative z-0 flex flex-col items-center gap-4">
+            <Avatar
+              name={patient.name}
+              src={patient.avatar}
+              size="h-32 w-32"
+              textSize="text-3xl"
+            />
+            <p className="text-sm font-medium text-white/70">Waiting for patient video…</p>
+          </div>
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            className="absolute inset-0 z-[1] h-full w-full object-cover"
+          />
+        </div>
+
+        {/* Top bar */}
+        <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-5 py-4">
+          <div>
+            <h3 className="text-base font-semibold text-white">{patient.name}</h3>
+            <p className="text-xs text-white/70">
+              {patient.age} Years • {patient.problem}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 text-xs font-semibold text-white">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-rose-500" />
+              {formatTimer(seconds)}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowNotes((v) => !v)}
+              className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                showNotes
+                  ? "bg-white text-[#234E3D]"
+                  : "bg-white/15 text-white hover:bg-white/25"
+              }`}
+            >
+              <NotebookPen size={14} />
+              Notes
+            </button>
+          </div>
+        </div>
+
+        {/* Counsellor - lahan screen (khali ujvi kade) */}
+        <div className="absolute bottom-24 right-4 z-10 h-32 w-24 overflow-hidden rounded-2xl border-2 border-white/30 bg-[#1B3329] shadow-xl sm:h-40 sm:w-56">
+          {/* Video stays mounted so the stream is not lost when camera is toggled */}
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            playsInline
+            className="h-full w-full -scale-x-100 object-cover"
+          />
+          {(camError || !camOn) && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#1B3329] text-white/70">
+              <VideoOff size={20} />
+              <span className="text-[11px]">
+                {camError ? "Camera unavailable" : "Camera off"}
+              </span>
+            </div>
+          )}
+          <span className="absolute bottom-1.5 left-2 rounded-md bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white">
+            You
+          </span>
+        </div>
+
+        {/* Controls */}
+        <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleMic}
+            aria-label="Toggle microphone"
+            className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
+              micOn ? "bg-white/15 text-white hover:bg-white/25" : "bg-white text-slate-800"
+            }`}
+          >
+            {micOn ? <Mic size={20} /> : <MicOff size={20} />}
+          </button>
+          <button
+            type="button"
+            onClick={toggleCam}
+            aria-label="Toggle camera"
+            className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
+              camOn ? "bg-white/15 text-white hover:bg-white/25" : "bg-white text-slate-800"
+            }`}
+          >
+            {camOn ? <Video size={20} /> : <VideoOff size={20} />}
+          </button>
+          <button
+            type="button"
+            onClick={endCall}
+            aria-label="End call"
+            className="flex h-12 items-center gap-2 rounded-full bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700"
+          >
+            <PhoneOff size={18} />
+            End
+          </button>
+        </div>
+      </div>
+
+      {/* NOTES PANEL */}
+      {showNotes && (
+        <aside className="absolute right-4 top-20 z-20 flex max-h-[calc(100vh-20rem)] w-[calc(100%-2rem)] flex-col overflow-hidden rounded-2xl border border-[#C8DACD] bg-white shadow-2xl sm:max-h-[calc(100vh-24rem)] sm:w-[440px]">
+          <div className="flex items-center justify-between border-b border-[#E3EDE6] px-4 py-3">
+            <div>
+              <h4 className="text-sm font-bold text-slate-900">Session Notes</h4>
+              <p className="text-[11px] text-slate-500">
+                Write down what the patient says
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowNotes(false)}
+              aria-label="Close notes"
+              className="rounded-xl p-1.5 text-slate-400 transition hover:bg-[#F4F7F4] hover:text-slate-600"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Saved notes */}
+          <div className="min-h-[140px] flex-1 space-y-2.5 overflow-y-auto px-4 py-3 sm:min-h-[220px]">
+            {notes.length === 0 ? (
+              <p className="py-3 text-center text-xs text-slate-400">
+                No notes yet. Type below and press Enter to save.
+              </p>
+            ) : (
+              notes.map((n) => (
+                <div
+                  key={n.id}
+                  className="group rounded-xl border border-[#E3EDE6] bg-[#F4F8F5] p-3"
+                >
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#257B51]">{n.at}</span>
+                    <button
+                      type="button"
+                      onClick={() => setNotes((prev) => prev.filter((x) => x.id !== n.id))}
+                      aria-label="Delete note"
+                      className="text-slate-400 opacity-0 transition hover:text-rose-500 focus:opacity-100 group-hover:opacity-100"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                    {n.text}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Input */}
+          <div className="border-t border-[#E3EDE6] p-3">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={handleKey}
+              rows={3}
+              placeholder="Type what the patient says… (Enter to save)"
+              className={`${FIELD} resize-none`}
+            />
+            <button
+              type="button"
+              onClick={addNote}
+              className="mt-2 w-full rounded-xl bg-[#234E3D] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#173629] active:scale-95"
+            >
+              Add Note
+            </button>
+          </div>
+        </aside>
+      )}
+    </div>
   );
 }

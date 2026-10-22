@@ -70,7 +70,7 @@ import Patients from "./components/Councellor_Dashboard/Patients.jsx";
 import Sessions from "./components/Councellor_Dashboard/Sessions.jsx";
 import Chats from "./components/Councellor_Dashboard/Chats.jsx";
 import Notifications from "./components/Councellor_Dashboard/Notifications.jsx";
-import Withdrawal from "./components/Councellor_Dashboard/Withdrawal.jsx";
+ 
 import Availability from "./components/Councellor_Dashboard/Availability.jsx";
 import ProfileSettings from "./components/Councellor_Dashboard/ProfileSettings.jsx"; // NAVIN
 import Sidebar, {
@@ -101,7 +101,7 @@ const PAGE_TO_PATH = {
   Notifications: "notifications",
   "Profile Settings": "profile-settings",
   Availability: "availability",
-  Withdrawal: "withdrawal",
+
 };
 
 const PATH_TO_PAGE = Object.fromEntries(
@@ -361,8 +361,6 @@ function PartnerDashboardShell({ onLogout }) {
       {/* NAVIN: Notifications page */}
       <Route path="notifications" element={<Notifications {...shared} />} />
 
-      {/* NAVIN: Withdrawal page */}
-      <Route path="withdrawal" element={<Withdrawal {...shared} />} />
 
       {/* NAVIN: Availability page */}
       <Route path="availability" element={<Availability {...shared} />} />

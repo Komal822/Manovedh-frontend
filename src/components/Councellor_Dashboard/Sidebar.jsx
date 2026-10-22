@@ -35,7 +35,7 @@ const MENU_ITEMS = [
 const ACCOUNT_ITEMS = [
   { label: "Profile Settings", icon: UserRoundCog, page: "Profile Settings" },
   { label: "Availability", icon: Clock3, page: "Availability" },
-  { label: "Withdrawal", icon: Wallet, page: "Withdrawal" },
+ 
 ];
 
 const LANGUAGES = ["English", "मराठी", "हिंदी"];
