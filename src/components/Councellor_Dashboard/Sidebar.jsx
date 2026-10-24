@@ -7,7 +7,6 @@ import {
   Bell,
   UserRoundCog,
   Clock3,
-  Wallet,
   LogOut,
   ChevronsLeft,
   ChevronsRight,
@@ -35,7 +34,6 @@ const MENU_ITEMS = [
 const ACCOUNT_ITEMS = [
   { label: "Profile Settings", icon: UserRoundCog, page: "Profile Settings" },
   { label: "Availability", icon: Clock3, page: "Availability" },
- 
 ];
 
 const LANGUAGES = ["English", "मराठी", "हिंदी"];
@@ -126,9 +124,13 @@ export default function Sidebar({
     }
   };
 
+  const handleLogout = () => {
+    if (typeof onLogout === "function") onLogout();
+  };
+
   return (
     <aside
-      className={`fixed left-0 top-0 z-[100] flex h-screen select-none flex-col border-r border-[#123a36] bg-[#032927] text-[#d9ebe5] transition-all duration-300 ease-in-out ${
+      className={`fixed left-0 top-0 z-[100] flex h-[100dvh] max-w-[85vw] select-none flex-col border-r border-[#123a36] bg-[#032927] text-[#d9ebe5] transition-all duration-300 ease-in-out ${
         collapsed ? "w-[76px]" : "w-[268px]"
       }`}
     >
@@ -183,7 +185,7 @@ export default function Sidebar({
       </div>
 
       {/* ---------- NAVIGATION ---------- */}
-      <div className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-3 py-4">
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-3 py-4">
         <div>
           <SectionLabel collapsed={collapsed}>MENU</SectionLabel>
           <nav className="space-y-1" aria-label="Main menu">
@@ -215,8 +217,8 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* ---------- BOTTOM: LANGUAGE + PROFILE ---------- */}
-      <div className="shrink-0 space-y-2.5 border-t border-[#123a36] bg-[#02211f]/50 p-3">
+      {/* ---------- BOTTOM: LANGUAGE + PROFILE + LOGOUT ---------- */}
+      <div className="shrink-0 space-y-2.5 border-t border-[#123a36] bg-[#02211f]/50 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {/* Language */}
         <div className="relative">
           <button
@@ -277,11 +279,14 @@ export default function Sidebar({
         {/* Profile */}
         <div
           className={`flex items-center rounded-xl border border-[#103b37] bg-[#052b28] p-2 ${
-            collapsed ? "justify-center" : "justify-between gap-2.5"
+            collapsed ? "justify-center" : "gap-2.5"
           }`}
         >
           <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#c4e0cb] bg-[#e2edd3]">
+            <div
+              title={collapsed ? partnerName : undefined}
+              className="flex h-[36px] w-[36px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#c4e0cb] bg-[#e2edd3]"
+            >
               <UserRound size={20} strokeWidth={1.8} className="text-[#2c6659]" />
             </div>
 
@@ -295,18 +300,21 @@ export default function Sidebar({
             )}
           </div>
 
-          {!collapsed && (
-            <button
-              type="button"
-              onClick={onLogout}
-              title="Logout"
-              aria-label="Logout"
-              className="flex h-[30px] w-[30px] shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#83afa5] transition hover:bg-[#3d1414]/50 hover:text-[#ffcccc]"
-            >
-              <LogOut size={16} strokeWidth={1.8} />
-            </button>
-          )}
         </div>
+
+        {/* Full Logout button — always visible (expanded and collapsed) */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          title={collapsed ? "Logout" : undefined}
+          aria-label="Logout"
+          className={`flex h-[40px] w-full cursor-pointer items-center rounded-xl border border-[#4a2323] bg-[#2a1313]/60 text-[#ffb4b4] outline-none transition hover:bg-[#4a1c1c] hover:text-[#ffd6d6] focus-visible:ring-2 focus-visible:ring-[#ff9a9a]/50 ${
+            collapsed ? "justify-center" : "gap-2.5 px-3"
+          }`}
+        >
+          <LogOut size={18} strokeWidth={1.8} className="shrink-0" />
+          {!collapsed && <span className="text-[13px] font-semibold">Logout</span>}
+        </button>
       </div>
     </aside>
   );
