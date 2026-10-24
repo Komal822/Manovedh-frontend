@@ -1,0 +1,57 @@
+const consentData = {
+  title: 'Manovedh — Informed Consent',
+  sub: 'DPDP Act 2023 · Mental Healthcare Act 2017 · IEC/2024/MH-45',
+  steps: ['Age', 'Overview', 'Modules', 'Sign', 'Done'],
+  minorNote: 'You are under 18. Under the DPDP Act 2023 a parent or legal guardian must give consent on your behalf. Please complete this form together with them.',
+  signals: [
+    ['Voice', 'pitch, pace, rhythm, jitter, shimmer, energy (acoustic features)'],
+    ['Text', 'what you type or say, sentiment, linguistic patterns'],
+    ['Facial expressions', 'action units, affect, eye gaze (on-device only)'],
+  ],
+  screens: 'The system screens for: Anxiety · Depression · Stress · Bipolar patterns · Suicidal risk indicators. Results are shared only with you and, if you agree, with a mental health professional.',
+  rights: [
+    ['Right to withdraw', 'Stop at any time, no reason needed, no penalty.'],
+    ['Right to access', 'Request your data in a readable format at any time.'],
+    ['Right to correction', 'Request correction of any inaccurate data.'],
+    ['Right to deletion', 'Request deletion (processed within 30 days).'],
+    ['Right to breach notification', 'You will be informed within 72 hours of any breach.'],
+    ['DPO contact', 'dpo@mindspace.in · Grievance resolved within 30 days. Escalation: Data Protection Board of India.'],
+  ],
+  security: [
+    'All personal identifiers are removed and replaced with a unique research code.',
+    'Data encrypted with **AES-256** at rest and in transit.',
+    'Raw audio deleted within **24 hours** of feature extraction.',
+    'Facial pixel data discarded **immediately** after metric extraction — no images stored.',
+    'Anonymised research data retained for **5 years** for longitudinal studies.',
+    'Primary processing in India. International academic sharing only under signed agreements.',
+  ],
+  confirms: [
+    ['I understand this is a screening tool, not a clinical diagnosis.', 'Results require review by a qualified mental health professional.'],
+    ['I understand my data will be used for AI research and validation.', 'Anonymised only. Never for advertising or commercial use.'],
+    ['I understand all personal identifiers will be removed from my data.', ''],
+    ['I understand I can withdraw at any time without penalty.', ''],
+    ['I know how to contact the DPO to exercise my rights.', ''],
+  ],
+  modules: [
+    { key: 'text', letter: 'T', title: 'Module 1 — Text Data',
+      what: 'Linguistic patterns, sentiment, emotional tone, sentence structure, cognitive markers in your typed or transcribed responses.',
+      points: ['Text tokenised and pseudonymised before analysis', 'Advanced anonymisation to prevent re-identification from writing style', 'Encrypted AES-256 in transit and storage'],
+      retention: 'Raw text 6 months → deleted. Anonymised features 5 years.' },
+    { key: 'voice', letter: 'V', title: 'Module 2 — Voice Data',
+      what: 'Prosody (pitch, pace, rhythm), vocal energy, jitter, shimmer, HNR, MFCCs — acoustic patterns only. Not the words you say.',
+      points: ['Raw audio deleted within 24 hours of feature extraction', 'Only anonymised numerical feature vectors retained — not your voice', 'No voice biometric templates created or stored', 'This is NOT voice recognition or speaker identification'],
+      retention: 'Raw audio 24 hours → deleted. Anonymised feature vectors 2 years.' },
+    { key: 'face', letter: 'F', title: 'Module 3 — Facial Expression Analysis',
+      what: 'Facial action units (FACS), valence/arousal scores, gaze patterns, micro-expressions — numerical metrics only.',
+      points: ['All processing on-device — no camera feed transmitted', 'Raw pixel data discarded immediately after metric extraction', 'No images, video, or photographs stored at any point', 'This is NOT facial recognition or biometric identification'],
+      retention: 'No raw video/images. Anonymised facial metric vectors 6 months.' },
+  ],
+  sharing: [
+    ['academic', 'I consent to sharing my fully anonymised data with academic research institutions under signed data sharing agreements.'],
+    ['repo', 'I consent to my anonymised data being included in AI mental health research repositories.'],
+  ],
+  conditions: 'Conditions: Signed data protection agreements required · Mental health research only · No commercial use · Annual transparency reports published.',
+  declaration: ['I have read and understood all consent information.', 'I am giving this consent voluntarily.', 'I know I can withdraw or delete my data at any time.'],
+};
+
+export default consentData;
