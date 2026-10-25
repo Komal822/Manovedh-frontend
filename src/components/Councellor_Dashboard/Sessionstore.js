@@ -131,6 +131,7 @@ function seed() {
     updatedAt: now - 2 * DAY,
     seen: status !== "pending",
     rescheduled: false,
+    rescheduleMessage: null,
     note: "",
     notes: [],
     ...extra,
@@ -203,6 +204,7 @@ export const sessionStore = {
       updatedAt: now,
       seen: false,
       rescheduled: false,
+      rescheduleMessage: null,
       note,
       notes: [],
     };
@@ -225,15 +227,18 @@ export const sessionStore = {
   },
 
   // Counsellor navin vel nivadto (pending kiva already scheduled session)
-  reschedule(id, start) {
+  // message = patient sathi optional message (session sobat save hoto)
+  reschedule(id, start, message = "") {
     const s = find(id);
     if (!s) return { ok: false, reason: "missing" };
     const v = validateSlot(start, id);
     if (!v.ok) return v;
+    const text = (message || "").trim();
     patch(id, {
       status: "scheduled",
       start,
       rescheduled: start !== s.start || s.rescheduled,
+      rescheduleMessage: text || null,
       updatedAt: Date.now(),
       seen: true,
     });
@@ -258,6 +263,7 @@ export const sessionStore = {
       updatedAt: now,
       seen: true,
       rescheduled: false,
+      rescheduleMessage: null,
       note: "",
       notes: [],
     };

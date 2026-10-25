@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
   Check, CalendarDays, MessageCircle, AlertTriangle, ArrowRight, CheckCheck, Menu, Sparkles,
   UserPlus, X, FlaskConical,
@@ -17,13 +17,41 @@ const DAY = 24 * HOUR;
 const BOOT = Date.now();
 
 const STATIC_ITEMS = [
-  { id: "m1", kind: "info", categories: ["messages"], icon: "message", title: "New message received",
-    text: "John Smith sent you a new message regarding therapy notes.", time: BOOT - 25 * MIN, unread: true,
-    action: "Open chat", page: "Chats" },
   { id: "r1", kind: "info", categories: ["reminders"], icon: "alert", title: "Follow-up reminder",
     text: "David Brown's routine follow-up evaluation is due today.", time: BOOT - 26 * HOUR, unread: false,
     action: "View patient", page: "Patients" },
 ];
+
+/* ---- Chat notifications store (replace with your real chat data later) ---- */
+const chatStore = (() => {
+  let msgs = [
+    { id: "c1", from: "John Smith", text: "Can we discuss my therapy notes before tomorrow?", time: BOOT - 25 * MIN, read: false },
+  ];
+  const subs = new Set();
+  const emit = () => subs.forEach((f) => f());
+  return {
+    get: () => msgs,
+    subscribe: (f) => { subs.add(f); return () => subs.delete(f); },
+    add: (m) => { msgs = [{ id: `c${Date.now()}`, read: false, time: Date.now(), ...m }, ...msgs]; emit(); },
+    markRead: (id) => { msgs = msgs.map((m) => (m.id === id ? { ...m, read: true } : m)); emit(); },
+    markAllRead: () => { msgs = msgs.map((m) => ({ ...m, read: true })); emit(); },
+  };
+})();
+
+const useChatMessages = () => useSyncExternalStore(chatStore.subscribe, chatStore.get);
+
+const DEMO_SENDERS = ["Priya Patil", "Rahul Deshmukh", "Anita Joshi", "Sameer Kulkarni"];
+const DEMO_TEXTS = [
+  "Hi doctor, I need to reschedule my next session.",
+  "Thank you, the exercises are really helping.",
+  "Can you share the notes from today's session?",
+  "I have a quick question about my medication.",
+];
+const simulateChatMessage = () =>
+  chatStore.add({
+    from: DEMO_SENDERS[Math.floor(Math.random() * DEMO_SENDERS.length)],
+    text: DEMO_TEXTS[Math.floor(Math.random() * DEMO_TEXTS.length)],
+  });
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -52,6 +80,7 @@ const BTN = `inline-flex items-center justify-center gap-1.5 whitespace-nowrap r
 const BTN_PRIMARY = `${BTN} bg-[#184D43] text-white hover:bg-[#123A32]`;
 const BTN_OUTLINE = `${BTN} border border-[#CFE6E3] bg-white text-[#122A2E] hover:bg-[#F0F9F7]`;
 const BTN_DANGER = `${BTN} border border-[#E7BFC2] bg-white text-[#9B2C2C] hover:bg-[#FBEDEE]`;
+const BTN_DEMO = `inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-dashed border-[#CFE6E3] px-3 text-[11px] font-bold text-[#5B7A7E] transition hover:bg-[#F0F9F7] active:scale-95 sm:h-10 sm:gap-2 sm:px-4 sm:text-xs ${FOCUS}`;
 
 /* Themed thin scrollbar — same colors as other pages */
 const SCROLLBAR_CSS = `
@@ -106,7 +135,7 @@ function useIsDesktop() {
   return isDesktop;
 }
 
-function buildItems(sessions, readIds, now) {
+function buildItems(sessions, chats, readIds, now) {
   const items = [];
 
   for (const s of sessions) {
@@ -118,7 +147,7 @@ function buildItems(sessions, readIds, now) {
       const recent = now - s.updatedAt < DAY;
       if (soon || recent) {
         items.push({ id: `ses-${s.id}`, kind: "scheduled", session: s, categories: ["appointments"],
-          icon: "calendar", title: soon ? "Upcoming session" : "Session scheduled", time: s.updatedAt, unread: false });
+          icon: "calendar", title: soon ? "Upcoming session" : s.rescheduled ? "Session rescheduled" : "Session scheduled", time: s.updatedAt, unread: false });
       }
     } else if (s.status === "declined" && now - s.updatedAt < DAY) {
       items.push({ id: `dec-${s.id}`, kind: "declined", session: s, categories: ["requests"],
@@ -127,6 +156,11 @@ function buildItems(sessions, readIds, now) {
       items.push({ id: `done-${s.id}`, kind: "completed", session: s, categories: ["appointments"],
         icon: "check", title: "Session completed", time: s.updatedAt, unread: false });
     }
+  }
+
+  for (const m of chats) {
+    items.push({ id: `chat-${m.id}`, kind: "chat", chat: m, categories: ["messages"],
+      icon: "message", title: "New message received", time: m.time, unread: !m.read });
   }
 
   for (const it of STATIC_ITEMS) items.push({ ...it, unread: it.unread && !readIds.has(it.id) });
@@ -165,6 +199,7 @@ export default function Notifications({ onLogout, onNavigate, sidebarCollapsed =
   const sidebarWidth = sidebarCollapsed ? 80 : 272;
 
   const sessions = useSessions();
+  const chats = useChatMessages();
   const now = useNow();
 
   const [readIds, setReadIds] = useState(() => new Set());
@@ -179,13 +214,14 @@ export default function Notifications({ onLogout, onNavigate, sidebarCollapsed =
     return () => clearTimeout(t);
   }, [toast]);
 
-  const items = useMemo(() => buildItems(sessions, readIds, now), [sessions, readIds, now]);
+  const items = useMemo(() => buildItems(sessions, chats, readIds, now), [sessions, chats, readIds, now]);
 
   const unreadCount = items.filter((n) => n.unread).length;
   const hasUnread = unreadCount > 0;
 
   const markAllRead = () => {
     sessionStore.markAllSeen();
+    chatStore.markAllRead();
     setReadIds(new Set(STATIC_ITEMS.map((i) => i.id)));
   };
 
@@ -216,6 +252,11 @@ export default function Notifications({ onLogout, onNavigate, sidebarCollapsed =
   const handleDecline = (s) => {
     sessionStore.decline(s.id);
     setToast(`Request from ${s.patientName} declined`);
+  };
+
+  const handleOpenChat = (m) => {
+    chatStore.markRead(m.id);
+    navigateTo("Chats");
   };
 
   const handleJoin = (s) => {
@@ -318,12 +359,19 @@ export default function Notifications({ onLogout, onNavigate, sidebarCollapsed =
               })}
             </nav>
 
-            <div className="flex shrink-0 items-center gap-2 [&>button]:flex-1 sm:[&>button]:flex-none">
+            <div className="flex shrink-0 flex-wrap items-center gap-2 [&>button]:flex-1 sm:[&>button]:flex-none">
               <button type="button" onClick={simulatePatientRequest}
                 title="Demo only: simulate a patient request"
-                className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-dashed border-[#CFE6E3] px-3 text-[11px] font-bold text-[#5B7A7E] transition hover:bg-[#F0F9F7] active:scale-95 sm:h-10 sm:gap-2 sm:px-4 sm:text-xs ${FOCUS}`}>
+                className={BTN_DEMO}>
                 <FlaskConical size={14} strokeWidth={2.2} />
                 Simulate request
+              </button>
+
+              <button type="button" onClick={simulateChatMessage}
+                title="Demo only: simulate a chat message"
+                className={BTN_DEMO}>
+                <MessageCircle size={14} strokeWidth={2.2} />
+                Simulate message
               </button>
 
               <button type="button" onClick={markAllRead} disabled={!hasUnread}
@@ -363,6 +411,7 @@ export default function Notifications({ onLogout, onNavigate, sidebarCollapsed =
                     {list.map((n) => (
                       <NotificationRow key={n.id} item={n} now={now}
                         onNavigate={navigateTo}
+                        onOpenChat={handleOpenChat}
                         onAccept={handleAccept}
                         onDecline={handleDecline}
                         onReschedule={(s) => setRescheduling({ session: s, notice: "" })}
@@ -409,12 +458,14 @@ function describe(item, now) {
       return `You declined the session request from ${s.patientName}.`;
     case "completed":
       return `Session with ${s.patientName} completed${s.notes?.length ? ` with ${s.notes.length} ${s.notes.length > 1 ? "notes" : "note"}` : ""}.`;
+    case "chat":
+      return `${item.chat.from}: ${item.chat.text}`;
     default:
       return item.text;
   }
 }
 
-function NotificationRow({ item, now, onNavigate, onAccept, onDecline, onReschedule, onJoin }) {
+function NotificationRow({ item, now, onNavigate, onOpenChat, onAccept, onDecline, onReschedule, onJoin }) {
   const cfg = ICON_CONFIG[item.icon] || ICON_CONFIG.calendar;
   const Icon = cfg.icon;
   const s = item.session;
@@ -443,6 +494,9 @@ function NotificationRow({ item, now, onNavigate, onAccept, onDecline, onResched
           {item.kind === "request" && s.note && (
             <p className="mt-1 line-clamp-1 text-[11px] font-medium italic text-[#5B7A7E] sm:text-xs">“{s.note}”</p>
           )}
+          {item.kind === "scheduled" && s.rescheduleMessage && (
+            <p className="mt-1 line-clamp-2 text-[11px] font-medium italic text-[#5B7A7E] sm:text-xs">“{s.rescheduleMessage}”</p>
+          )}
           <time className="mt-1 block text-[11px] font-semibold text-[#5B7A7E] sm:mt-1.5 sm:text-xs">{timeAgo(item.time, now)}</time>
         </div>
       </div>
@@ -463,6 +517,12 @@ function NotificationRow({ item, now, onNavigate, onAccept, onDecline, onResched
               <JoinButton session={s} now={now} onJoin={onJoin} />
             </div>
           </>
+        )}
+
+        {item.kind === "chat" && (
+          <button type="button" onClick={() => onOpenChat(item.chat)} className={BTN_OUTLINE}>
+            Open chat <ArrowRight size={13} strokeWidth={2.2} />
+          </button>
         )}
 
         {(item.kind === "declined" || item.kind === "completed") && (

@@ -31,6 +31,8 @@ export function formatTimer(sec) {
   return `${m}:${s}`;
 }
 
+const MESSAGE_MAX = 300;
+
 /* ============================================================
    AVATAR
 ============================================================ */
@@ -102,6 +104,7 @@ export function JoinButton({ session, now, onJoin }) {
    RESCHEDULE MODAL
    - pending request: navin vel nivadun accept + schedule
    - scheduled session: vel badalne
+   - optional message to patient (auto-filled, editable)
 ============================================================ */
 
 export function RescheduleModal({ session, notice = "", onClose, onDone }) {
@@ -114,6 +117,10 @@ export function RescheduleModal({ session, notice = "", onClose, onDone }) {
     return toLocalInput(d.getTime());
   });
   const [submitError, setSubmitError] = useState("");
+
+  // Message: follows the auto-filled default until the counsellor edits it
+  const [customMessage, setCustomMessage] = useState("");
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -135,10 +142,18 @@ export function RescheduleModal({ session, notice = "", onClose, onDone }) {
     if (c) error = `This clashes with ${c.patientName} at ${formatSlot(c.start)}.`;
   }
 
+  const firstName = (session.patientName || "").split(" ")[0];
+  const defaultMessage = Number.isNaN(ts)
+    ? ""
+    : isPending
+    ? `Hi ${firstName}, your session is scheduled for ${formatSlot(ts)}. Please let me know if this time doesn't work for you.`
+    : `Hi ${firstName}, your session has been rescheduled to ${formatSlot(ts)}. Please let me know if this time doesn't work for you.`;
+  const message = touched ? customMessage : defaultMessage;
+
   const submit = (e) => {
     e.preventDefault();
     if (error) return;
-    const r = sessionStore.reschedule(session.id, ts);
+    const r = sessionStore.reschedule(session.id, ts, message.trim());
     if (!r.ok) {
       setSubmitError("Could not save this time. Please pick another.");
       return;
@@ -158,7 +173,7 @@ export function RescheduleModal({ session, notice = "", onClose, onDone }) {
       <form
         onSubmit={submit}
         noValidate
-        className="w-full max-w-md rounded-[30px] border border-[#C8DACD] bg-white p-6 shadow-2xl md:p-7"
+        className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-[30px] border border-[#C8DACD] bg-white p-6 shadow-2xl md:p-7"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -207,6 +222,41 @@ export function RescheduleModal({ session, notice = "", onClose, onDone }) {
           <p className="mt-2 text-[11px] text-slate-400">
             Join button opens 15 minutes before the session starts.
           </p>
+        </div>
+
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-center justify-between">
+            <label htmlFor="resched-msg" className="text-xs font-semibold text-slate-700">
+              Message to patient <span className="font-normal text-slate-400">(optional)</span>
+            </label>
+            <span className="text-[11px] text-slate-400">
+              {message.length}/{MESSAGE_MAX}
+            </span>
+          </div>
+          <textarea
+            id="resched-msg"
+            rows={3}
+            maxLength={MESSAGE_MAX}
+            value={message}
+            onChange={(e) => {
+              setCustomMessage(e.target.value);
+              setTouched(true);
+            }}
+            placeholder="Add a short note for the patient…"
+            className={`${FIELD} resize-none`}
+          />
+          {touched && (
+            <button
+              type="button"
+              onClick={() => {
+                setTouched(false);
+                setCustomMessage("");
+              }}
+              className="mt-1.5 text-[11px] font-semibold text-[#257B51] hover:underline"
+            >
+              Reset to suggested message
+            </button>
+          )}
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2.5">
